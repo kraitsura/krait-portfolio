@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 
-import backgroundGif from '@/assets/21e2e73eb9a9984e3b407328f65f5e5b.gif'
+import backgroundGif from '@/assets/public/images/21e2e73eb9a9984e3b407328f65f5e5b.gif';
 
 interface DarkeningBackgroundWithArticleProps {
   title: string;
