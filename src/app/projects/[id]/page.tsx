@@ -1,15 +1,25 @@
 'use client';
 import { useRouter, useParams } from 'next/navigation';
-import Image from 'next/image';
+import Image, { StaticImageData } from 'next/image';
 import { projects } from '@/utils/projectList';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 
+interface Project {
+  id: string;
+  title: string;
+  tags: string[];
+  date?: string;
+  status?: string;
+  description: string;
+  image: StaticImageData;
+}
+
 const ProjectDetail: React.FC = () => {
   const router = useRouter();
   const { id } = useParams() as { id: string };
-  const [project, setProject] = useState<any>(null);
+  const [project, setProject] = useState<Project | null>(null);
   const [showArticle, setShowArticle] = useState(false);
 
   useEffect(() => {
@@ -78,7 +88,7 @@ const ProjectDetail: React.FC = () => {
           className="w-full aspect-video relative mb-8"
         >
           <Image
-            src={project.image}
+            src={project.image.src}
             alt={project.title}
             layout="fill"
             objectFit="cover"
@@ -97,8 +107,8 @@ const ProjectDetail: React.FC = () => {
             >
               <h2 className="text-2xl font-bold mb-4">Project Article</h2>
               <p className="mb-4">
-                This is where a more detailed article about the project would go. You can include
-                information about the project's background, challenges, solutions, and outcomes.
+              This is where a more detailed article about the project would go. You can include
+              information about the project&apos;s background, challenges, solutions, and outcomes.
               </p>
               <p>
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nunc id

@@ -1,6 +1,6 @@
 // /utils/iconMap.ts
 
-import { Code, Globe, Cpu, Brain, Leaf, BarChart, Recycle, Star, Database } from 'lucide-react';
+import { Globe, Cpu, Brain, Leaf, BarChart, Recycle, Star, Database } from 'lucide-react';
 
 // Icon mapping for project tags
 export const iconMap: { [key: string]: React.ElementType } = {

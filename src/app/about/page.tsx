@@ -122,7 +122,7 @@ const About: React.FC = () => {
             <div className="max-w-2xl bg-black/60 backdrop-blur-md rounded-lg p-8">
               <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-shadow">About Me</h2>
               <p className="text-lg mb-4 text-gray-300">
-                I'm a Software Developer by profession. I love building useful products, and have a passion for using technology to make a difference.
+                I&apos;m a Software Developer by profession. I love building useful products, and have a passion for using technology to make a difference.
               </p>
               <p className="text-lg mb-4 text-gray-300">
                 My goal is to create a space where knowledge is celebrated and shared, across borders, and beyond restrictive boundaries. To allow people from all walks of life to have access to high-quality papers.

@@ -30,9 +30,9 @@ const IntroPage = () => {
         return gifs[nextIndex];
       });
     }, 300000); // 5 minutes in milliseconds
-
+  
     return () => clearInterval(interval);
-  }, []);
+  }, [gifs]);
 
   return (
     <div className={styles.fadeIn}>

@@ -20,7 +20,7 @@ async function getArticle(slug: string) {
       content 
     };
   } catch (err) {
-    return null;
+    console.error(err);
   }
 }
 

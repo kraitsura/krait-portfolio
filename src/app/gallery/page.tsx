@@ -2,9 +2,9 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { motion, useScroll, useTransform, MotionValue } from 'framer-motion';
+import { useScroll, MotionValue } from 'framer-motion';
 import Image, { StaticImageData } from 'next/image';
-import Link from 'next/link';
+
 import friends from '@/assets/public/gallery_img/friends.jpeg';
 import rocks from '@/assets/public/gallery_img/rocks.jpeg';
 import bridge from '@/assets/public/gallery_img/bridge.jpeg';
