@@ -8,7 +8,7 @@ import { ArrowLeft } from 'lucide-react';
 
 const ProjectDetail: React.FC = () => {
   const router = useRouter();
-  const { id } = useParams();
+  const { id } = useParams() as { id: string };
   const [project, setProject] = useState<any>(null);
   const [showArticle, setShowArticle] = useState(false);
 
@@ -36,7 +36,7 @@ const ProjectDetail: React.FC = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 0.8 }}
       className="fixed inset-0 bg-black text-white p-8 flex flex-col items-center overflow-y-auto z-50"
     >
       <motion.h1
@@ -53,7 +53,7 @@ const ProjectDetail: React.FC = () => {
           <motion.div
             initial={{ x: -50, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
+            transition={{ delay: 0.3, duration: 0.7 }}
             className="md:w-[calc(50%-1rem)] mb-4 md:mb-0"
           >
             <h2 className="text-xl font-semibold mb-2">Project Details</h2>
@@ -65,7 +65,7 @@ const ProjectDetail: React.FC = () => {
           <motion.div
             initial={{ x: 50, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
-            transition={{ delay: 0.4, duration: 0.5 }}
+            transition={{ delay: 0.4, duration: 0.7 }}
             className="md:w-[calc(50%-1rem)]"
           >
             <h2 className="text-xl font-semibold mb-2">Description</h2>

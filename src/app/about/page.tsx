@@ -1,49 +1,139 @@
-import React from "react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
+'use client'
 
+import React, { useEffect, useRef } from 'react';
+import styles from '@/styles/fadeIn.module.css';
+
+interface ParticleProps {
+  x: number;
+  y: number;
+  size: number;
+  speedX: number;
+  speedY: number;
+  color: string;
+}
+
+class Particle implements ParticleProps {
+  x: number;
+  y: number;
+  size: number;
+  speedX: number;
+  speedY: number;
+  color: string;
+
+  constructor(canvasWidth: number, canvasHeight: number) {
+    this.x = Math.random() * canvasWidth;
+    this.y = Math.random() * canvasHeight;
+    this.size = Math.random() * 5 + 1;
+    this.speedX = Math.random() * 3 - 1.5;
+    this.speedY = Math.random() * 3 - 1.5;
+    this.color = `hsl(${Math.random() * 360}, 50%, 50%)`;
+  }
+
+  update(canvasWidth: number, canvasHeight: number): void {
+    this.x += this.speedX;
+    this.y += this.speedY;
+
+    if (this.size > 0.2) this.size -= 0.1;
+
+    if (this.x < 0 || this.x > canvasWidth) this.speedX *= -1;
+    if (this.y < 0 || this.y > canvasHeight) this.speedY *= -1;
+  }
+
+  draw(ctx: CanvasRenderingContext2D): void {
+    ctx.fillStyle = this.color;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
 
 const About: React.FC = () => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const resizeCanvas = (): void => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+
+    resizeCanvas();
+
+    const particles: Particle[] = [];
+    const particleCount = 100;
+
+    const createParticles = (): void => {
+      for (let i = 0; i < particleCount; i++) {
+        particles.push(new Particle(canvas.width, canvas.height));
+      }
+    };
+
+    const animateParticles = (): void => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      for (let i = 0; i < particles.length; i++) {
+        particles[i].update(canvas.width, canvas.height);
+        particles[i].draw(ctx);
+
+        for (let j = i; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+
+          if (distance < 100) {
+            ctx.beginPath();
+            ctx.strokeStyle = particles[i].color;
+            ctx.lineWidth = 0.2;
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.stroke();
+          }
+        }
+
+        if (particles[i].size <= 0.2) {
+          particles[i] = new Particle(canvas.width, canvas.height);
+        }
+      }
+
+      requestAnimationFrame(animateParticles);
+    };
+
+    createParticles();
+    animateParticles();
+
+    window.addEventListener('resize', resizeCanvas);
+
+    return () => {
+      window.removeEventListener('resize', resizeCanvas);
+    };
+  }, []);
+
   return (
-    <main className="flex-1 text-white">
-      <section id="home" className="min-h-screen flex items-center justify-center bg-gradient-to-b from-transparent to-black/30">
-        <div className="text-center">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-4 text-shadow">John Doe</h1>
-          <p className="text-xl sm:text-2xl md:text-3xl mb-8 text-shadow">Web Developer & Designer</p>
-          <Button className="bg-white/10 text-white border border-white/20 hover:bg-white/20 transition-all duration-300">
-            View My Work
-          </Button>
+    <main className="flex-1 text-white bg-black relative overflow-hidden">
+      <div className={styles.fadeIn}>
+        <canvas ref={canvasRef} className="absolute inset-0 z-0" />
+        <div className="relative z-10 flex flex-col min-h-screen">
+          <section id="about" className="flex-grow flex items-center justify-center p-4">
+            <div className="max-w-2xl bg-black/60 backdrop-blur-md rounded-lg p-8">
+              <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-shadow">About Me</h2>
+              <p className="text-lg mb-4 text-gray-300">
+                I'm a Software Developer by profession. I love building useful products, and have a passion for using technology to make a difference.
+              </p>
+              <p className="text-lg mb-4 text-gray-300">
+                My goal is to create a space where knowledge is celebrated and shared, across borders, and beyond restrictive boundaries. To allow people from all walks of life to have access to high-quality papers.
+              </p>
+              <p className="text-lg text-gray-300">
+                Away from the screen, you can find me in the woods, the kitchen, a good book, or nowhere at all, lost in thought.
+              </p>
+            </div>
+          </section>
         </div>
-      </section>
-
-      <section id="about" className="min-h-screen flex items-center justify-center bg-black/40 backdrop-blur-sm">
-        <div className="max-w-2xl px-4">
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-shadow">About Me</h2>
-          <p className="text-lg mb-4 text-gray-300">
-            I'm a passionate web developer with expertise in React, Node.js, and modern web technologies. I love
-            creating beautiful and functional websites that provide great user experiences.
-          </p>
-          <p className="text-lg text-gray-300">
-            When I'm not coding, you can find me exploring new technologies, contributing to open-source projects, or
-            enjoying a good cup of coffee.
-          </p>
-        </div>
-      </section>
-
-      <section id="projects" className="min-h-screen py-16 bg-gradient-to-b from-black/40 to-black/60">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl sm:text-4xl font-bold mb-8 text-shadow">My Projects</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-            {[1, 2, 3, 4].map((project) => (
-              <div key={project} className="bg-white/5 backdrop-blur-sm rounded-lg p-6 border border-white/10 transition-all duration-300 hover:bg-white/10">
-                <h3 className="text-xl font-semibold mb-2">Project {project}</h3>
-                <p className="mb-4 text-gray-300">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-                <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">View Project</Button>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      </div>
     </main>
   );
 };

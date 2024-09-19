@@ -1,4 +1,5 @@
-import React from 'react'
+'use client'
+
 import Link from 'next/link'
 
 interface NavItem {
@@ -16,8 +17,11 @@ const navItems: NavItem[] = [
 ]
 
 const Header: React.FC = () => {
+
   return (
-    <header className="bg-black text-white p-4">
+    <header 
+      className="fixed top-0 left-0 right-0 z-50 bg-black text-white p-4 transition-opacity duration-300"
+    >
       <nav className="container mx-auto flex justify-end items-center">
         <ul className="flex space-x-4">
           {navItems.map((item) => (
@@ -32,4 +36,5 @@ const Header: React.FC = () => {
     </header>
   )
 }
+
 export default Header

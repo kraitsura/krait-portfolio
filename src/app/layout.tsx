@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { Inter } from 'next/font/google';
 import Header from "@/components/custom/Header";
-import NavBar from "@/components/custom/NavBar";
 import StartSh from "@/components/custom/StartSh";
 import "./globals.css";
 
@@ -32,10 +31,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`scroll-smooth ${geistSans.variable} ${geistMono.variable}`}>
-      <body className={inter.className}>
+      <body className={`${inter.className} flex flex-col min-h-screen`}>
         <StartSh>
           <Header />
-          <main>{children}</main>
+          <main className="flex-grow">
+            {children}
+          </main>
         </StartSh>
       </body>
     </html>

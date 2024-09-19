@@ -1,15 +1,15 @@
 'use client'
 import React, { useState, useEffect, useRef } from 'react';
-import Image from 'next/image';
-
-import backgroundGif from '@/assets/public/images/21e2e73eb9a9984e3b407328f65f5e5b.gif';
+import Image, { StaticImageData } from 'next/image';
 
 interface DarkeningBackgroundWithArticleProps {
+  opener: string;
   title: string;
   content: string;
+  image: StaticImageData;
 }
 
-const DarkenBg: React.FC<DarkeningBackgroundWithArticleProps> = ({ title, content }) => {
+const DarkenBg: React.FC<DarkeningBackgroundWithArticleProps> = ({ opener, title, content, image }) => {
   const [scrollPercentage, setScrollPercentage] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -43,7 +43,7 @@ const DarkenBg: React.FC<DarkeningBackgroundWithArticleProps> = ({ title, conten
     >
       <div className="absolute inset-0">
         <Image
-          src={backgroundGif}
+          src={image}
           alt="Background GIF"
           layout="fill"
           objectFit="cover"
@@ -64,7 +64,7 @@ const DarkenBg: React.FC<DarkeningBackgroundWithArticleProps> = ({ title, conten
       />
       <div className="min-h-[200vh] relative z-10">
         <div className="h-screen flex items-center justify-center">
-          <h1 className="text-4xl font-bold text-red-500 text-shadow">Scroll to read the article</h1>
+          <h1 className="text-4xl font-bold text-red-500 text-shadow">{opener}</h1>
         </div>
         <section
           className={`px-4 py-16 md:px-8 lg:px-16 max-w-3xl mx-auto transition-opacity duration-500 ${
