@@ -1,6 +1,6 @@
 // /utils/projects.ts
 import { StaticImageData } from 'next/image';
-import quantumImage from '@/assets/public/images/SEI_150779771.jpg';
+import quantumImage from '../../public/images/SEI_150779771.jpg';
 
 // Define the structure of a project
 export interface Project {

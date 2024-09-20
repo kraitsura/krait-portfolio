@@ -1,15 +1,17 @@
 'use client'
 import React, { useState, useEffect, useRef } from 'react';
 import Image, { StaticImageData } from 'next/image';
+import path from 'path';
 
 interface DarkeningBackgroundWithArticleProps {
   opener: string;
   title: string;
   content: string;
-  image: StaticImageData;
+  image: string;
+  className?: string; // Add this line to include the className prop
 }
 
-const DarkenBg: React.FC<DarkeningBackgroundWithArticleProps> = ({ opener, title, content, image }) => {
+const DarkenBg: React.FC<DarkeningBackgroundWithArticleProps> = ({ opener, title, content, image, className }) => {
   const [scrollPercentage, setScrollPercentage] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -39,7 +41,7 @@ const DarkenBg: React.FC<DarkeningBackgroundWithArticleProps> = ({ opener, title
   return (
     <div
       ref={containerRef}
-      className="h-screen w-full overflow-y-scroll relative bg-black text-white"
+      className={`h-screen w-full overflow-y-scroll relative bg-black text-white ${className}`} // Add className here
     >
       <div className="absolute inset-0">
         <Image
@@ -48,6 +50,7 @@ const DarkenBg: React.FC<DarkeningBackgroundWithArticleProps> = ({ opener, title
           layout="fill"
           objectFit="cover"
           quality={100}
+          unoptimized
         />
       </div>
       <div 
@@ -84,8 +87,3 @@ const DarkenBg: React.FC<DarkeningBackgroundWithArticleProps> = ({ opener, title
 };
 
 export default DarkenBg;
-
-
-
-
-
