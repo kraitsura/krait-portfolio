@@ -1,7 +1,6 @@
 'use client'
 import React, { useState, useEffect, useRef } from 'react';
-import Image, { StaticImageData } from 'next/image';
-import path from 'path';
+import Image from 'next/image';
 
 interface DarkeningBackgroundWithArticleProps {
   opener: string;

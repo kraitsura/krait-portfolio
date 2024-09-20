@@ -15,7 +15,6 @@ export interface ImageData {
 
 interface GalleryImageProps extends ImageData {
   index: number;
-  total: number;
 }
 
 export const GalleryImage: React.FC<GalleryImageProps> = ({ 
@@ -23,7 +22,6 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
   title, 
   subtitle, 
   index, 
-  total, 
   position, 
   textPosition 
 }) => {
