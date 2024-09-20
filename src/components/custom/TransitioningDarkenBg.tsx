@@ -6,7 +6,6 @@ interface DarkeningBackgroundWithArticleProps {
   title: string;
   content: string;
   images: string[];
-  transitionInterval?: number;
 }
 
 const TransitioningDarkenBg: React.FC<DarkeningBackgroundWithArticleProps> = ({
@@ -14,11 +13,9 @@ const TransitioningDarkenBg: React.FC<DarkeningBackgroundWithArticleProps> = ({
   title,
   content,
   images,
-  transitionInterval = 60000 
 }) => {
   const [scrollPercentage, setScrollPercentage] = useState(0);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [randomImageIndex] = useState(() => Math.floor(Math.random() * images.length));
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleScroll = useCallback(() => {
@@ -41,18 +38,6 @@ const TransitioningDarkenBg: React.FC<DarkeningBackgroundWithArticleProps> = ({
     };
   }, [handleScroll]);
 
-  useEffect(() => {
-    if (images.length < 2) return;
-    const interval = setInterval(() => {
-      setIsTransitioning(true);
-      setTimeout(() => {
-        setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
-        setIsTransitioning(false);
-      }, 1500);
-    }, transitionInterval);
-    return () => clearInterval(interval);
-  }, [images, transitionInterval]);
-
   const isFullyDarkened = scrollPercentage >= 80;
 
   return (
@@ -61,25 +46,17 @@ const TransitioningDarkenBg: React.FC<DarkeningBackgroundWithArticleProps> = ({
       className={`h-screen w-full overflow-y-scroll relative bg-black text-white`}
     >
       <div className="absolute inset-0 overflow-hidden">
-        {images.map((image, index) => (
-          <div
-            key={index}
-            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-              index === currentImageIndex ? 'opacity-100' : 'opacity-0'
-            }`}
-            style={{transitionDelay: isTransitioning ? '500ms' : '0ms'}}
-          >
-            <Image
-              src={image}
-              alt={`Background ${index + 1}`}
-              layout="fill"
-              objectFit="cover"
-              unoptimized
-              quality={100}
-              priority={index === currentImageIndex}
-            />
-          </div>
-        ))}
+        <div className="absolute inset-0">
+          <Image
+            src={images[randomImageIndex]}
+            alt="Background"
+            layout="fill"
+            objectFit="cover"
+            unoptimized
+            quality={100}
+            priority
+          />
+        </div>
       </div>
       <div 
         className="absolute inset-0 pointer-events-none transition-opacity duration-1000"

@@ -1,46 +1,35 @@
-'use client'
-import React, { useEffect, useState } from 'react';
-import TransitioningDarkenBg from '@/components/custom/TransitioningDarkenBg';
-import styles from '@/styles/fadeIn.module.css';
+import React from 'react';
+import fs from 'fs';
+import path from 'path';
 import NavBar from '@/components/custom/NavBar';
-import { getFileNames } from '@/utils/getFileNames';
+import IntroPage from '@/components/custom/IntroPage';
 
-const IntroPage = () => {
-  const [gifs, setGifs] = useState<string[]>([]);
+function getGifPaths(): string[] {
+  const gifsDirectory = path.join(process.cwd(), 'public', 'gifs');
+  
+  try {
+    // Read the contents of the directory
+    const files = fs.readdirSync(gifsDirectory);
+    
+    // Filter for .gif files and create full paths
+    const gifPaths = files
+      .filter(file => path.extname(file).toLowerCase() === '.gif')
+      .map(file => `/gifs/${file}`);
+    
+    return gifPaths;
+  } catch (error) {
+    console.error('Error reading gifs directory:', error);
+    return [];
+  }
+}
 
-  useEffect(() => {
-    const fetchGifs = async () => {
-      const fetchedGifs = await getFileNames("public/gifs");
-      setGifs(fetchedGifs.map(gif => `/gifs/${gif}`));
-    };
-    fetchGifs();
-  }, []);
-
-  const articleTitle = "the Starving Cat";
-  const articleContent = `
-    I only recently found out how interesting even the seemingly boring things in life can be.
-    This space is a melting pot of all my interests. Something I'm doing to hold myself accountable for my learning journey.
-    This repository becomes not only a record of my time on Earth, but of all of the living, even what you and I have faced.
-  `;
-
-  return (
-    <div className={styles.fadeIn}>
-      <TransitioningDarkenBg 
-        opener={"Welcome Back"} 
-        title={articleTitle} 
-        content={articleContent} 
-        images={gifs}
-        transitionInterval={60000}
-      />
-    </div>
-  );
-};
+const gifPaths = getGifPaths();
 
 const Home: React.FC = () => {
   return (
     <>
       <NavBar />
-      <IntroPage />
+      <IntroPage images={gifPaths}/>
     </>
   );
 };
