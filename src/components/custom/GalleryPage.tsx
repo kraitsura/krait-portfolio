@@ -65,7 +65,6 @@ export const GalleryPage: React.FC<GalleryPageProps> = ({ images }) => {
           <GalleryImage
             {...images[currentIndex]}
             index={currentIndex}
-            total={images.length}
           />
         </motion.div>
       </AnimatePresence>
