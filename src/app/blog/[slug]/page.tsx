@@ -5,7 +5,7 @@ import fs from 'fs/promises';
 import matter from 'gray-matter';
 
 async function getArticle(slug: string) {
-  const articlesDirectory = path.join(process.cwd(), 'src/assets/public/articles');
+  const articlesDirectory = path.join(process.cwd(), '/public/articles');
   const fullPath = path.join(articlesDirectory, `${slug}.md`);
   
   try {
@@ -25,7 +25,7 @@ async function getArticle(slug: string) {
 }
 
 export async function generateStaticParams() {
-  const articlesDirectory = path.join(process.cwd(), 'src/assets/public/articles');
+  const articlesDirectory = path.join(process.cwd(), '/public/articles');
   const files = await fs.readdir(articlesDirectory);
   
   return files.map(filename => ({

@@ -18,7 +18,7 @@ const ArticleComponent: React.FC<ArticleProps> = ({ article }) => {
     <div className="min-h-screen w-full relative bg-black text-white">
       <div className="absolute inset-0">
         <Image
-          src="/assets/background.gif"
+          src="/public/fallback.png"
           alt="Background GIF"
           layout="fill"
           objectFit="cover"
