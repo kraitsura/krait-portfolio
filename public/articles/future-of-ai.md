@@ -1,4 +1,3 @@
-# File: @assets/public/articles/future-of-ai.md
 ---
 title: "The Future of AI: Possibilities and Challenges"
 date: "2024-09-18"

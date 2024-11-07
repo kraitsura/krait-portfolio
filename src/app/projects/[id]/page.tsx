@@ -1,45 +1,48 @@
 'use client';
 import { useRouter, useParams } from 'next/navigation';
 import Image, { StaticImageData } from 'next/image';
-import { projects } from '@/utils/projectList';
+import { Project, projects } from '@/utils/projectList';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
-
-interface Project {
-  id: string;
-  title: string;
-  tags: string[];
-  date?: string;
-  status?: string;
-  description: string;
-  image: StaticImageData;
-}
+import ReactMarkdown from 'react-markdown';
+import { getArticle, ArticleNotFoundError } from '@/utils/markdown';
 
 const ProjectDetail: React.FC = () => {
   const router = useRouter();
   const { id } = useParams() as { id: string };
-  const [project, setProject] = useState<Project | null>(null);
   const [showArticle, setShowArticle] = useState(false);
 
-  useEffect(() => {
-    if (id) {
-      const foundProject = projects.find((p) => p.id.toString() === id);
-      if (foundProject) {
-        setProject(foundProject);
-        // Trigger article reveal after a delay
-        setTimeout(() => setShowArticle(true), 1000);
+  // Find project directly
+  const project = projects.find(p => p.id.toString() === id);
+  
+  // If no project found, redirect
+  if (!project) {
+    router.push('/404');
+    return <div>Loading...</div>;
+  }
+
+  // Load article content
+  const loadArticle = async () => {
+    try {
+      const article = await getArticle(project.contentPath);
+      project.content = article.content;
+      setTimeout(() => setShowArticle(true), 1000);
+    } catch (error) {
+      if (error instanceof ArticleNotFoundError) {
+        console.error(`Article not found: ${error.message}`);
+      } else {
+        console.error('Failed to load project:', error);
       }
     }
-  }, [id]);
+  };
+
+  // Load article when component mounts
+  loadArticle();
 
   const handleGoBack = () => {
     router.back();
   };
-
-  if (!project) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <motion.div
@@ -70,6 +73,7 @@ const ProjectDetail: React.FC = () => {
             <p><strong>Tags:</strong> {project.tags.join(', ')}</p>
             <p><strong>Date:</strong> {project.date || 'N/A'}</p>
             <p><strong>Status:</strong> {project.status || 'N/A'}</p>
+            <p><strong>Github:</strong> <a href={project.github} target="_blank" rel="noopener noreferrer">{project.github}</a></p>
           </motion.div>
 
           <motion.div
@@ -103,19 +107,9 @@ const ProjectDetail: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 50 }}
               transition={{ duration: 0.5 }}
-              className="w-full bg-gray-900 p-6 rounded-lg"
+              className="w-full bg-gray-900 p-6 rounded-lg prose prose-invert max-w-none"
             >
-              <h2 className="text-2xl font-bold mb-4">Project Article</h2>
-              <p className="mb-4">
-              This is where a more detailed article about the project would go. You can include
-              information about the project&apos;s background, challenges, solutions, and outcomes.
-              </p>
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nunc id
-                aliquam tincidunt, nisl nunc tincidunt nunc, vitae aliquam nunc nunc vitae nunc.
-                Sed euismod, nunc id aliquam tincidunt, nisl nunc tincidunt nunc, vitae aliquam
-                nunc nunc vitae nunc.
-              </p>
+              <ReactMarkdown>{project.content}</ReactMarkdown>
             </motion.div>
           )}
         </AnimatePresence>

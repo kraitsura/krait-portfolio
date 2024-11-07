@@ -1,7 +1,6 @@
 import React from 'react';
 import fs from 'fs';
 import path from 'path';
-import NavBar from '@/components/custom/NavBar';
 import IntroPage from '@/components/custom/IntroPage';
 
 function getGifPaths(): string[] {
@@ -28,7 +27,6 @@ const gifPaths = getGifPaths();
 const Home: React.FC = () => {
   return (
     <>
-      <NavBar />
       <IntroPage images={gifPaths}/>
     </>
   );
