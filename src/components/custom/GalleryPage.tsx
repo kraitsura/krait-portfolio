@@ -26,7 +26,7 @@ export const GalleryPage: React.FC<GalleryPageProps> = ({ images }) => {
     }
   };
 
-  const handleWheel = (e: WheelEvent) => {
+  const handleWheel = (e: globalThis.WheelEvent) => {
     e.preventDefault();
     if (e.deltaY > 0) {
       setCurrentIndex((prevIndex) => Math.min(prevIndex + 1, images.length - 1));

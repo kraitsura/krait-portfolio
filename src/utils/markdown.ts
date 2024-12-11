@@ -4,7 +4,7 @@ export interface ArticleMetadata {
   title: string;
   date: string;
   images: string[];
-  [key: string]: any; // For other potential frontmatter fields
+  [key: string]: string | string[]; // For other potential frontmatter fields
 }
 
 export interface Article {

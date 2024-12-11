@@ -1,7 +1,7 @@
 'use client';
 import { useRouter, useParams } from 'next/navigation';
-import Image, { StaticImageData } from 'next/image';
-import { Project, projects } from '@/utils/projectList';
+import Image from 'next/image';
+import { projects } from '@/utils/projectList';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
