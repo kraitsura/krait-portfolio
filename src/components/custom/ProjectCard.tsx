@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Project } from '@/utils/projectList';
 import { iconMap } from '@/utils/iconMap';
+import { Playfair_Display, Roboto_Mono } from 'next/font/google';
 
 interface ProjectCardProps {
   project: Project;
@@ -10,6 +11,9 @@ interface ProjectCardProps {
   onClick: () => void;
   isSelected: boolean;
 }
+
+const playfair = Playfair_Display({ subsets: ['latin'] });
+const robotoMono = Roboto_Mono({ subsets: ['latin'] });
 
 const ProjectCard: React.FC<ProjectCardProps> = ({ project, index, onClick, isSelected }) => {
   return (
@@ -20,18 +24,20 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, index, onClick, isSe
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3, delay: index * 0.1 }}
-      className={`relative aspect-video cursor-pointer group ${isSelected ? 'z-30' : ''}`}
+      className={`relative aspect-video cursor-pointer group border-2 border-[var(--theme-primary)] project-card-border ${
+        isSelected ? 'z-30' : ''
+      }`}
     >
       <motion.div 
         layoutId={`project-image-${project.id}`}
-        className="absolute inset-0 rounded-lg overflow-hidden"
+        className="absolute inset-0 overflow-hidden"
       >
         <Image 
           src={project.image} 
           alt={project.title} 
           layout="fill" 
-          objectFit="cover" 
-          className="rounded-lg"
+          objectFit="cover"
+          className=""
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-50" />
       </motion.div>
@@ -53,13 +59,18 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, index, onClick, isSe
       </motion.div>
 
       <motion.div 
-        className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent text-white p-4"
+        className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent theme-text p-4"
         initial={{ opacity: 1, y: 0 }}
         animate={{ opacity: isSelected ? 0 : 1, y: isSelected ? 20 : 0 }}
         transition={{ duration: 0.3 }}
       >
-        <h3 className="text-lg font-semibold">{project.title}</h3>
-        <p className="text-sm">{project.description}</p>
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 right-0 bg-[var(--theme-primary)] h-[2px] my-auto" />
+          <h3 className={`${playfair.className} text-black text-lg font-semibold relative bg-[var(--theme-primary)] inline-block pr-2`}>
+            {project.title}
+          </h3>
+        </div>
+        <p className={`${robotoMono.className} theme-body text-sm`}>{project.description}</p>
       </motion.div>
     </motion.div>
   );

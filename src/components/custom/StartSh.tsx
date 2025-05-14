@@ -1,7 +1,9 @@
 'use client'
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Roboto_Mono } from 'next/font/google';
+import * as THREE from 'three';
+import { Particles } from '../three/Particles';
 
 const robotoMono = Roboto_Mono({ subsets: ['latin'] });
 
@@ -50,8 +52,8 @@ const StartSh: React.FC<StartShProps> = ({ children }) => {
   }
 
   return (
-    <div className={`fixed inset-0 z-50 flex items-center justify-center bg-black ${robotoMono.className}`}>
-      <HyperdriveBackground />
+    <div className={`fixed inset-0 z-50 flex items-center justify-center ${robotoMono.className}`}>
+      <ParticlesBackground />
       <div className="w-full max-w-2xl bg-black bg-opacity-70 border border-green-400 rounded-lg p-8 shadow-lg transform hover:scale-105 transition-transform duration-300" style={{ boxShadow: '0 0 20px rgba(74, 222, 128, 0.5)' }}>
         <div className="flex items-center mb-4">
           <div className="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
@@ -81,26 +83,55 @@ const StartSh: React.FC<StartShProps> = ({ children }) => {
   );
 };
 
-const HyperdriveBackground: React.FC = () => {
-  return (
-    <div className="absolute inset-0 overflow-hidden">
-      <div className="absolute inset-0 bg-black">
-        {[...Array(200)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute bg-white rounded-full"
-            style={{
-              width: Math.random() * 2 + 1 + 'px',
-              height: Math.random() * 2 + 1 + 'px',
-              top: Math.random() * 100 + '%',
-              left: Math.random() * 100 + '%',
-              animation: `hyperdrive ${Math.random() * 2 + 1}s linear infinite`,
-            }}
-          />
-        ))}
-      </div>
-    </div>
-  );
+const ParticlesBackground: React.FC = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    containerRef.current.appendChild(renderer.domElement);
+
+    const particles = new Particles({
+      color: 0xFFFFFF,
+      size: 0.5,
+      rangeH: 100,
+      rangeV: 100,
+      rangeZ: 50,
+      pointCount: 2000,
+      speed: 0.15
+    });
+
+    scene.add(particles);
+    camera.position.z = 1;
+
+    const animate = () => {
+      requestAnimationFrame(animate);
+      particles.updateConstant();
+      renderer.render(scene, camera);
+    };
+
+    const handleResize = () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    };
+
+    window.addEventListener('resize', handleResize);
+    animate();
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      containerRef.current?.removeChild(renderer.domElement);
+      renderer.dispose();
+    };
+  }, []);
+
+  return <div ref={containerRef} className="absolute inset-0 -z-10" />;
 };
 
 export default StartSh;

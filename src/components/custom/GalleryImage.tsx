@@ -1,6 +1,10 @@
 import React from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
+import { Playfair_Display, Roboto_Mono } from 'next/font/google';
+
+const playfair = Playfair_Display({ subsets: ['latin'] });
+const robotoMono = Roboto_Mono({ subsets: ['latin'] });
 
 export type Position = 'left' | 'center-left' | 'center' | 'center-right' | 'right';
 export type TextPosition = 'top' | 'bottom' | 'left' | 'right';
@@ -64,13 +68,13 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
       <div className="relative max-w-full max-h-full p-4 flex flex-col items-start">
         {textPosition === 'top' && (title || subtitle) && (
           <motion.div 
-            className="text-white max-w-md mb-4"
+            className="theme-text max-w-md mb-4"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.5 }}
           >
-            {title && <h2 className="text-xl font-bold">{title}</h2>}
-            {subtitle && <p className="text-sm">{subtitle}</p>}
+            {title && <h2 className={`${playfair.className} theme-heading text-xl font-bold`}>{title}</h2>}
+            {subtitle && <p className={`${robotoMono.className} theme-body text-sm`}>{subtitle}</p>}
           </motion.div>
         )}
         <motion.div
@@ -88,24 +92,24 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
         </motion.div>
         {textPosition === 'bottom' && (title || subtitle) && (
           <motion.div 
-            className="text-white max-w-md mt-4"
+            className="theme-text max-w-md mt-4"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.5 }}
           >
-            {title && <h2 className="text-xl font-bold">{title}</h2>}
-            {subtitle && <p className="text-sm">{subtitle}</p>}
+            {title && <h2 className={`${playfair.className} theme-heading text-xl font-bold`}>{title}</h2>}
+            {subtitle && <p className={`${robotoMono.className} theme-body text-sm`}>{subtitle}</p>}
           </motion.div>
         )}
         {(textPosition === 'left' || textPosition === 'right') && (title || subtitle) && (
           <motion.div 
-            className={`absolute ${getTextPositionClass()} text-white max-w-md`}
+            className={`absolute ${getTextPositionClass()} theme-text max-w-md`}
             initial={{ opacity: 0, x: textPosition === 'left' ? -20 : 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2, duration: 0.5 }}
           >
-            {title && <h2 className="text-xl font-bold">{title}</h2>}
-            {subtitle && <p className="text-sm">{subtitle}</p>}
+            {title && <h2 className={`${playfair.className} theme-heading text-xl font-bold`}>{title}</h2>}
+            {subtitle && <p className={`${robotoMono.className} theme-body text-sm`}>{subtitle}</p>}
           </motion.div>
         )}
       </div>

@@ -28,7 +28,7 @@ const Projects: React.FC = () => {
         initial={{ x: -100, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ delay: 0.5, duration: 0.8 }}
-        className="text-8xl font-thin mb-16 fixed top-24 left-4 z-10"
+        className="text-8xl font-thin mb-16 fixed top-24 left-4 z-10 theme-text"
         style={{ writingMode: 'vertical-lr', textOrientation: 'mixed' }}
       >
         Projects

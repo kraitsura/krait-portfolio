@@ -1,6 +1,7 @@
 'use client'
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
+import { Playfair_Display, Roboto_Mono } from 'next/font/google';
 
 interface DarkeningBackgroundWithArticleProps {
   opener: string;
@@ -9,6 +10,9 @@ interface DarkeningBackgroundWithArticleProps {
   image: string;
   className?: string; // Add this line to include the className prop
 }
+
+const playfair = Playfair_Display({ subsets: ['latin'] });
+const robotoMono = Roboto_Mono({ subsets: ['latin'] });
 
 const DarkenBg: React.FC<DarkeningBackgroundWithArticleProps> = ({ opener, title, content, image, className }) => {
   const [scrollPercentage, setScrollPercentage] = useState(0);
@@ -40,7 +44,7 @@ const DarkenBg: React.FC<DarkeningBackgroundWithArticleProps> = ({ opener, title
   return (
     <div
       ref={containerRef}
-      className={`h-screen w-full overflow-y-scroll relative bg-black text-white ${className}`} // Add className here
+      className={`h-screen w-full overflow-y-scroll relative bg-black text-[#d4af37] ${className}`} // Add className here
     >
       <div className="absolute inset-0">
         <Image
@@ -66,17 +70,17 @@ const DarkenBg: React.FC<DarkeningBackgroundWithArticleProps> = ({ opener, title
       />
       <div className="min-h-[200vh] relative z-10">
         <div className="h-screen flex items-center justify-center">
-          <h1 className="text-4xl font-bold text-red-500 text-shadow">{opener}</h1>
+          <h1 className={`${playfair.className} text-4xl font-bold text-[#d4af37]`}>{opener}</h1>
         </div>
         <section
           className={`px-4 py-16 md:px-8 lg:px-16 max-w-3xl mx-auto transition-opacity duration-500 ${
             isFullyDarkened ? 'opacity-100' : 'opacity-0'
           }`}
         >
-          <h2 className="text-3xl font-bold mb-6 text-red-500">{title}</h2>
-          <div className="prose prose-invert">
+          <h2 className={`${playfair.className} text-3xl font-bold mb-6 text-[#d4af37]`}>{title}</h2>
+          <div className={`${robotoMono.className} prose prose-invert prose-gold`}>
             {content.split('\n').map((paragraph, index) => (
-              <p key={index} className="mb-4">{paragraph}</p>
+              <p key={index} className="mb-4 text-[#d4af37]">{paragraph}</p>
             ))}
           </div>
         </section>
