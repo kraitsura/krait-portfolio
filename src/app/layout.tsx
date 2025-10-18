@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import { Inter } from 'next/font/google';
+import { Inter } from "next/font/google";
 import Header from "@/components/custom/Header";
 import StartSh from "@/components/custom/StartSh";
 import { TouchProvider } from "@/contexts/TouchContext";
@@ -18,10 +18,10 @@ const geistMono = localFont({
   weight: "100 900",
 });
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Aarya's Website",
+  title: "kraitsura",
   description: "Created by Aarya",
 };
 
@@ -31,14 +31,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`scroll-smooth ${geistSans.variable} ${geistMono.variable}`}>
+    <html
+      lang="en"
+      className={`scroll-smooth ${geistSans.variable} ${geistMono.variable}`}
+    >
       <body className={`${inter.className} flex flex-col min-h-screen`}>
         <TouchProvider>
           <StartSh>
             <Header />
-            <main className="flex-grow">
-              {children}
-            </main>
+            <main className="flex-grow">{children}</main>
           </StartSh>
         </TouchProvider>
       </body>

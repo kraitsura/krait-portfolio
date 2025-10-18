@@ -16,7 +16,10 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true }) => {
   const tabContentRef = useRef<HTMLDivElement>(null);
   const skillsSectionRef = useRef<HTMLDivElement>(null);
 
-  const colorOptions = useMemo(() => ["amber", "white", "green", "blue", "red"], []);
+  const colorOptions = useMemo(
+    () => ["amber", "white", "green", "blue", "red"],
+    [],
+  );
 
   useEffect(() => {
     // Detect Safari browser
@@ -219,9 +222,7 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true }) => {
     >
       <div className={`${styles.frame} ${styles.noclick}`}>
         <div className={`${styles.piece} ${styles.output} ${styles.filter}`}>
-          <div
-            className={styles.pipboy}
-          >
+          <div className={styles.pipboy}>
             {/* Footer Navigation */}
             <ul className={styles["pip-foot"]}>
               <li className={activeTab === "items" ? styles.active : ""}>
@@ -286,8 +287,8 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true }) => {
                         ))}
                       </div>
                       <div className={styles["dragon-text"]}>
-                        <p>Full-Stack Developer</p>
-                        <p>Crafting digital experiences</p>
+                        <p>Engineer</p>
+                        <p>the tinkering kind</p>
                       </div>
                     </div>
 
@@ -526,7 +527,9 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true }) => {
 
             {/* Keystroke Info - Fixed Top Right */}
             {!isTouchDevice && (
-              <div className={styles["keystroke-info"]}>{getKeystrokeInfo()}</div>
+              <div className={styles["keystroke-info"]}>
+                {getKeystrokeInfo()}
+              </div>
             )}
           </div>
 
