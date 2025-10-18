@@ -1,407 +1,488 @@
 import * as THREE from 'three';
-import TWEEN from '@tweenjs/tween.js';
-import { Particles } from './Particles';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass';
 
-const CRTShader = {
-  uniforms: {
-    'tDiffuse': { value: null },
-    'time': { value: 0 },
-    'scanlineIntensity': { value: 0.3 },
-    'noiseIntensity': { value: 0.1 },
-    'vignetteIntensity': { value: 0.8 }
-  },
-  vertexShader: `
-    varying vec2 vUv;
-    void main() {
-      vUv = uv;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-    }
-  `,
-  fragmentShader: `
-    uniform sampler2D tDiffuse;
-    uniform float time;
-    uniform float scanlineIntensity;
-    uniform float noiseIntensity;
-    uniform float vignetteIntensity;
-    varying vec2 vUv;
+import { Particles } from './Particles';
+import { RocketModel } from './rocket/RocketModel';
+import { RocketAnimator } from './rocket/RocketAnimator';
+import { RocketState, SceneState } from './rocket/RocketState';
+import { CRTShader } from './effects/CRTShader';
 
-    float random(vec2 st) {
-      return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
-    }
-
-    void main() {
-      vec2 uv = vUv;
-      
-      // Slight curve effect
-      vec2 curved_uv = uv * 2.0 - 1.0;
-      vec2 offset = curved_uv.yx * curved_uv.yx * curved_uv.yx * 0.1;
-      uv = uv + offset;
-
-      // Sample the texture
-      vec4 texel = texture2D(tDiffuse, uv);
-      
-      // Scanlines
-      float scanline = sin(uv.y * 800.0 + time * 10.0) * 0.04 * scanlineIntensity;
-      texel.rgb -= scanline;
-
-      // Noise
-      float noise = random(uv + time) * noiseIntensity;
-      texel.rgb += noise;
-
-      // Vignette
-      float vignette = length(curved_uv);
-      vignette = 1.0 - vignette * vignetteIntensity;
-      texel.rgb *= vignette;
-
-      // RGB split
-      float shift = 0.002;
-      texel.r = texture2D(tDiffuse, vec2(uv.x + shift, uv.y)).r;
-      texel.b = texture2D(tDiffuse, vec2(uv.x - shift, uv.y)).b;
-
-      // Color adjustments
-      texel.rgb = pow(texel.rgb, vec3(0.8));
-      texel.rgb *= 1.2;
-
-      if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) {
-        gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
-      } else {
-        gl_FragColor = texel;
-      }
-    }
-  `
-};
-
+/**
+ * Main RocketScene class - orchestrates all components
+ * Refactored to use Three.js AnimationMixer instead of TWEEN.js
+ */
 export class RocketScene {
+  // Core Three.js components
   private renderer: THREE.WebGLRenderer;
   private scene: THREE.Scene;
-  private camera!: THREE.PerspectiveCamera;
-  private rocketGroup!: THREE.Group;
-  private stars!: Particles;
-  private rocket!: THREE.Group;
-  private fire!: THREE.Mesh;
-  private rocketTarget!: THREE.Vector3;
-  private cameraTarget!: THREE.Vector3;
+  private camera: THREE.PerspectiveCamera;
   private composer!: EffectComposer;
+  private clock: THREE.Clock;
+
+  // Scene hierarchy
+  private sceneRoot!: THREE.Group;
+  private viewContainer!: THREE.Group;
+  private rocketContainer!: THREE.Group;
+
+  // Components
+  private rocketModel!: RocketModel;
+  private particles!: Particles;
+  private animator!: RocketAnimator;
+  private state!: RocketState;
+
+  // Interaction
+  private mouse: THREE.Vector2 = new THREE.Vector2();
+  private raycaster: THREE.Raycaster = new THREE.Raycaster();
+  private interactionPlane!: THREE.Plane;
+  private rocketTarget: THREE.Vector3 = new THREE.Vector3();
+  private cameraTarget: THREE.Vector3 = new THREE.Vector3(0, 2, 20);
+  private mouseTrackingEnabled: boolean = true;
+
+  // Event handlers
+  private mousemoveHandler: ((e: MouseEvent) => void) | null = null;
+  private mousedownHandler: ((e: MouseEvent) => void) | null = null;
+  private mouseupHandler: ((e: MouseEvent) => void) | null = null;
+  private rafId: number | null = null;
+
+  // Animation state
+  private idleRotationSpeed: number = 3; // Degrees per second
   private time: number = 0;
-  
+
   constructor(container: HTMLDivElement) {
-    // Three.js setup
-    this.renderer = new THREE.WebGLRenderer({ antialias: true });
-    this.renderer.setPixelRatio(window.devicePixelRatio);
+    // Initialize clock
+    this.clock = new THREE.Clock();
+
+    // Initialize state management
+    this.state = new RocketState();
+
+    // Setup renderer
+    this.renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      powerPreference: 'high-performance'
+    });
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.domElement.style.cursor = 'default';
     container.appendChild(this.renderer.domElement);
 
-    // Set cursor style to default instead of pointer
-    this.renderer.domElement.style.cursor = 'default';
-
-    // Camera setup
-    this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100000);
+    // Setup camera
+    this.camera = new THREE.PerspectiveCamera(
+      60,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      100000
+    );
     this.camera.position.set(0, 2, 20);
 
-    // Scene setup
+    // Setup scene
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0x000000);
-    this.scene.fog = new THREE.Fog(this.scene.background, 15, 30);
+    this.scene.fog = new THREE.Fog(0x000000, 15, 30);
 
+    // Setup scene hierarchy
+    this.setupSceneHierarchy();
+
+    // Setup components
     this.setupLights();
     this.setupRocket();
-    this.setupStars();
+    this.setupParticles();
+    this.setupPostProcessing();
     this.setupInteraction();
+    this.setupAnimator();
+
+    // Start render loop
     this.animate();
-
-    this.rocketTarget = new THREE.Vector3();
-    this.cameraTarget = new THREE.Vector3().copy(this.camera.position);
-
-    // Setup post-processing
-    this.composer = new EffectComposer(this.renderer);
-    this.composer.addPass(new RenderPass(this.scene, this.camera));
-
-    const crtPass = new ShaderPass(CRTShader);
-    this.composer.addPass(crtPass);
   }
 
-  private setupLights() {
-    const aLight = new THREE.AmbientLight(0x555555);
-    this.scene.add(aLight);
+  /**
+   * Setup the scene hierarchy to fix rotation issues
+   */
+  private setupSceneHierarchy(): void {
+    // Root of all scene objects
+    this.sceneRoot = new THREE.Group();
+    this.sceneRoot.name = 'SceneRoot';
+    this.scene.add(this.sceneRoot);
 
-    const dLight1 = new THREE.DirectionalLight(0xffffff, 0.4);
-    dLight1.position.set(0.7, 1, 1);
-    this.scene.add(dLight1);
+    // Container for applying the viewing angle
+    this.viewContainer = new THREE.Group();
+    this.viewContainer.name = 'ViewContainer';
+    this.viewContainer.rotation.x = THREE.MathUtils.degToRad(-70); // Apply viewing angle here
+    this.sceneRoot.add(this.viewContainer);
+
+    // Container for the rocket (no rotation applied)
+    this.rocketContainer = new THREE.Group();
+    this.rocketContainer.name = 'RocketContainer';
+    this.viewContainer.add(this.rocketContainer);
   }
 
-  private setupRocket() {
-    // Create rocket group
-    this.rocketGroup = new THREE.Group();
-    this.rocketGroup.rotation.x = THREE.MathUtils.degToRad(-70);
-    this.scene.add(this.rocketGroup);
+  /**
+   * Setup scene lighting
+   */
+  private setupLights(): void {
+    // Ambient light
+    const ambientLight = new THREE.AmbientLight(0x555555);
+    this.sceneRoot.add(ambientLight);
 
-    this.rocket = new THREE.Group();
-    this.rocket.position.y = -1.5;
-    this.rocketGroup.add(this.rocket);
+    // Directional light
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.4);
+    directionalLight.position.set(0.7, 1, 1);
+    this.sceneRoot.add(directionalLight);
 
-    // Body
-    const points = [];
-    points.push(new THREE.Vector2(0, 0));
-    for (let i = 0; i < 11; i++) {
-      const point = new THREE.Vector2(
-        Math.cos(i * 0.227 - 0.75) * 8,
-        i * 4.0
-      );
-      points.push(point);
-    }
-    points.push(new THREE.Vector2(0, 40));
-
-    const rocketGeo = new THREE.LatheGeometry(points, 32);
-    const rocketMat = new THREE.MeshToonMaterial({
-      color: 0xcccccc
-    });
-
-    const OutlineShader = {
-      uniforms: {
-        offset: { value: 0.3 },
-        color: { value: new THREE.Color('#000000') },
-        alpha: { value: 1.0 }
-      },
-      vertexShader: `
-        uniform float offset;
-        void main() {
-          vec4 pos = modelViewMatrix * vec4(position + normal * offset, 1.0);
-          gl_Position = projectionMatrix * pos;
-        }
-      `,
-      fragmentShader: `
-        uniform vec3 color;
-        uniform float alpha;
-        void main() {
-          gl_FragColor = vec4(color, alpha);
-        }
-      `
-    };
-
-    const rocketOutlineMat = new THREE.ShaderMaterial({
-      uniforms: THREE.UniformsUtils.clone(OutlineShader.uniforms),
-      vertexShader: OutlineShader.vertexShader,
-      fragmentShader: OutlineShader.fragmentShader,
-      side: THREE.BackSide,
-    });
-    rocketOutlineMat.uniforms.color.value = new THREE.Color(0xd4af37);
-
-    const rocketObj = new THREE.Group();
-    rocketObj.add(new THREE.Mesh(rocketGeo, rocketMat));
-    rocketObj.add(new THREE.Mesh(rocketGeo, rocketOutlineMat));
-    rocketObj.scale.setScalar(0.1);
-    this.rocket.add(rocketObj);
-
-    // Add wings
-    this.setupWings(rocketOutlineMat);
-
-    // Setup fire effect
-    this.setupFire();
+    // Optional: Add a subtle point light that follows the rocket
+    const rocketLight = new THREE.PointLight(0xffd700, 0.3, 10);
+    rocketLight.position.y = -2;
+    this.rocketContainer.add(rocketLight);
   }
 
-  private setupWings(rocketOutlineMat: THREE.ShaderMaterial) {
-    const shape = new THREE.Shape();
-    shape.moveTo(3, 0);
-    shape.quadraticCurveTo(25, -8, 15, -37);
-    shape.quadraticCurveTo(13, -21, 0, -20);
-    shape.lineTo(3, 0);
-
-    const extrudeSettings = {
-      steps: 1,
-      depth: 4,
-      bevelEnabled: true,
-      bevelThickness: 2,
-      bevelSize: 2,
-      bevelSegments: 5
-    };
-
-    const wingGroup = new THREE.Group();
-    this.rocket.add(wingGroup);
-
-    const wingGeo = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-    wingGeo.computeVertexNormals();
-    const wingMat = new THREE.MeshToonMaterial({
-      color: 0xd4af37
-    });
-    const wingOutlineMat = rocketOutlineMat.clone();
-    wingOutlineMat.uniforms.offset.value = 1;
-
-    const wing = new THREE.Group();
-    wing.add(new THREE.Mesh(wingGeo, wingMat));
-    wing.add(new THREE.Mesh(wingGeo, wingOutlineMat));
-    wing.scale.setScalar(0.03);
-    wing.position.set(0.6, 0.9, 0);
-    wingGroup.add(wing);
-
-    // Add other wings
-    const wing2 = wingGroup.clone();
-    wing2.rotation.y = Math.PI;
-    this.rocket.add(wing2);
-
-    const wing3 = wingGroup.clone();
-    wing3.rotation.y = Math.PI / 2;
-    this.rocket.add(wing3);
-
-    const wing4 = wingGroup.clone();
-    wing4.rotation.y = -Math.PI / 2;
-    this.rocket.add(wing4);
+  /**
+   * Setup the rocket model
+   */
+  private setupRocket(): void {
+    // Create rocket model
+    this.rocketModel = new RocketModel();
+    this.rocketContainer.add(this.rocketModel);
   }
 
-  private setupFire() {
-    const firePoints = [];
-    for (let i = 0; i <= 10; i++) {
-      const point = new THREE.Vector2(
-        Math.sin(i * 0.18) * 8,
-        (-10 + i) * 2.5
-      );
-      firePoints.push(point);
-    }
-
-    const fireGeo = new THREE.LatheGeometry(firePoints, 32);
-    const fireMat = new THREE.ShaderMaterial({
-      uniforms: {
-        color1: { value: new THREE.Color('yellow') },
-        color2: { value: new THREE.Color(0xff7b00) }
-      },
-      vertexShader: `
-        varying vec2 vUv;
-        void main() {
-          vUv = uv;
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
-        }
-      `,
-      fragmentShader: `
-        uniform vec3 color1;
-        uniform vec3 color2;
-        varying vec2 vUv;
-        void main() {
-          gl_FragColor = vec4(mix(color1, color2, vUv.y), 1.0);
-        }
-      `,
-    });
-
-    this.fire = new THREE.Mesh(fireGeo, fireMat);
-    this.fire.scale.setScalar(0.06);
-    this.rocket.add(this.fire);
-  }
-
-  private setupStars() {
-    this.stars = new Particles({
+  /**
+   * Setup particle system
+   */
+  private setupParticles(): void {
+    this.particles = new Particles({
       color: 0xffffff,
       size: 0.2,
       rangeH: 20,
       rangeV: 20,
       rangeZ: 30,
-      pointCount: 400,
-      speed: 0.1
+      pointCount: 200,
+      speed: 0.1,
+      exclusionRadius: 0.3 // Keep particles away from center where rocket is
     });
-    this.scene.add(this.stars);
+    this.sceneRoot.add(this.particles);
   }
 
-  private setupInteraction() {
-    const mouse = new THREE.Vector2();
-    const raycaster = new THREE.Raycaster();
-    const plane = new THREE.Plane(new THREE.Vector3(0, 0.642, 0.766), 0);
+  /**
+   * Setup post-processing effects
+   */
+  private setupPostProcessing(): void {
+    this.composer = new EffectComposer(this.renderer);
 
-    const mousemove = (e: MouseEvent) => {
-      mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-      mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+    // Main render pass
+    const renderPass = new RenderPass(this.scene, this.camera);
+    this.composer.addPass(renderPass);
 
-      this.cameraTarget.x = -mouse.x * 2;
-      this.cameraTarget.z = 9 + mouse.y * 2;
-
-      raycaster.setFromCamera(mouse, this.camera);
-      raycaster.ray.intersectPlane(plane, this.rocketTarget);
-    };
-
-    const mousedown = (e: MouseEvent) => {
-      e.preventDefault();
-      
-      TWEEN.removeAll();
-
-      const dir = mouse.x < 0 ? -1 : 1;
-      
-      new TWEEN.Tween(this.rocket.rotation)
-        .to({ y: dir * Math.PI }, 1000)
-        .easing(TWEEN.Easing.Quadratic.InOut)
-        .start();
-
-      new TWEEN.Tween(this.rocketGroup.scale)
-        .to({ x: 0.9, y: 1.2, z: 0.9 }, 400)
-        .easing(TWEEN.Easing.Cubic.InOut)
-        .start();
-
-      this.stars.speedTarget = 0.3;
-    };
-
-    const mouseup = () => {
-      new TWEEN.Tween(this.rocketGroup.scale)
-        .to({ x: 1, y: 1, z: 1 }, 400)
-        .easing(TWEEN.Easing.Cubic.InOut)
-        .start();
-
-      this.stars.speedTarget = 0.1;
-    };
-
-    this.renderer.domElement.addEventListener('mousemove', mousemove);
-    this.renderer.domElement.addEventListener('mousedown', mousedown);
-    this.renderer.domElement.addEventListener('mouseup', mouseup);
+    // CRT effect pass
+    const crtPass = new ShaderPass(CRTShader);
+    this.composer.addPass(crtPass);
   }
 
-  private animate() {
-    const clock = new THREE.Clock();
-    let time = 0;
-    const angle = THREE.MathUtils.degToRad(3);
+  /**
+   * Setup the animation system
+   */
+  private setupAnimator(): void {
+    // Create the animator with references to all animated objects
+    this.animator = new RocketAnimator(
+      this.camera,
+      this.rocketModel,
+      this.rocketContainer,
+      this.scene,
+      this.state
+      // Note: particles/stars functionality may need to be adapted
+    );
 
-    const lerp = (object: any, prop: string, destination: number) => {
-      if (object && object[prop] !== destination) {
-        object[prop] += (destination - object[prop]) * 0.1;
-        if (Math.abs(destination - object[prop]) < 0.01) {
-          object[prop] = destination;
-        }
+    // Start idle animation
+    this.state.on(SceneState.IDLE, () => {
+      this.animator.startIdle();
+    });
+
+    // Handle state transitions
+    this.state.on(SceneState.LAUNCHING, () => {
+      console.log('Launching rocket!');
+    });
+
+    this.state.on(SceneState.RESETTING, () => {
+      console.log('Resetting scene...');
+    });
+
+    // Start in idle state
+    if (this.state.state === SceneState.IDLE) {
+      this.animator.startIdle();
+    }
+  }
+
+  /**
+   * Setup mouse interaction
+   */
+  private setupInteraction(): void {
+    // Create an invisible plane for mouse interaction
+    this.interactionPlane = new THREE.Plane(
+      new THREE.Vector3(0, 0.642, 0.766),
+      0
+    );
+
+    // Throttled update function
+    const updateTargets = () => {
+      if (!this.state.canInteract() || !this.mouseTrackingEnabled) {
+        this.rafId = null;
+        return;
+      }
+
+      // Update camera target based on mouse position
+      this.cameraTarget.x = -this.mouse.x * 2;
+      this.cameraTarget.z = 20 + this.mouse.y * 2;
+
+      // Update rocket target using raycaster
+      this.raycaster.setFromCamera(this.mouse, this.camera);
+      this.raycaster.ray.intersectPlane(this.interactionPlane, this.rocketTarget);
+
+      this.rafId = null;
+    };
+
+    // Mouse move handler
+    this.mousemoveHandler = (e: MouseEvent) => {
+      if (!this.state.canInteract() || !this.mouseTrackingEnabled) return;
+
+      // Update mouse coordinates
+      this.mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+      this.mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+      // Throttle updates using requestAnimationFrame
+      if (this.rafId === null) {
+        this.rafId = requestAnimationFrame(updateTargets);
       }
     };
 
-    const animate = () => {
-      requestAnimationFrame(animate);
-      TWEEN.update();
+    // Mouse down handler
+    this.mousedownHandler = (e: MouseEvent) => {
+      if (!this.state.canInteract()) return;
 
-      time += clock.getDelta();
+      const target = e.target as HTMLElement;
+      const isInteractive = target.closest(
+        'a, button, input, textarea, select, [role="button"]'
+      );
 
-      this.rocketGroup.rotation.y = Math.cos(time * 8) * angle;
-      this.fire.scale.y = THREE.MathUtils.randFloat(0.04, 0.08);
-      this.stars.updateConstant();
+      if (!isInteractive) {
+        e.preventDefault();
 
-      lerp(this.rocketGroup.position, 'y', this.rocketTarget?.y || 0);
-      lerp(this.rocketGroup.position, 'x', this.rocketTarget?.x || 0);
-      lerp(this.camera.position, 'x', this.cameraTarget?.x || 0);
-      lerp(this.camera.position, 'z', this.cameraTarget?.z || 0);
-      lerp(this.stars, 'speed', this.stars.speedTarget);
+        // Play click animation
+        const direction = this.mouse.x < 0 ? -1 : 1;
+        this.animator.playClickAnimation(direction);
 
-      // Safely update CRT shader time uniform
-      if (this.composer?.passes?.[1]) {
-        const crtPass = this.composer.passes[1] as ShaderPass;
-        crtPass.uniforms.time.value = time;
+        // Temporary boost to particles
+        this.particles.speedTarget = 0.3;
       }
-
-      // Render with composer
-      this.composer?.render();
     };
 
-    animate();
+    // Mouse up handler
+    this.mouseupHandler = () => {
+      if (!this.state.canInteract()) return;
+
+      // Reset particle speed
+      this.particles.speedTarget = 0.1;
+    };
+
+    // Register event listeners
+    window.addEventListener('mousemove', this.mousemoveHandler);
+    window.addEventListener('mousedown', this.mousedownHandler);
+    window.addEventListener('mouseup', this.mouseupHandler);
   }
 
-  public handleResize() {
+  /**
+   * Main animation loop
+   */
+  private animate(): void {
+    const animationLoop = () => {
+      requestAnimationFrame(animationLoop);
+
+      const deltaTime = this.clock.getDelta();
+      const elapsedTime = this.clock.getElapsedTime();
+      this.time = elapsedTime;
+
+      // Update animator (handles all animation clips)
+      this.animator.update(deltaTime);
+
+      // Update based on state
+      if (this.state.canInteract()) {
+        // Normal idle state updates
+        this.updateIdleAnimations(deltaTime, elapsedTime);
+        this.updateCameraPosition(deltaTime);
+        this.updateRocketPosition(deltaTime);
+      }
+
+      // Always update these
+      this.updateParticles(deltaTime);
+      this.updateFireEffect(elapsedTime);
+      this.updatePostProcessing(elapsedTime);
+
+      // Render the scene
+      this.composer.render();
+    };
+
+    animationLoop();
+  }
+
+  /**
+   * Update idle animations
+   */
+  private updateIdleAnimations(deltaTime: number, elapsedTime: number): void {
+    // Subtle idle rotation
+    const rotationAngle = THREE.MathUtils.degToRad(this.idleRotationSpeed);
+    this.rocketContainer.rotation.y = Math.cos(elapsedTime * 8) * rotationAngle;
+  }
+
+  /**
+   * Smoothly update camera position
+   */
+  private updateCameraPosition(deltaTime: number): void {
+    const lerpFactor = 1 - Math.pow(0.1, deltaTime);
+
+    this.camera.position.x = THREE.MathUtils.lerp(
+      this.camera.position.x,
+      this.cameraTarget.x,
+      lerpFactor
+    );
+
+    this.camera.position.z = THREE.MathUtils.lerp(
+      this.camera.position.z,
+      this.cameraTarget.z,
+      lerpFactor
+    );
+  }
+
+  /**
+   * Smoothly update rocket position
+   */
+  private updateRocketPosition(deltaTime: number): void {
+    const lerpFactor = 1 - Math.pow(0.1, deltaTime);
+
+    this.rocketContainer.position.x = THREE.MathUtils.lerp(
+      this.rocketContainer.position.x,
+      this.rocketTarget.x,
+      lerpFactor
+    );
+
+    this.rocketContainer.position.y = THREE.MathUtils.lerp(
+      this.rocketContainer.position.y,
+      this.rocketTarget.y,
+      lerpFactor
+    );
+  }
+
+  /**
+   * Update particle system
+   */
+  private updateParticles(deltaTime: number): void {
+    // Update particles
+    this.particles.updateConstant();
+
+    // Smooth speed transitions
+    const speedLerp = 1 - Math.pow(0.1, deltaTime);
+    this.particles.speed = THREE.MathUtils.lerp(
+      this.particles.speed,
+      this.particles.speedTarget,
+      speedLerp
+    );
+  }
+
+  /**
+   * Update fire flicker effect
+   */
+  private updateFireEffect(elapsedTime: number): void {
+    this.rocketModel.updateFire(elapsedTime);
+  }
+
+  /**
+   * Update post-processing uniforms
+   */
+  private updatePostProcessing(elapsedTime: number): void {
+    // Update CRT shader time uniform
+    if (this.composer.passes[1]) {
+      const crtPass = this.composer.passes[1] as ShaderPass;
+      if (crtPass.uniforms?.time) {
+        crtPass.uniforms.time.value = elapsedTime;
+      }
+    }
+  }
+
+  /**
+   * Public method to trigger the takeoff animation
+   */
+  public shootOff(callback?: () => void): void {
+    console.log('RocketScene.shootOff() called');
+
+    if (!this.state.canShoot()) {
+      console.warn('Cannot shoot - current state:', this.state.state);
+      return;
+    }
+
+    // Disable mouse tracking immediately
+    this.mouseTrackingEnabled = false;
+    console.log('Mouse tracking disabled');
+
+    // Reset mouse position to center for smooth animation
+    this.mouse.set(0, 0);
+    this.rocketTarget.set(0, 0, 0);
+
+    // Start the launch animation
+    this.animator.startLaunch(() => {
+      console.log('Launch animation complete');
+      if (callback) {
+        callback();
+      }
+    }, () => {
+      // Callback for when reset completes
+      this.mouseTrackingEnabled = true;
+      this.mouse.set(0, 0);
+      this.cameraTarget.set(0, 2, 20);
+      console.log('Mouse tracking re-enabled');
+    });
+  }
+
+  /**
+   * Handle window resize
+   */
+  public handleResize(): void {
     this.camera.aspect = window.innerWidth / window.innerHeight;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.composer.setSize(window.innerWidth, window.innerHeight);
   }
 
-  public dispose() {
+  /**
+   * Cleanup and dispose
+   */
+  public dispose(): void {
+    // Cancel any pending RAF callbacks
+    if (this.rafId !== null) {
+      cancelAnimationFrame(this.rafId);
+      this.rafId = null;
+    }
+
+    // Remove event listeners
+    if (this.mousemoveHandler) {
+      window.removeEventListener('mousemove', this.mousemoveHandler);
+      this.mousemoveHandler = null;
+    }
+    if (this.mousedownHandler) {
+      window.removeEventListener('mousedown', this.mousedownHandler);
+      this.mousedownHandler = null;
+    }
+    if (this.mouseupHandler) {
+      window.removeEventListener('mouseup', this.mouseupHandler);
+      this.mouseupHandler = null;
+    }
+
+    // Dispose components
+    this.animator.dispose();
+    this.rocketModel.dispose();
+
+    // Remove canvas from DOM
+    if (this.renderer.domElement.parentNode) {
+      this.renderer.domElement.parentNode.removeChild(this.renderer.domElement);
+    }
+
+    // Dispose Three.js resources
     this.renderer.dispose();
     this.composer.dispose();
   }

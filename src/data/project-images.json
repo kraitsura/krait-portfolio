@@ -1,0 +1,72 @@
+{
+  "atoms-tech": [
+    "/project-images/atoms-tech/1.png",
+    "/project-images/atoms-tech/2.gif",
+    "/project-images/atoms-tech/3.gif"
+  ],
+  "colosseum-tech": [
+    "/project-images/colosseum-tech/1.png",
+    "/project-images/colosseum-tech/2.png",
+    "/project-images/colosseum-tech/3.png"
+  ],
+  "conduit": [
+    "/project-images/conduit/1.png",
+    "/project-images/conduit/2.png",
+    "/project-images/conduit/3.png"
+  ],
+  "event-chat": [
+    "/project-images/event-chat/1.png",
+    "/project-images/event-chat/2.png",
+    "/project-images/event-chat/3.png"
+  ],
+  "gameoflife": [
+    "/project-images/gameoflife/1.png",
+    "/project-images/gameoflife/2.png",
+    "/project-images/gameoflife/3.png"
+  ],
+  "glutton-cli": [
+    "/project-images/glutton-cli/1.png",
+    "/project-images/glutton-cli/2.png",
+    "/project-images/glutton-cli/3.png"
+  ],
+  "grimoire": [
+    "/project-images/grimoire/1.png",
+    "/project-images/grimoire/2.png",
+    "/project-images/grimoire/3.png"
+  ],
+  "log-cli": [
+    "/project-images/log-cli/1.png",
+    "/project-images/log-cli/2.png",
+    "/project-images/log-cli/3.png"
+  ],
+  "md-pastebin": [
+    "/project-images/md-pastebin/1.png",
+    "/project-images/md-pastebin/2.png",
+    "/project-images/md-pastebin/3.png"
+  ],
+  "moviewebsite": [
+    "/project-images/moviewebsite/1.png",
+    "/project-images/moviewebsite/2.png",
+    "/project-images/moviewebsite/3.png"
+  ],
+  "pomo-cli": [
+    "/project-images/pomo-cli/1.png",
+    "/project-images/pomo-cli/2.png",
+    "/project-images/pomo-cli/3.png"
+  ],
+  "rocket-game": [
+    "/project-images/rocket-game/1.png",
+    "/project-images/rocket-game/2.png",
+    "/project-images/rocket-game/3.png"
+  ],
+  "soccer-stats": [
+    "/project-images/soccer-stats/1.png",
+    "/project-images/soccer-stats/2.png",
+    "/project-images/soccer-stats/3.png"
+  ],
+  "wiin-website": [
+    "/project-images/wiin-website/1.png",
+    "/project-images/wiin-website/2.png",
+    "/project-images/wiin-website/3.png"
+  ]
+}

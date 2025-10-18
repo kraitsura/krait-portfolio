@@ -1,82 +1,18 @@
 "use client";
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, memo } from "react";
 import Image from "next/image";
 import Dashboard from "./Dashboard";
 import styles from "@/styles/fadeIn.module.css";
 import Pipboy from "@/components/custom/Pipboy";
+import { useTouchDevice } from "@/contexts/TouchContext";
 
 interface IntroPageProps {
   images: string[];
 }
 
-const IntroPage: React.FC<IntroPageProps> = ({ images }) => {
-  const [scrollPercentage, setScrollPercentage] = useState(0);
-  const [randomImageIndex] = useState(() =>
-    Math.floor(Math.random() * images.length),
-  );
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [isAtBottom, setIsAtBottom] = useState(false);
-  const [isAtTop, setIsAtTop] = useState(true);
-
-  const scrollToTop = () => {
-    if (containerRef.current) {
-      const container = containerRef.current;
-      container.removeEventListener("scroll", handleScroll);
-
-      setIsAtBottom(false);
-      setScrollPercentage(0);
-
-      container.scrollTo({
-        top: 0,
-        behavior: "smooth",
-      });
-
-      setTimeout(() => {
-        container.addEventListener("scroll", handleScroll);
-        setIsAtTop(true);
-      }, 1000);
-    }
-  };
-
-  const handleScroll = useCallback(() => {
-    if (containerRef.current) {
-      const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
-      requestAnimationFrame(() => {
-        const newScrollPercentage =
-          (scrollTop / (scrollHeight - clientHeight)) * 100;
-        setScrollPercentage(Math.min(newScrollPercentage, 100));
-
-        setIsAtBottom(newScrollPercentage > 80);
-        setIsAtTop(scrollTop < 100);
-      });
-    }
-  }, []);
-
-  useEffect(() => {
-    const container = containerRef.current;
-    if (container) {
-      container.addEventListener("scroll", handleScroll);
-    }
-    return () => {
-      if (container) {
-        container.removeEventListener("scroll", handleScroll);
-      }
-    };
-  }, [handleScroll]);
-
-  const isFullyDarkened = scrollPercentage >= 80;
-
-  const scrollToBottom = () => {
-    if (containerRef.current) {
-      const scrollHeight = containerRef.current.scrollHeight;
-      containerRef.current.scrollTo({
-        top: scrollHeight,
-        behavior: "smooth",
-      });
-    }
-  };
-
-  const NavigationArrow = ({
+// Memoized NavigationArrow component extracted for performance
+const NavigationArrow = memo(
+  ({
     direction,
     onClick,
   }: {
@@ -86,13 +22,13 @@ const IntroPage: React.FC<IntroPageProps> = ({ images }) => {
     <button
       onClick={onClick}
       className={`
-        hover:text-green-400
-        transition-colors
-        cursor-pointer
-        p-2
-        relative
-        ${styles["bounce-and-shimmer"]}
-      `}
+      hover:text-green-400
+      transition-colors
+      cursor-pointer
+      p-2
+      relative
+      ${styles["bounce-and-shimmer"]}
+    `}
       aria-label={`Scroll to ${direction === "up" ? "top" : "bottom"}`}
     >
       <svg
@@ -110,7 +46,94 @@ const IntroPage: React.FC<IntroPageProps> = ({ images }) => {
         />
       </svg>
     </button>
+  ),
+);
+
+NavigationArrow.displayName = "NavigationArrow";
+
+const IntroPage: React.FC<IntroPageProps> = ({ images }) => {
+  const { isTouchDevice } = useTouchDevice();
+  const [scrollPercentage, setScrollPercentage] = useState(0);
+  const [randomImageIndex] = useState(() =>
+    Math.floor(Math.random() * images.length),
   );
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isAtBottom, setIsAtBottom] = useState(false);
+  const [isAtTop, setIsAtTop] = useState(true);
+
+  const handleScroll = useCallback(() => {
+    if (containerRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
+      requestAnimationFrame(() => {
+        const newScrollPercentage =
+          (scrollTop / (scrollHeight - clientHeight)) * 100;
+        setScrollPercentage(Math.min(newScrollPercentage, 100));
+
+        setIsAtBottom(newScrollPercentage > 95);
+        setIsAtTop(scrollTop < 100);
+      });
+    }
+  }, []);
+
+  const scrollToTop = useCallback(() => {
+    if (containerRef.current) {
+      const container = containerRef.current;
+      container.removeEventListener("scroll", handleScroll);
+
+      setIsAtBottom(false);
+      setScrollPercentage(0);
+
+      container.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+
+      setTimeout(() => {
+        container.addEventListener("scroll", handleScroll);
+        setIsAtTop(true);
+      }, 1000);
+    }
+  }, [handleScroll]);
+
+  const scrollToBottom = useCallback(() => {
+    if (containerRef.current) {
+      const scrollHeight = containerRef.current.scrollHeight;
+      containerRef.current.scrollTo({
+        top: scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (container) {
+      container.addEventListener("scroll", handleScroll);
+    }
+    return () => {
+      if (container) {
+        container.removeEventListener("scroll", handleScroll);
+      }
+    };
+  }, [handleScroll]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.shiftKey && (e.key === "J" || e.key === "j")) {
+        e.preventDefault();
+        scrollToBottom();
+      } else if (e.shiftKey && (e.key === "K" || e.key === "k")) {
+        e.preventDefault();
+        scrollToTop();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [scrollToBottom, scrollToTop]);
+
+  const isFullyDarkened = scrollPercentage >= 95;
 
   return (
     <div className={styles.fadeIn}>
@@ -146,33 +169,49 @@ const IntroPage: React.FC<IntroPageProps> = ({ images }) => {
           <div className="h-screen flex items-center justify-center">
             <div className="h-full w-full flex flex-col items-center justify-center gap-8">
               <div className="w-full max-w-[800px]">
-                <Pipboy />
-                <div className="h-[48px] flex justify-center mt-4 relative z-20">
-                  {isAtTop && (
+                <Pipboy isActive={scrollPercentage < 70} />
+                <div className="h-[48px] flex flex-col items-center justify-center -mt-2 relative z-20">
+                  <div
+                    className={`flex flex-col items-center transition-all duration-500 ${
+                      isAtTop
+                        ? "opacity-100 translate-y-0"
+                        : "opacity-0 -translate-y-2 pointer-events-none"
+                    }`}
+                  >
+                    {!isTouchDevice && (
+                      <div className="text-[10px] text-white opacity-40 mb-1">
+                        ⇧J
+                      </div>
+                    )}
                     <NavigationArrow
                       direction="down"
                       onClick={scrollToBottom}
                     />
-                  )}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
           <div
-            className={`transition-all duration-1000 ${
-              isFullyDarkened
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 translate-y-10"
+            className={`transition-all duration-1000 pointer-events-none ${
+              isFullyDarkened ? "opacity-100" : "opacity-0"
             }`}
           >
             <div className={styles.pipboyContainer}>
-              <Dashboard />
+              <Dashboard isVisible={isFullyDarkened} />
             </div>
-            <div className="fixed bottom-8 left-1/2 -translate-x-1/2 flex justify-center mt-4 z-20">
+            <div className="fixed bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center justify-center mt-4 z-20">
               <div
-                className={`transition-opacity duration-300 ${isAtBottom ? "opacity-100" : "opacity-0"}`}
+                className={`transition-all duration-500 flex flex-col items-center ${
+                  isAtBottom
+                    ? "opacity-100 translate-y-0 pointer-events-auto"
+                    : "opacity-0 translate-y-2 pointer-events-none"
+                }`}
               >
                 <NavigationArrow direction="up" onClick={scrollToTop} />
+                {!isTouchDevice && (
+                  <div className="text-[10px] text-white opacity-40 mt-1">⇧K</div>
+                )}
               </div>
             </div>
           </div>

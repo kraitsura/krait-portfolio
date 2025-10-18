@@ -1,12 +1,20 @@
 declare module 'three/examples/jsm/postprocessing/EffectComposer' {
-    import { WebGLRenderer, WebGLRenderTarget, Scene, Camera } from 'three';
+    import { WebGLRenderer, WebGLRenderTarget } from 'three';
+
+    interface Pass {
+        enabled: boolean;
+        renderToScreen?: boolean;
+        render?: (renderer: WebGLRenderer, writeBuffer: WebGLRenderTarget, readBuffer: WebGLRenderTarget) => void;
+        setSize?: (width: number, height: number) => void;
+    }
+
     export class EffectComposer {
         constructor(renderer: WebGLRenderer, renderTarget?: WebGLRenderTarget);
         render(): void;
-        addPass(pass: any): void;
+        addPass(pass: Pass): void;
         setSize(width: number, height: number): void;
         dispose(): void;
-        passes: any[];
+        passes: Pass[];
     }
 }
 
@@ -19,11 +27,11 @@ declare module 'three/examples/jsm/postprocessing/RenderPass' {
 }
 
 declare module 'three/examples/jsm/postprocessing/ShaderPass' {
-    import { ShaderMaterial, Texture, Vector2 } from 'three';
-    
+    import { ShaderMaterial } from 'three';
+
     interface ShaderPassUniforms {
         [key: string]: {
-            value: any;
+            value: number | boolean | string | object | null;
         };
     }
 

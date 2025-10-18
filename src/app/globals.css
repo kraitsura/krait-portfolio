@@ -206,3 +206,94 @@ body {
 .project-card-border:hover::after {
     opacity: 1;
 }
+
+/* Brutalist Highlight Border for Keyboard Navigation */
+.project-card-highlighted {
+    outline: 2px solid #FFFF31;
+    outline-offset: 12px;
+    background: rgba(255, 255, 49, 0.05);
+    box-shadow: 0 0 20px rgba(255, 255, 49, 0.15);
+}
+
+.project-card-border {
+    transition: outline 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Vim-like Keystroke Info */
+.keystroke-info-projects {
+    position: fixed;
+    top: 450px;
+    left: 12px;
+    font-family: 'Roboto Mono', monospace;
+    font-size: 11px;
+    color: rgba(212, 175, 55, 0.6);
+    z-index: 10;
+}
+
+.keystroke-item {
+    display: flex;
+    gap: 4px;
+    margin: 8px 0;
+    align-items: center;
+}
+
+.keystroke-item kbd {
+    background: rgba(212, 175, 55, 0.1);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    padding: 2px 4px;
+    font-size: 10px;
+    font-family: 'Roboto Mono', monospace;
+    color: var(--theme-primary);
+}
+
+.keystroke-item span {
+    opacity: 0.7;
+    font-size: 10px;
+}
+
+/* Custom Scrollbar Styles - Sleek and Transparent */
+* {
+    /* Firefox */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(212, 175, 55, 0.3) transparent;
+}
+
+/* Webkit browsers (Chrome, Safari, Edge) */
+*::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+    background-color: rgba(212, 175, 55, 0.3);
+    border-radius: 4px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    transition: background-color 0.2s ease;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(212, 175, 55, 0.5);
+}
+
+/* Social Icon Selection - Subtle Blinking Border */
+@keyframes subtle-pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.4);
+        opacity: 1;
+    }
+    50% {
+        box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.8);
+        opacity: 0.9;
+    }
+}
+
+.social-icon-selected {
+    animation: subtle-pulse 2s ease-in-out infinite;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 4px;
+}

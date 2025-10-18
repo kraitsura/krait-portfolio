@@ -45,7 +45,7 @@ export const GalleryPage: React.FC<GalleryPageProps> = ({ images }) => {
         container.removeEventListener('wheel', handleWheel);
       }
     };
-  }, []);
+  }, [handleWheel]);
 
   return (
     <div 
