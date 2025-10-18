@@ -328,7 +328,7 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true }) => {
                               className={styles["attr-fill"]}
                               style={{ width: "60%" }}
                             ></div>
-                            <span className={styles["attr-value"]}>6</span>
+                            <span className={styles["attr-value"]}>9</span>
                           </div>
                         </div>
                         <div className={styles["attribute"]}>
@@ -350,7 +350,7 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true }) => {
                               className={styles["attr-fill"]}
                               style={{ width: "70%" }}
                             ></div>
-                            <span className={styles["attr-value"]}>7</span>
+                            <span className={styles["attr-value"]}>10</span>
                           </div>
                         </div>
                         <div className={styles["attribute"]}>
@@ -382,7 +382,7 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true }) => {
                               className={styles["attr-fill"]}
                               style={{ width: "70%" }}
                             ></div>
-                            <span className={styles["attr-value"]}>7</span>
+                            <span className={styles["attr-value"]}>20</span>
                           </div>
                         </div>
                       </div>
