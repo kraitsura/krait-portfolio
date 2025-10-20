@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import styles from "@/styles/pip.module.scss";
 import { useTouchDevice } from "@/contexts/TouchContext";
-import { useThemeColor } from "@/contexts/ThemeColorContext";
+import { useThemeColor, type ThemeColor } from "@/contexts/ThemeColorContext";
 
 interface PipboyProps {
   isActive?: boolean;
@@ -19,7 +19,7 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true, onScrollToSocials }) =
   const skillsSectionRef = useRef<HTMLDivElement>(null);
 
   const colorOptions = useMemo(
-    () => ["amber", "white", "green", "blue", "red"],
+    () => ["amber", "white", "green", "blue", "red"] as const,
     [],
   );
 
@@ -85,7 +85,7 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true, onScrollToSocials }) =
           );
         } else if (e.key === "Enter") {
           e.preventDefault();
-          setColor(colorOptions[selectedColorIndex]);
+          setColor(colorOptions[selectedColorIndex] as ThemeColor);
         }
       }
       // Other tabs - j/k for scrolling
@@ -135,12 +135,12 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true, onScrollToSocials }) =
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isActive, activeTab, selectedColorIndex, colorOptions]);
+  }, [isActive, activeTab, selectedColorIndex, colorOptions, setColor]);
 
   const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setColor(e.target.value);
+    setColor(e.target.value as ThemeColor);
     // Update selectedColorIndex to match clicked color
-    const index = colorOptions.indexOf(e.target.value);
+    const index = colorOptions.indexOf(e.target.value as ThemeColor);
     if (index !== -1) {
       setSelectedColorIndex(index);
     }

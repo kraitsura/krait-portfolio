@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-type ThemeColor = 'amber' | 'white' | 'green' | 'blue' | 'red';
+export type ThemeColor = 'amber' | 'white' | 'green' | 'blue' | 'red';
 
 interface ThemeColorContextType {
   color: ThemeColor;
