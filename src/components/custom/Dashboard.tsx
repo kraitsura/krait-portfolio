@@ -136,7 +136,10 @@ const Dashboard: React.FC<DashboardProps> = ({ isVisible = true }) => {
             {socialLinks.map((link, index) => (
               <button
                 key={link.name}
-                onClick={() => handleLaunch(link.url)}
+                onClick={() => {
+                  setSelectedIndex(index);
+                  handleLaunch(link.url);
+                }}
                 disabled={isLaunching}
                 className={`
                   relative p-4 sm:p-6

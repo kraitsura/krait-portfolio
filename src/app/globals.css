@@ -222,33 +222,60 @@ body {
 /* Vim-like Keystroke Info */
 .keystroke-info-projects {
     position: fixed;
-    top: 450px;
+    top: 280px;
     left: 12px;
     font-family: 'Roboto Mono', monospace;
-    font-size: 11px;
+    font-size: 9px;
     color: rgba(212, 175, 55, 0.6);
     z-index: 10;
 }
 
+@media (min-width: 768px) {
+    .keystroke-info-projects {
+        top: 450px;
+        font-size: 11px;
+    }
+}
+
 .keystroke-item {
     display: flex;
-    gap: 4px;
-    margin: 8px 0;
+    gap: 2px;
+    margin: 4px 0;
     align-items: center;
+}
+
+@media (min-width: 768px) {
+    .keystroke-item {
+        gap: 4px;
+        margin: 8px 0;
+    }
 }
 
 .keystroke-item kbd {
     background: rgba(212, 175, 55, 0.1);
     border: 1px solid rgba(212, 175, 55, 0.3);
-    padding: 2px 4px;
-    font-size: 10px;
+    padding: 1px 2px;
+    font-size: 8px;
     font-family: 'Roboto Mono', monospace;
     color: var(--theme-primary);
 }
 
+@media (min-width: 768px) {
+    .keystroke-item kbd {
+        padding: 2px 4px;
+        font-size: 10px;
+    }
+}
+
 .keystroke-item span {
     opacity: 0.7;
-    font-size: 10px;
+    font-size: 8px;
+}
+
+@media (min-width: 768px) {
+    .keystroke-item span {
+        font-size: 10px;
+    }
 }
 
 /* Custom Scrollbar Styles - Sleek and Transparent */

@@ -2,7 +2,7 @@
 import { useRouter, useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { projects } from '@/utils/projectList';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import VerticalCarousel from '@/components/custom/VerticalCarousel';
 
@@ -10,7 +10,6 @@ const ProjectDetail: React.FC = () => {
   const router = useRouter();
   const { id } = useParams() as { id: string };
   const [isTouchDevice, setIsTouchDevice] = useState(false);
-  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
 
   // Find project directly
   const project = projects.find(p => p.id.toString() === id);
@@ -23,40 +22,11 @@ const ProjectDetail: React.FC = () => {
   const goToPreviousProject = () => {
     const prevIndex = (currentIndex - 1 + projects.length) % projects.length;
     router.push(`/projects/${projects[prevIndex].id}`);
-    setSwipeDirection(null); // Reset swipe state
   };
 
   const goToNextProject = () => {
     const nextIndex = (currentIndex + 1) % projects.length;
     router.push(`/projects/${projects[nextIndex].id}`);
-    setSwipeDirection(null); // Reset swipe state
-  };
-
-  // Handle horizontal swipe for project navigation
-  const handleHorizontalSwipe = (_: unknown, info: { offset: { x: number } }) => {
-    if (!isTouchDevice) return;
-
-    const swipeThreshold = 100;
-
-    if (info.offset.x > swipeThreshold) {
-      // Swiped right
-      if (swipeDirection === 'right') {
-        // Second swipe - navigate to previous project
-        goToPreviousProject();
-      } else {
-        // First swipe - show arrow
-        setSwipeDirection('right');
-      }
-    } else if (info.offset.x < -swipeThreshold) {
-      // Swiped left
-      if (swipeDirection === 'left') {
-        // Second swipe - navigate to next project
-        goToNextProject();
-      } else {
-        // First swipe - show arrow
-        setSwipeDirection('left');
-      }
-    }
   };
 
   // Detect touch device
@@ -66,16 +36,6 @@ const ProjectDetail: React.FC = () => {
     };
     checkTouch();
   }, []);
-
-  // Auto-dismiss arrow after 3 seconds
-  useEffect(() => {
-    if (swipeDirection) {
-      const timer = setTimeout(() => {
-        setSwipeDirection(null);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [swipeDirection]);
 
   // Add keyboard navigation for Esc, h, l
   useEffect(() => {
@@ -121,23 +81,33 @@ const ProjectDetail: React.FC = () => {
           <h1 className="text-base md:text-lg font-thin tracking-tight truncate">{project.title}</h1>
           <p className="text-xs font-thin text-gray-500 mt-0.5 truncate">{project.description}</p>
         </div>
-        <button
-          onClick={handleGoBack}
-          className="ml-4 p-1.5 hover:bg-gray-100 rounded transition-colors flex-shrink-0"
-          title="Press Esc to go back"
-        >
-          <X size={16} strokeWidth={1} />
-        </button>
+        <div className="flex items-center gap-1 ml-4 flex-shrink-0">
+          <button
+            onClick={goToPreviousProject}
+            className="p-1.5 hover:bg-gray-100 rounded transition-colors border border-transparent hover:border-gray-200"
+            title="Previous project (h)"
+          >
+            <ChevronLeft size={16} strokeWidth={1} />
+          </button>
+          <button
+            onClick={goToNextProject}
+            className="p-1.5 hover:bg-gray-100 rounded transition-colors border border-transparent hover:border-gray-200"
+            title="Next project (l)"
+          >
+            <ChevronRight size={16} strokeWidth={1} />
+          </button>
+          <button
+            onClick={handleGoBack}
+            className="p-1.5 hover:bg-gray-100 rounded transition-colors border border-transparent hover:border-gray-200"
+            title="Back to projects (Esc)"
+          >
+            <X size={16} strokeWidth={1} />
+          </button>
+        </div>
       </motion.div>
 
       {/* Main Content - Split Layout */}
-      <motion.div
-        className="flex-1 flex flex-col md:flex-row overflow-hidden relative"
-        drag={isTouchDevice ? "x" : false}
-        dragConstraints={{ left: 0, right: 0 }}
-        dragElastic={0.2}
-        onDragEnd={handleHorizontalSwipe}
-      >
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden relative min-h-0">
         {/* Top/Left Side - Image Carousel */}
         <motion.div
           initial={{ x: -30, opacity: 0 }}
@@ -153,7 +123,7 @@ const ProjectDetail: React.FC = () => {
           initial={{ x: 30, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.3 }}
-          className="w-full md:w-[45%] overflow-y-auto px-4 md:px-6 py-4"
+          className="w-full md:w-[45%] overflow-y-auto px-4 md:px-6 py-4 flex-1 min-h-0"
         >
           {/* Technologies */}
           <div className="mb-4 pb-4 border-b border-gray-100">
@@ -229,52 +199,7 @@ const ProjectDetail: React.FC = () => {
             </div>
           )}
         </motion.div>
-
-        {/* Floating Arrow Indicators - Only on touch devices */}
-        <AnimatePresence>
-          {isTouchDevice && swipeDirection === 'left' && (
-            <motion.div
-              initial={{ x: 20, opacity: 0 }}
-              animate={{
-                x: 0,
-                opacity: [0.4, 0.8, 0.4],
-              }}
-              exit={{ x: 20, opacity: 0 }}
-              transition={{
-                x: { duration: 0.3 },
-                opacity: { duration: 1.5, repeat: Infinity }
-              }}
-              className="fixed right-4 top-1/2 -translate-y-1/2 z-50 pointer-events-auto"
-              onClick={goToNextProject}
-            >
-              <div className="p-3 bg-white/90 border border-gray-300 rounded-sm shadow-lg backdrop-blur-sm cursor-pointer hover:bg-gray-50 transition-colors">
-                <ChevronRight size={32} strokeWidth={0.75} className="text-gray-700" />
-              </div>
-            </motion.div>
-          )}
-
-          {isTouchDevice && swipeDirection === 'right' && (
-            <motion.div
-              initial={{ x: -20, opacity: 0 }}
-              animate={{
-                x: 0,
-                opacity: [0.4, 0.8, 0.4],
-              }}
-              exit={{ x: -20, opacity: 0 }}
-              transition={{
-                x: { duration: 0.3 },
-                opacity: { duration: 1.5, repeat: Infinity }
-              }}
-              className="fixed left-4 top-1/2 -translate-y-1/2 z-50 pointer-events-auto"
-              onClick={goToPreviousProject}
-            >
-              <div className="p-3 bg-white/90 border border-gray-300 rounded-sm shadow-lg backdrop-blur-sm cursor-pointer hover:bg-gray-50 transition-colors">
-                <ChevronLeft size={32} strokeWidth={0.75} className="text-gray-700" />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
+      </div>
     </motion.div>
   );
 };

@@ -170,25 +170,59 @@ const IntroPage: React.FC<IntroPageProps> = ({ images }) => {
             <div className="h-full w-full flex flex-col items-center justify-center gap-8">
               <div className="w-full max-w-[800px]">
                 <Pipboy isActive={scrollPercentage < 70} />
-                <div className="h-[48px] flex flex-col items-center justify-center -mt-2 relative z-20">
-                  <div
-                    className={`flex flex-col items-center transition-all duration-500 ${
-                      isAtTop
-                        ? "opacity-100 translate-y-0"
-                        : "opacity-0 -translate-y-2 pointer-events-none"
-                    }`}
-                  >
-                    {!isTouchDevice && (
+                {/* Down arrow - different positioning for mobile vs desktop */}
+                {isTouchDevice ? (
+                  // Mobile/Touch: Top-left corner, smaller size
+                  <div className="fixed top-8 left-8 z-20">
+                    <div
+                      className={`transition-all duration-500 ${
+                        isAtTop
+                          ? "opacity-100 translate-y-0"
+                          : "opacity-0 -translate-y-2 pointer-events-none"
+                      }`}
+                    >
+                      <button
+                        onClick={scrollToBottom}
+                        className="hover:text-green-400 transition-colors cursor-pointer p-2 relative"
+                        aria-label="Scroll to bottom"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-6 w-16 opacity-30 pointer-events-none"
+                          viewBox="0 0 48 12"
+                          fill="none"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={1.5}
+                            d="M2 2 L24 10 L46 2"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  // Desktop: Centered below Pipboy
+                  <div className="h-[48px] flex flex-col items-center justify-center -mt-2 relative z-20">
+                    <div
+                      className={`flex flex-col items-center transition-all duration-500 ${
+                        isAtTop
+                          ? "opacity-100 translate-y-0"
+                          : "opacity-0 -translate-y-2 pointer-events-none"
+                      }`}
+                    >
                       <div className="text-[10px] text-white opacity-40 mb-1">
                         ⇧J
                       </div>
-                    )}
-                    <NavigationArrow
-                      direction="down"
-                      onClick={scrollToBottom}
-                    />
+                      <NavigationArrow
+                        direction="down"
+                        onClick={scrollToBottom}
+                      />
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           </div>

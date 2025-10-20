@@ -302,7 +302,9 @@
 .colors {
     display: grid;
     grid-template-columns: 33.33% 33.33% 33.33%;
-    margin-top: 35px;
+    margin: 35px auto 0;
+    max-width: 400px;
+    padding: 0 20px;
 }
 
 .colors label {
@@ -458,7 +460,10 @@
 }
 
 .pip-foot {
-    display: block;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2%;
     position: absolute;
     bottom: -14px;
     width: calc(100% - 60px);
@@ -473,10 +478,9 @@
 .pip-foot a {
     border-radius: 0;
     display: block;
-    float: left;
-    width: 12%;
+    width: 20%;
     height: 28px;
-    margin: 0 4%;
+    margin: 0;
     text-align: center;
     position: relative;
     line-height: 25px;
@@ -906,12 +910,13 @@
         width: 98%;
         margin: 0 1%;
         left: 0;
+        gap: 1%;
     }
 
     .pip-foot a {
-        width: 16%;
+        width: 22%;
         height: 35px;
-        margin: 0 2%;
+        margin: 0;
         line-height: 32px;
         overflow: hidden;
         font-size: 0.85em;

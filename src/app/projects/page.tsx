@@ -136,13 +136,13 @@ const Projects: React.FC = () => {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
-      className="min-h-screen bg-black text-white p-8 overflow-hidden relative"
+      className="min-h-screen bg-black text-white p-4 md:p-8 overflow-hidden relative"
     >
       <motion.h1
         initial={{ x: -100, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ delay: 0.5, duration: 0.8 }}
-        className="text-8xl font-thin mb-16 fixed top-24 left-4 z-10 theme-text"
+        className="text-5xl md:text-8xl font-thin mb-16 fixed top-24 left-4 z-10 theme-text"
         style={{ writingMode: 'vertical-lr', textOrientation: 'mixed' }}
       >
         Projects
@@ -157,20 +157,12 @@ const Projects: React.FC = () => {
           className="keystroke-info-projects"
         >
           <div className="keystroke-item">
-            <kbd>h</kbd>
-            <span>prev project</span>
+            <kbd>h/l</kbd>
+            <span>project</span>
           </div>
           <div className="keystroke-item">
-            <kbd>l</kbd>
-            <span>next project</span>
-          </div>
-          <div className="keystroke-item">
-            <kbd>k</kbd>
-            <span>prev section</span>
-          </div>
-          <div className="keystroke-item">
-            <kbd>j</kbd>
-            <span>next section</span>
+            <kbd>k/j</kbd>
+            <span>section</span>
           </div>
           <div className="keystroke-item">
             <kbd>↵</kbd>
@@ -179,7 +171,7 @@ const Projects: React.FC = () => {
         </motion.div>
       )}
 
-      <div className="ml-24 mt-8 space-y-12">
+      <div className="ml-16 md:ml-24 mt-16 md:mt-20 space-y-6 md:space-y-12">
         {categoryOrder.map((category) => {
           const categoryProjects = projectsByCategory[category];
           if (categoryProjects.length === 0) return null;
@@ -196,11 +188,11 @@ const Projects: React.FC = () => {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2, duration: 0.5 }}
-                className="text-3xl font-thin mb-6 theme-text"
+                className="text-3xl font-thin mb-3 md:mb-6 theme-text"
               >
                 {category}
               </motion.h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-12">
                 <AnimatePresence>
                   {categoryProjects.map((project) => {
                     const currentIndex = globalIndex++;
@@ -225,6 +217,7 @@ const Projects: React.FC = () => {
                           onClick={() => handleProjectClick(project)}
                           isSelected={selectedId === project.id}
                           isHighlighted={isHighlighted}
+                          isTouchDevice={isTouchDevice}
                         />
                       </motion.div>
                     );

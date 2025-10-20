@@ -11,12 +11,13 @@ interface ProjectCardProps {
   onClick: () => void;
   isSelected: boolean;
   isHighlighted?: boolean;
+  isTouchDevice?: boolean;
 }
 
 const playfair = Playfair_Display({ subsets: ['latin'] });
 const robotoMono = Roboto_Mono({ subsets: ['latin'] });
 
-const ProjectCard: React.FC<ProjectCardProps> = ({ project, index, onClick, isSelected, isHighlighted = false }) => {
+const ProjectCard: React.FC<ProjectCardProps> = ({ project, index, onClick, isSelected, isHighlighted = false, isTouchDevice = false }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [hoveredTag, setHoveredTag] = useState<number | null>(null);
@@ -105,7 +106,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, index, onClick, isSe
       transition={{ duration: 0.3, delay: index * 0.1 }}
       className={`relative aspect-video cursor-pointer group border-2 border-[var(--theme-primary)] project-card-border ${
         isSelected ? 'z-30' : ''
-      } ${isHighlighted ? 'project-card-highlighted' : ''}`}
+      } ${isHighlighted && !isTouchDevice ? 'project-card-highlighted' : ''}`}
     >
       <motion.div
         layoutId={`project-image-${project.id}`}
@@ -261,19 +262,19 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, index, onClick, isSe
         </AnimatePresence>
       </motion.div>
 
-      <motion.div 
-        className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent theme-text p-4"
+      <motion.div
+        className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent theme-text p-2 md:p-3 lg:p-4 overflow-hidden"
         initial={{ opacity: 1, y: 0 }}
         animate={{ opacity: isSelected ? 0 : 1, y: isSelected ? 20 : 0 }}
         transition={{ duration: 0.3 }}
       >
-        <div className="relative">
+        <div className="relative overflow-hidden">
           <div className="absolute inset-y-0 left-0 right-0 bg-[var(--theme-primary)] h-[2px] my-auto" />
-          <h3 className={`${playfair.className} text-black text-lg font-semibold relative bg-[var(--theme-primary)] inline-block pr-2`}>
+          <h3 className={`${playfair.className} text-black text-base md:text-lg lg:text-xl font-semibold relative bg-[var(--theme-primary)] inline-block pr-2`}>
             {project.title}
           </h3>
         </div>
-        <p className={`${robotoMono.className} theme-body text-sm`}>{project.description}</p>
+        <p className={`${robotoMono.className} theme-body text-xs md:text-sm line-clamp-2`}>{project.description}</p>
       </motion.div>
     </motion.div>
   );
