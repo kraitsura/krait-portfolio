@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import styles from "@/styles/pip.module.scss";
 import { useTouchDevice } from "@/contexts/TouchContext";
+import { useThemeColor } from "@/contexts/ThemeColorContext";
 
 interface PipboyProps {
   isActive?: boolean;
@@ -9,8 +10,8 @@ interface PipboyProps {
 
 const Pipboy: React.FC<PipboyProps> = ({ isActive = true, onScrollToSocials }) => {
   const { isTouchDevice } = useTouchDevice();
+  const { color, setColor } = useThemeColor();
   const [activeTab, setActiveTab] = useState("items");
-  const [color, setColor] = useState("amber");
   const [browser, setBrowser] = useState("chrome");
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
   const [selectedColorIndex, setSelectedColorIndex] = useState(0);
@@ -58,29 +59,6 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true, onScrollToSocials }) =
       }
     };
   }, [isActive, color]);
-
-  useEffect(() => {
-    // Remove all color classes from html element
-    const htmlElement = document.documentElement;
-    const colorClasses = ["amber", "white", "green", "blue", "red"];
-    colorClasses.forEach((c) => htmlElement.classList.remove(c));
-
-    // Add the new color class
-    htmlElement.classList.add(color);
-
-    // Update global theme color variable
-    const colorMap: Record<string, string> = {
-      amber: "#FFAA3C", // rgb(255, 170, 60)
-      white: "#F5F5F5", // rgb(245, 245, 245)
-      green: "#00E632", // rgb(0, 230, 50)
-      blue: "#3296FF", // rgb(50, 150, 255)
-      red: "#FF2800", // rgb(255, 40, 0)
-    };
-
-    if (colorMap[color]) {
-      htmlElement.style.setProperty("--theme-primary", colorMap[color]);
-    }
-  }, [color]);
 
   // Keyboard navigation with j/k for scrolling and h/l for tabs
   useEffect(() => {
@@ -289,7 +267,7 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true, onScrollToSocials }) =
                       // Reset to Status tab after scrolling to socials
                       setTimeout(() => {
                         setActiveTab("items");
-                      }, 2000);
+                      }, 800);
                     }}
                   >
                     Socials

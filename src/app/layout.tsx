@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 import Header from "@/components/custom/Header";
 import StartSh from "@/components/custom/StartSh";
 import { TouchProvider } from "@/contexts/TouchContext";
+import { ThemeColorProvider } from "@/contexts/ThemeColorContext";
 import "./globals.css";
 
 const geistSans = localFont({
@@ -36,12 +37,14 @@ export default function RootLayout({
       className={`scroll-smooth ${geistSans.variable} ${geistMono.variable}`}
     >
       <body className={`${inter.className} flex flex-col min-h-screen`}>
-        <TouchProvider>
-          <StartSh>
-            <Header />
-            <main className="flex-grow">{children}</main>
-          </StartSh>
-        </TouchProvider>
+        <ThemeColorProvider>
+          <TouchProvider>
+            <StartSh>
+              <Header />
+              <main className="flex-grow">{children}</main>
+            </StartSh>
+          </TouchProvider>
+        </ThemeColorProvider>
       </body>
     </html>
   );

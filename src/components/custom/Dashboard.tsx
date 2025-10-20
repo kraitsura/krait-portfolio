@@ -145,14 +145,15 @@ const Dashboard: React.FC<DashboardProps> = ({ isVisible = true }) => {
                 disabled={isLaunching}
                 className={`
                   relative p-4 sm:p-6
-                  text-[#d4af37]
                   transition-all duration-300 ease-in-out
-                  hover:text-[#f0d068]
                   disabled:opacity-50 disabled:cursor-not-allowed
                   border border-transparent rounded
                   ${selectedIndex === index ? "social-icon-selected" : ""}
                 `}
-                style={{ pointerEvents: "auto" }}
+                style={{
+                  pointerEvents: "auto",
+                  color: 'var(--theme-primary)'
+                }}
                 aria-label={link.name}
               >
                 <div className="scale-75 sm:scale-100">{link.icon}</div>
@@ -173,7 +174,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isVisible = true }) => {
               className="hidden sm:block text-left self-start mt-8"
               style={{ pointerEvents: "none" }}
             >
-              <div className="text-xs text-[#d4af37] opacity-50 font-mono">
+              <div className="text-xs opacity-50 font-mono" style={{ color: 'var(--theme-primary)' }}>
                 h/l navigate | ⏎ launch
               </div>
             </div>

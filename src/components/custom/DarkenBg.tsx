@@ -44,7 +44,8 @@ const DarkenBg: React.FC<DarkeningBackgroundWithArticleProps> = ({ opener, title
   return (
     <div
       ref={containerRef}
-      className={`h-screen w-full overflow-y-scroll relative bg-black text-[#d4af37] ${className}`} // Add className here
+      className={`h-screen w-full overflow-y-scroll relative bg-black ${className}`} // Add className here
+      style={{ color: 'var(--theme-primary)' }}
     >
       <div className="absolute inset-0">
         <Image
@@ -70,17 +71,17 @@ const DarkenBg: React.FC<DarkeningBackgroundWithArticleProps> = ({ opener, title
       />
       <div className="min-h-[200vh] relative z-10">
         <div className="h-screen flex items-center justify-center">
-          <h1 className={`${playfair.className} text-4xl font-bold text-[#d4af37]`}>{opener}</h1>
+          <h1 className={`${playfair.className} text-4xl font-bold`} style={{ color: 'var(--theme-primary)' }}>{opener}</h1>
         </div>
         <section
           className={`px-4 py-16 md:px-8 lg:px-16 max-w-3xl mx-auto transition-opacity duration-500 ${
             isFullyDarkened ? 'opacity-100' : 'opacity-0'
           }`}
         >
-          <h2 className={`${playfair.className} text-3xl font-bold mb-6 text-[#d4af37]`}>{title}</h2>
+          <h2 className={`${playfair.className} text-3xl font-bold mb-6`} style={{ color: 'var(--theme-primary)' }}>{title}</h2>
           <div className={`${robotoMono.className} prose prose-invert prose-gold`}>
             {content.split('\n').map((paragraph, index) => (
-              <p key={index} className="mb-4 text-[#d4af37]">{paragraph}</p>
+              <p key={index} className="mb-4" style={{ color: 'var(--theme-primary)' }}>{paragraph}</p>
             ))}
           </div>
         </section>

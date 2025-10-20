@@ -1,6 +1,8 @@
 import React from 'react';
-import { articlesInfo } from '@/utils/articlesInfo';
 import AnimatedBlogContent from '@/components/custom/AnimatedBlogContent';
+import path from 'path';
+import fs from 'fs/promises';
+import matter from 'gray-matter';
 
 interface Article {
   slug: string;
@@ -10,15 +12,33 @@ interface Article {
 }
 
 async function getArticles(): Promise<Article[]> {
-  // Simulate fetching articles from a data source
-  const articles = Object.entries(articlesInfo).map(([slug, info]) => ({
-    slug,
-    title: info.title,
-    description: info.description,
-    date: info.date,
-  }));
+  const articlesDirectory = path.join(process.cwd(), 'public/articles');
 
-  return articles.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  try {
+    const files = await fs.readdir(articlesDirectory);
+    const mdFiles = files.filter(file => file.endsWith('.md'));
+
+    const articles = await Promise.all(
+      mdFiles.map(async (filename) => {
+        const slug = filename.replace('.md', '');
+        const fullPath = path.join(articlesDirectory, filename);
+        const fileContents = await fs.readFile(fullPath, 'utf8');
+        const { data: frontmatter } = matter(fileContents);
+
+        return {
+          slug,
+          title: frontmatter.title || slug,
+          description: frontmatter.description || '',
+          date: frontmatter.date || new Date().toISOString(),
+        };
+      })
+    );
+
+    return articles.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  } catch (err) {
+    console.error('Error reading articles:', err);
+    return [];
+  }
 }
 
 export default async function BlogPage() {

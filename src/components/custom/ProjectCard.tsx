@@ -148,8 +148,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, index, onClick, isSe
               className="relative backdrop-blur-md bg-black/40 border border-[var(--theme-primary)] rounded-full overflow-hidden cursor-pointer flex items-center"
               style={{
                 boxShadow: isHovered
-                  ? '0 0 10px rgba(212, 175, 55, 0.35), 0 0 20px rgba(212, 175, 55, 0.15)'
-                  : '0 0 8px rgba(212, 175, 55, 0.25)',
+                  ? '0 0 10px rgba(var(--theme-primary-rgb), 0.35), 0 0 20px rgba(var(--theme-primary-rgb), 0.15)'
+                  : '0 0 8px rgba(var(--theme-primary-rgb), 0.25)',
               }}
               initial={{ opacity: 0, scale: 0.8 }}
               exit={{ opacity: 0, scale: 0.8 }}
@@ -208,8 +208,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, index, onClick, isSe
             className="relative backdrop-blur-md bg-black/40 border border-[var(--theme-primary)] rounded-full overflow-visible cursor-pointer flex items-center"
             style={{
               boxShadow: showCollapsedTooltip
-                ? '0 0 10px rgba(212, 175, 55, 0.35), 0 0 20px rgba(212, 175, 55, 0.15)'
-                : '0 0 8px rgba(212, 175, 55, 0.25)',
+                ? '0 0 10px rgba(var(--theme-primary-rgb), 0.35), 0 0 20px rgba(var(--theme-primary-rgb), 0.15)'
+                : '0 0 8px rgba(var(--theme-primary-rgb), 0.25)',
             }}
             initial={{ opacity: 0, scale: 0.8 }}
             exit={{ opacity: 0, scale: 0.8 }}

@@ -26,11 +26,18 @@ async function getArticle(slug: string) {
 
 export async function generateStaticParams() {
   const articlesDirectory = path.join(process.cwd(), '/public/articles');
-  const files = await fs.readdir(articlesDirectory);
-  
-  return files.map(filename => ({
-    slug: filename.replace('.md', '')
-  }));
+
+  try {
+    const files = await fs.readdir(articlesDirectory);
+    const mdFiles = files.filter(file => file.endsWith('.md'));
+
+    return mdFiles.map(filename => ({
+      slug: filename.replace('.md', '')
+    }));
+  } catch (err) {
+    console.error('Error reading articles directory:', err);
+    return [];
+  }
 }
 
 export default async function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {

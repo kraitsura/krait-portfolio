@@ -350,22 +350,22 @@
 }
 
 // On non-touch devices, show arrow indicator when both checked and focused
-.pipboy-global:not(.touch-device) .colors input:checked + label.focused::before {
+.pipboy-global:not(:global(.touch-device)) .colors input:checked + label.focused::before {
     content: "▶ ";
     left: 8px;
 }
 
-.pipboy-global:not(.touch-device) .colors input:checked + label.focused::after {
+.pipboy-global:not(:global(.touch-device)) .colors input:checked + label.focused::after {
     content: "";
 }
 
 // On touch devices, keep corner brackets even when checked and focused
-.pipboy-global.touch-device .colors input:checked + label.focused::before {
+.pipboy-global:global(.touch-device) .colors input:checked + label.focused::before {
     content: "[ ";
     left: 5px;
 }
 
-.pipboy-global.touch-device .colors input:checked + label.focused::after {
+.pipboy-global:global(.touch-device) .colors input:checked + label.focused::after {
     content: " ]";
     right: 5px;
 }
@@ -443,7 +443,7 @@
 }
 
 // Arrow indicator on non-touch devices
-.pipboy-global:not(.touch-device) .colors input:checked + label::before {
+.pipboy-global:not(:global(.touch-device)) .colors input:checked + label::before {
     content: "▶ ";
     position: absolute;
     left: 8px;
