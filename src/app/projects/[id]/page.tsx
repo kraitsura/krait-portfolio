@@ -37,6 +37,24 @@ const ProjectDetail: React.FC = () => {
     checkTouch();
   }, []);
 
+  // Prevent body scroll on mobile
+  useEffect(() => {
+    // Add overflow-hidden to body and html
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    // Set height to 100vh to prevent any scroll
+    document.body.style.height = '100vh';
+    document.documentElement.style.height = '100vh';
+
+    return () => {
+      // Cleanup on unmount
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+      document.body.style.height = '';
+      document.documentElement.style.height = '';
+    };
+  }, []);
+
   // Add keyboard navigation for Esc, h, l
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
@@ -68,7 +86,7 @@ const ProjectDetail: React.FC = () => {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="h-screen overflow-hidden bg-white text-gray-900 flex flex-col font-mono"
+      className="fixed inset-0 overflow-hidden bg-white text-gray-900 flex flex-col font-mono"
     >
       {/* Top Bar - Title */}
       <motion.div
@@ -113,7 +131,7 @@ const ProjectDetail: React.FC = () => {
           initial={{ x: -30, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.3 }}
-          className="w-full h-[40vh] md:h-auto md:w-[55%] relative border-b md:border-b-0 md:border-r border-gray-200 flex-shrink-0"
+          className="w-full h-[40vh] md:h-auto md:w-[55%] relative border-b md:border-b-0 md:border-r border-gray-200 flex-shrink-0 overflow-hidden"
         >
           <VerticalCarousel images={project.images} projectName={project.title} isTouchDevice={isTouchDevice} />
         </motion.div>
@@ -123,7 +141,7 @@ const ProjectDetail: React.FC = () => {
           initial={{ x: 30, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.3 }}
-          className="w-full md:w-[45%] overflow-y-auto px-4 md:px-6 py-4 flex-1 min-h-0 max-h-[60vh] md:max-h-none"
+          className="w-full md:w-[45%] overflow-y-auto px-4 md:px-6 py-4 flex-1 min-h-0 h-[60vh] md:h-auto"
         >
           {/* Technologies */}
           <div className="mb-4 pb-4 border-b border-gray-100">

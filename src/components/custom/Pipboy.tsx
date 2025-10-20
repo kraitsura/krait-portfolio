@@ -4,9 +4,10 @@ import { useTouchDevice } from "@/contexts/TouchContext";
 
 interface PipboyProps {
   isActive?: boolean;
+  onScrollToSocials?: () => void;
 }
 
-const Pipboy: React.FC<PipboyProps> = ({ isActive = true }) => {
+const Pipboy: React.FC<PipboyProps> = ({ isActive = true, onScrollToSocials }) => {
   const { isTouchDevice } = useTouchDevice();
   const [activeTab, setActiveTab] = useState("items");
   const [color, setColor] = useState("amber");
@@ -265,6 +266,19 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true }) => {
                   Settings
                 </a>
               </li>
+              {isTouchDevice && (
+                <li className={activeTab === "socials" ? styles.active : ""}>
+                  <a
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setActiveTab("socials");
+                      onScrollToSocials?.();
+                    }}
+                  >
+                    Socials
+                  </a>
+                </li>
+              )}
             </ul>
 
             <div
@@ -513,6 +527,12 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true }) => {
                             className={
                               selectedColorIndex === index ? styles.focused : ""
                             }
+                            onClick={() => {
+                              setSelectedColorIndex(index);
+                              if (isTouchDevice) {
+                                setColor(colorOption);
+                              }
+                            }}
                           >
                             {colorOption.charAt(0).toUpperCase() +
                               colorOption.slice(1)}

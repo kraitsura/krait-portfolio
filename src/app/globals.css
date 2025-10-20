@@ -340,7 +340,7 @@ body {
 .touch-nav-arrows {
     position: fixed;
     top: 280px;
-    left: 12px;
+    left: 20px;
     display: flex;
     flex-direction: column;
     gap: 8px;
