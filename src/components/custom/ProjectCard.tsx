@@ -11,13 +11,12 @@ interface ProjectCardProps {
   onClick: () => void;
   isSelected: boolean;
   isHighlighted?: boolean;
-  isTouchDevice?: boolean;
 }
 
 const playfair = Playfair_Display({ subsets: ['latin'] });
 const robotoMono = Roboto_Mono({ subsets: ['latin'] });
 
-const ProjectCard: React.FC<ProjectCardProps> = ({ project, index, onClick, isSelected, isHighlighted = false, isTouchDevice = false }) => {
+const ProjectCard: React.FC<ProjectCardProps> = ({ project, index, onClick, isSelected, isHighlighted = false }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [hoveredTag, setHoveredTag] = useState<number | null>(null);
@@ -106,7 +105,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, index, onClick, isSe
       transition={{ duration: 0.3, delay: index * 0.1 }}
       className={`relative aspect-video cursor-pointer group border-2 border-[var(--theme-primary)] project-card-border ${
         isSelected ? 'z-30' : ''
-      } ${isHighlighted && !isTouchDevice ? 'project-card-highlighted' : ''}`}
+      } ${isHighlighted ? 'project-card-highlighted' : ''}`}
     >
       <motion.div
         layoutId={`project-image-${project.id}`}

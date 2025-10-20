@@ -1,6 +1,6 @@
 'use client';
 import { useRouter, useParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { projects } from '@/utils/projectList';
 import { motion } from 'framer-motion';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -15,19 +15,19 @@ const ProjectDetail: React.FC = () => {
   const project = projects.find(p => p.id.toString() === id);
   const currentIndex = projects.findIndex(p => p.id.toString() === id);
 
-  const handleGoBack = () => {
+  const handleGoBack = useCallback(() => {
     router.push('/projects');
-  };
+  }, [router]);
 
-  const goToPreviousProject = () => {
+  const goToPreviousProject = useCallback(() => {
     const prevIndex = (currentIndex - 1 + projects.length) % projects.length;
     router.push(`/projects/${projects[prevIndex].id}`);
-  };
+  }, [currentIndex, router]);
 
-  const goToNextProject = () => {
+  const goToNextProject = useCallback(() => {
     const nextIndex = (currentIndex + 1) % projects.length;
     router.push(`/projects/${projects[nextIndex].id}`);
-  };
+  }, [currentIndex, router]);
 
   // Detect touch device
   useEffect(() => {
@@ -113,7 +113,7 @@ const ProjectDetail: React.FC = () => {
           initial={{ x: -30, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.3 }}
-          className="w-full h-[45vh] md:h-auto md:w-[55%] relative border-b md:border-b-0 md:border-r border-gray-200 flex-shrink-0"
+          className="w-full h-[40vh] md:h-auto md:w-[55%] relative border-b md:border-b-0 md:border-r border-gray-200 flex-shrink-0"
         >
           <VerticalCarousel images={project.images} projectName={project.title} isTouchDevice={isTouchDevice} />
         </motion.div>
@@ -123,7 +123,7 @@ const ProjectDetail: React.FC = () => {
           initial={{ x: 30, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.3 }}
-          className="w-full md:w-[45%] overflow-y-auto px-4 md:px-6 py-4 flex-1 min-h-0"
+          className="w-full md:w-[45%] overflow-y-auto px-4 md:px-6 py-4 flex-1 min-h-0 max-h-[60vh] md:max-h-none"
         >
           {/* Technologies */}
           <div className="mb-4 pb-4 border-b border-gray-100">

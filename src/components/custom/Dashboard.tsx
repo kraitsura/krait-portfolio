@@ -75,11 +75,13 @@ const Dashboard: React.FC<DashboardProps> = ({ isVisible = true }) => {
 
     window.addEventListener("resize", handleResize);
 
+    // Copy ref to local variable for cleanup
+    const container = containerRef.current;
+
     // Cleanup
     return () => {
       window.removeEventListener("resize", handleResize);
       sceneRef.current?.dispose();
-      const container = containerRef.current;
       if (container) {
         container.innerHTML = "";
       }

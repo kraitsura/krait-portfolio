@@ -207,16 +207,63 @@ body {
     opacity: 1;
 }
 
+/* Corner Pulse Animation - More Dramatic */
+@keyframes cornerPulse {
+    0%, 100% {
+        opacity: 0.3;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+/* Glow Pulse Animation */
+@keyframes glowPulse {
+    0%, 100% {
+        box-shadow:
+            0 0 8px 2px rgba(220, 38, 38, 0.3),
+            0 0 16px 4px rgba(220, 38, 38, 0.2),
+            0 0 24px rgba(220, 38, 38, 0.1);
+    }
+    50% {
+        box-shadow:
+            0 0 12px 3px rgba(220, 38, 38, 0.6),
+            0 0 24px 6px rgba(220, 38, 38, 0.4),
+            0 0 36px rgba(220, 38, 38, 0.3);
+    }
+}
+
 /* Brutalist Highlight Border for Keyboard Navigation */
 .project-card-highlighted {
-    outline: 2px solid #FFFF31;
-    outline-offset: 12px;
-    background: rgba(255, 255, 49, 0.05);
-    box-shadow: 0 0 20px rgba(255, 255, 49, 0.15);
+    position: relative;
+    border: 2px solid transparent !important;
+    background: rgba(220, 38, 38, 0.08);
+    animation: glowPulse 2s ease-in-out infinite;
+}
+
+.project-card-highlighted::before {
+    content: "";
+    position: absolute;
+    inset: -8px;
+    background:
+        linear-gradient(to right, #DC2626, #DC2626) top left,
+        linear-gradient(to bottom, #DC2626, #DC2626) top left,
+        linear-gradient(to left, #DC2626, #DC2626) top right,
+        linear-gradient(to bottom, #DC2626, #DC2626) top right,
+        linear-gradient(to right, #DC2626, #DC2626) bottom left,
+        linear-gradient(to top, #DC2626, #DC2626) bottom left,
+        linear-gradient(to left, #DC2626, #DC2626) bottom right,
+        linear-gradient(to top, #DC2626, #DC2626) bottom right;
+    background-size: 35px 6px, 6px 35px, 35px 6px, 6px 35px, 35px 6px, 6px 35px, 35px 6px, 6px 35px;
+    background-repeat: no-repeat;
+    animation: cornerPulse 2s ease-in-out infinite 0.2s;
+    opacity: 0;
+    animation-fill-mode: forwards;
+    pointer-events: none;
 }
 
 .project-card-border {
-    transition: outline 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+    transition: border-color 0.3s ease, outline 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
 }
 
 /* Vim-like Keystroke Info */
@@ -276,6 +323,71 @@ body {
     .keystroke-item span {
         font-size: 10px;
     }
+}
+
+/* Touch Navigation Arrows */
+@keyframes arrowPulse {
+    0%, 100% {
+        border-color: rgba(212, 175, 55, 0.4);
+        box-shadow: 0 0 8px rgba(212, 175, 55, 0.2);
+    }
+    50% {
+        border-color: rgba(212, 175, 55, 0.7);
+        box-shadow: 0 0 12px rgba(212, 175, 55, 0.4);
+    }
+}
+
+.touch-nav-arrows {
+    position: fixed;
+    top: 280px;
+    left: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 10;
+}
+
+@media (min-width: 768px) {
+    .touch-nav-arrows {
+        top: 450px;
+        gap: 12px;
+    }
+}
+
+.arrow-button {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(212, 175, 55, 0.05);
+    border: 1px solid rgba(212, 175, 55, 0.5);
+    border-radius: 4px;
+    color: var(--theme-primary);
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    animation: arrowPulse 2s ease-in-out infinite;
+    user-select: none;
+}
+
+@media (min-width: 768px) {
+    .arrow-button {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+    }
+}
+
+.arrow-button:hover {
+    background: rgba(212, 175, 55, 0.15);
+    border-color: var(--theme-primary);
+    box-shadow: 0 0 16px rgba(212, 175, 55, 0.5);
+}
+
+.arrow-button:active {
+    transform: scale(0.95);
+    background: rgba(212, 175, 55, 0.2);
 }
 
 /* Custom Scrollbar Styles - Sleek and Transparent */

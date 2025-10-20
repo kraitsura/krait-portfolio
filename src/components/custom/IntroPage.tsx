@@ -173,7 +173,7 @@ const IntroPage: React.FC<IntroPageProps> = ({ images }) => {
                 {/* Down arrow - different positioning for mobile vs desktop */}
                 {isTouchDevice ? (
                   // Mobile/Touch: Top-left corner, smaller size
-                  <div className="fixed top-8 left-8 z-20">
+                  <div className="fixed top-4 left-8 z-20">
                     <div
                       className={`transition-all duration-500 ${
                         isAtTop
@@ -181,26 +181,31 @@ const IntroPage: React.FC<IntroPageProps> = ({ images }) => {
                           : "opacity-0 -translate-y-2 pointer-events-none"
                       }`}
                     >
-                      <button
-                        onClick={scrollToBottom}
-                        className="hover:text-green-400 transition-colors cursor-pointer p-2 relative"
-                        aria-label="Scroll to bottom"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-6 w-16 opacity-30 pointer-events-none"
-                          viewBox="0 0 48 12"
-                          fill="none"
-                          stroke="currentColor"
+                      <div className="flex flex-col items-center">
+                        <div className="text-[10px] text-white opacity-40 mb-1">
+                          socials
+                        </div>
+                        <button
+                          onClick={scrollToBottom}
+                          className={`hover:text-green-400 transition-colors cursor-pointer p-2 relative ${styles["bounce-and-shimmer"]}`}
+                          aria-label="Scroll to bottom"
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={1.5}
-                            d="M2 2 L24 10 L46 2"
-                          />
-                        </svg>
-                      </button>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-6 w-16 opacity-30 pointer-events-none"
+                            viewBox="0 0 48 12"
+                            fill="none"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={1.5}
+                              d="M2 2 L24 10 L46 2"
+                            />
+                          </svg>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ) : (

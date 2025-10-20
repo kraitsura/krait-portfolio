@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GalleryImage, ImageData } from './GalleryImage';
 
@@ -26,14 +26,14 @@ export const GalleryPage: React.FC<GalleryPageProps> = ({ images }) => {
     }
   };
 
-  const handleWheel = (e: globalThis.WheelEvent) => {
+  const handleWheel = useCallback((e: globalThis.WheelEvent) => {
     e.preventDefault();
     if (e.deltaY > 0) {
       setCurrentIndex((prevIndex) => Math.min(prevIndex + 1, images.length - 1));
     } else {
       setCurrentIndex((prevIndex) => Math.max(prevIndex - 1, 0));
     }
-  };
+  }, [images.length]);
 
   useEffect(() => {
     const container = containerRef.current;

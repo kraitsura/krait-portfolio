@@ -441,11 +441,13 @@ const ParticlesBackground: React.FC<ParticlesBackgroundProps> = React.memo(
 
       animate();
 
+      // Copy ref to local variable for cleanup
+      const container = containerRef.current;
+
       return () => {
         window.removeEventListener("resize", handleResize);
         cancelAnimationFrame(animationId);
 
-        const container = containerRef.current;
         if (container?.contains(renderer.domElement)) {
           container.removeChild(renderer.domElement);
         }

@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Project, projectsByCategory, categoryOrder } from '@/utils/projectList';
 import ProjectCard from '@/components/custom/ProjectCard';
@@ -25,7 +25,7 @@ const Projects: React.FC = () => {
     (category) => projectsByCategory[category]
   );
 
-  const handleProjectClick = (project: Project) => {
+  const handleProjectClick = useCallback((project: Project) => {
     // Find the index of the clicked project
     const projectIndex = allProjects.findIndex(p => p.id === project.id);
     if (projectIndex !== -1) {
@@ -40,7 +40,7 @@ const Projects: React.FC = () => {
     setTimeout(() => {
       router.push(`/projects/${project.id}`);
     }, 300); // Reduced delay for smoother transition
-  };
+  }, [allProjects, router]);
 
   // Helper to get the starting index of each section
   const getSectionStartIndices = () => {
@@ -59,7 +59,7 @@ const Projects: React.FC = () => {
   };
 
   // Helper to find which section an index belongs to
-  const getSectionForIndex = (index: number): number => {
+  const getSectionForIndex = useCallback((index: number): number => {
     const sectionStarts = getSectionStartIndices();
     for (let i = sectionStarts.length - 1; i >= 0; i--) {
       if (index >= sectionStarts[i]) {
@@ -67,27 +67,27 @@ const Projects: React.FC = () => {
       }
     }
     return 0;
-  };
+  }, []);
 
-  // Keyboard navigation: h/l (prev/next project), j/k (prev/next section), Enter (open)
+  // Keyboard navigation: k/j (prev/next project), h/l (prev/next section), Enter (open)
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       const sectionStarts = getSectionStartIndices();
 
-      if (event.key === 'l') {
+      if (event.key === 'j') {
         // Next project
         setHighlightedIndex((prev) => (prev + 1) % allProjects.length);
-      } else if (event.key === 'h') {
+      } else if (event.key === 'k') {
         // Previous project
         setHighlightedIndex((prev) =>
           prev === 0 ? allProjects.length - 1 : prev - 1
         );
-      } else if (event.key === 'j') {
+      } else if (event.key === 'l') {
         // Next section (jump to first project of next category)
         const currentSection = getSectionForIndex(highlightedIndex);
         const nextSection = (currentSection + 1) % sectionStarts.length;
         setHighlightedIndex(sectionStarts[nextSection]);
-      } else if (event.key === 'k') {
+      } else if (event.key === 'h') {
         // Previous section (jump to first project of previous category)
         const currentSection = getSectionForIndex(highlightedIndex);
         const prevSection = currentSection === 0 ? sectionStarts.length - 1 : currentSection - 1;
@@ -157,17 +157,42 @@ const Projects: React.FC = () => {
           className="keystroke-info-projects"
         >
           <div className="keystroke-item">
-            <kbd>h/l</kbd>
+            <kbd>k/j</kbd>
             <span>project</span>
           </div>
           <div className="keystroke-item">
-            <kbd>k/j</kbd>
+            <kbd>h/l</kbd>
             <span>section</span>
           </div>
           <div className="keystroke-item">
             <kbd>↵</kbd>
             <span>open</span>
           </div>
+        </motion.div>
+      )}
+
+      {/* Touch navigation arrows */}
+      {isTouchDevice && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1, duration: 0.5 }}
+          className="touch-nav-arrows"
+        >
+          <button
+            onClick={() => setHighlightedIndex((prev) => prev === 0 ? allProjects.length - 1 : prev - 1)}
+            className="arrow-button"
+            aria-label="Previous project"
+          >
+            ↑
+          </button>
+          <button
+            onClick={() => setHighlightedIndex((prev) => (prev + 1) % allProjects.length)}
+            className="arrow-button"
+            aria-label="Next project"
+          >
+            ↓
+          </button>
         </motion.div>
       )}
 
@@ -217,7 +242,6 @@ const Projects: React.FC = () => {
                           onClick={() => handleProjectClick(project)}
                           isSelected={selectedId === project.id}
                           isHighlighted={isHighlighted}
-                          isTouchDevice={isTouchDevice}
                         />
                       </motion.div>
                     );

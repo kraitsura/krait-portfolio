@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronUp, ChevronDown } from 'lucide-react';
@@ -13,13 +13,13 @@ interface VerticalCarouselProps {
 const VerticalCarousel: React.FC<VerticalCarouselProps> = ({ images, projectName, isTouchDevice = false }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const goToNext = () => {
+  const goToNext = useCallback(() => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
-  };
+  }, [images.length]);
 
-  const goToPrevious = () => {
+  const goToPrevious = useCallback(() => {
     setCurrentIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length);
-  };
+  }, [images.length]);
 
   // Handle swipe gestures
   const handleDragEnd = (_: unknown, info: { offset: { y: number } }) => {
