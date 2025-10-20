@@ -67,6 +67,19 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true, onScrollToSocials }) =
 
     // Add the new color class
     htmlElement.classList.add(color);
+
+    // Update global theme color variable
+    const colorMap: Record<string, string> = {
+      amber: "#FFAA3C", // rgb(255, 170, 60)
+      white: "#F5F5F5", // rgb(245, 245, 245)
+      green: "#00E632", // rgb(0, 230, 50)
+      blue: "#3296FF", // rgb(50, 150, 255)
+      red: "#FF2800", // rgb(255, 40, 0)
+    };
+
+    if (colorMap[color]) {
+      htmlElement.style.setProperty("--theme-primary", colorMap[color]);
+    }
   }, [color]);
 
   // Keyboard navigation with j/k for scrolling and h/l for tabs
@@ -219,7 +232,7 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true, onScrollToSocials }) =
 
   return (
     <div
-      className={`${styles["pipboy-global"]} ${styles[color]} ${styles[browser]}`}
+      className={`${styles["pipboy-global"]} ${styles[color]} ${styles[browser]} ${isTouchDevice ? "touch-device" : ""}`}
     >
       <div className={`${styles.frame} ${styles.noclick}`}>
         <div className={`${styles.piece} ${styles.output} ${styles.filter}`}>
@@ -273,6 +286,10 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true, onScrollToSocials }) =
                       e.preventDefault();
                       setActiveTab("socials");
                       onScrollToSocials?.();
+                      // Reset to Status tab after scrolling to socials
+                      setTimeout(() => {
+                        setActiveTab("items");
+                      }, 2000);
                     }}
                   >
                     Socials
