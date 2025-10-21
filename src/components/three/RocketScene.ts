@@ -45,6 +45,7 @@ export class RocketScene {
   private mousedownHandler: ((e: MouseEvent) => void) | null = null;
   private mouseupHandler: ((e: MouseEvent) => void) | null = null;
   private rafId: number | null = null;
+  private lastUpdateTime: number = 0;
 
   // Animation state
   private idleRotationSpeed: number = 3; // Degrees per second
@@ -239,9 +240,17 @@ export class RocketScene {
       this.rafId = null;
     };
 
-    // Mouse move handler
+    // Mouse move handler with temporal throttling (30 FPS)
     this.mousemoveHandler = (e: MouseEvent) => {
       if (!this.state.canInteract() || !this.mouseTrackingEnabled) return;
+
+      const now = performance.now();
+      const timeSinceLastUpdate = now - this.lastUpdateTime;
+
+      // Throttle to 30 FPS (33ms between updates)
+      if (timeSinceLastUpdate < 33) return;
+
+      this.lastUpdateTime = now;
 
       // Update mouse coordinates
       this.mouse.x = (e.clientX / window.innerWidth) * 2 - 1;

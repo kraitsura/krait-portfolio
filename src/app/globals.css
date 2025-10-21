@@ -208,13 +208,20 @@ body {
     opacity: 1;
 }
 
+/* Prevent hover border when card is highlighted */
+.project-card-highlighted.project-card-border:hover::after {
+    opacity: 0 !important;
+}
+
 /* Corner Pulse Animation - More Dramatic */
 @keyframes cornerPulse {
     0%, 100% {
-        opacity: 0.3;
+        opacity: 0.5;
+        filter: drop-shadow(0 0 4px rgba(220, 38, 38, 0.4)) drop-shadow(0 0 8px rgba(220, 38, 38, 0.3));
     }
     50% {
         opacity: 1;
+        filter: drop-shadow(0 0 8px rgba(220, 38, 38, 0.8)) drop-shadow(0 0 16px rgba(220, 38, 38, 0.6));
     }
 }
 
@@ -239,7 +246,6 @@ body {
     position: relative;
     border: 2px solid transparent !important;
     background: rgba(220, 38, 38, 0.08);
-    animation: glowPulse 2s ease-in-out infinite;
 }
 
 .project-card-highlighted::before {
@@ -255,7 +261,7 @@ body {
         linear-gradient(to top, #DC2626, #DC2626) bottom left,
         linear-gradient(to left, #DC2626, #DC2626) bottom right,
         linear-gradient(to top, #DC2626, #DC2626) bottom right;
-    background-size: 35px 6px, 6px 35px, 35px 6px, 6px 35px, 35px 6px, 6px 35px, 35px 6px, 6px 35px;
+    background-size: 35px 10px, 10px 35px, 35px 10px, 10px 35px, 35px 10px, 10px 35px, 35px 10px, 10px 35px;
     background-repeat: no-repeat;
     animation: cornerPulse 2s ease-in-out infinite 0.2s;
     opacity: 0;

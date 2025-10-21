@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import styles from "@/styles/pip.module.scss";
 import { useTouchDevice } from "@/contexts/TouchContext";
 import { useThemeColor, type ThemeColor } from "@/contexts/ThemeColorContext";
@@ -17,6 +17,7 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true, onScrollToSocials }) =
   const [selectedColorIndex, setSelectedColorIndex] = useState(0);
   const tabContentRef = useRef<HTMLDivElement>(null);
   const skillsSectionRef = useRef<HTMLDivElement>(null);
+  const frameRef = useRef<HTMLDivElement>(null);
 
   const colorOptions = useMemo(
     () => ["amber", "white", "green", "blue", "red"] as const,
@@ -29,9 +30,9 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true, onScrollToSocials }) =
     setBrowser(isSafari ? "safari" : "chrome");
   }, []);
 
+  // Track cursor position (only on non-touch devices when active)
   useEffect(() => {
-    // Only attach mouse listener when Pipboy is active (not when Dashboard is showing)
-    if (!isActive) return;
+    if (!isActive || isTouchDevice) return;
 
     let animationFrameId: number;
 
@@ -41,9 +42,8 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true, onScrollToSocials }) =
       }
 
       animationFrameId = requestAnimationFrame(() => {
-        const frame = document.querySelector(`.${styles.frame}`);
-        if (frame) {
-          const rect = frame.getBoundingClientRect();
+        if (frameRef.current) {
+          const rect = frameRef.current.getBoundingClientRect();
           const x = e.clientX - rect.left;
           const y = e.clientY - rect.top;
           setCursorPosition({ x, y });
@@ -58,7 +58,7 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true, onScrollToSocials }) =
         cancelAnimationFrame(animationFrameId);
       }
     };
-  }, [isActive, color]);
+  }, [isActive, isTouchDevice]);
 
   // Keyboard navigation with j/k for scrolling and h/l for tabs
   useEffect(() => {
@@ -137,17 +137,39 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true, onScrollToSocials }) =
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isActive, activeTab, selectedColorIndex, colorOptions, setColor]);
 
-  const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleColorChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setColor(e.target.value as ThemeColor);
     // Update selectedColorIndex to match clicked color
     const index = colorOptions.indexOf(e.target.value as ThemeColor);
     if (index !== -1) {
       setSelectedColorIndex(index);
     }
-  };
+  }, [colorOptions, setColor]);
+
+  const handleTabChange = useCallback((tab: string) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    setActiveTab(tab);
+  }, []);
+
+  const handleSocialsClick = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setActiveTab("socials");
+    onScrollToSocials?.();
+    // Reset to Status tab after scrolling to socials
+    setTimeout(() => {
+      setActiveTab("items");
+    }, 800);
+  }, [onScrollToSocials]);
+
+  const handleColorLabelClick = useCallback((index: number, colorOption: ThemeColor) => () => {
+    setSelectedColorIndex(index);
+    if (isTouchDevice) {
+      setColor(colorOption);
+    }
+  }, [isTouchDevice, setColor]);
 
   // Get keystroke info based on active tab
-  const getKeystrokeInfo = () => {
+  const keystrokeInfo = useMemo(() => {
     switch (activeTab) {
       case "items":
         return "h/l: Tabs";
@@ -160,7 +182,7 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true, onScrollToSocials }) =
       default:
         return "h/l: Tabs";
     }
-  };
+  }, [activeTab]);
 
   const skillDetails = {
     skill1: [
@@ -212,64 +234,34 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true, onScrollToSocials }) =
     <div
       className={`${styles["pipboy-global"]} ${styles[color]} ${styles[browser]} ${isTouchDevice ? "touch-device" : ""}`}
     >
-      <div className={`${styles.frame} ${styles.noclick}`}>
+      <div ref={frameRef} className={`${styles.frame} ${styles.noclick}`}>
         <div className={`${styles.piece} ${styles.output} ${styles.filter}`}>
           <div className={styles.pipboy}>
             {/* Footer Navigation */}
             <ul className={styles["pip-foot"]}>
               <li className={activeTab === "items" ? styles.active : ""}>
-                <a
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setActiveTab("items");
-                  }}
-                >
+                <a onClick={handleTabChange("items")}>
                   Status
                 </a>
               </li>
               <li className={activeTab === "stats" ? styles.active : ""}>
-                <a
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setActiveTab("stats");
-                  }}
-                >
+                <a onClick={handleTabChange("stats")}>
                   Stats
                 </a>
               </li>
               <li className={activeTab === "quests" ? styles.active : ""}>
-                <a
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setActiveTab("quests");
-                  }}
-                >
+                <a onClick={handleTabChange("quests")}>
                   Skills
                 </a>
               </li>
               <li className={activeTab === "misc" ? styles.active : ""}>
-                <a
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setActiveTab("misc");
-                  }}
-                >
+                <a onClick={handleTabChange("misc")}>
                   Settings
                 </a>
               </li>
               {isTouchDevice && (
                 <li className={activeTab === "socials" ? styles.active : ""}>
-                  <a
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setActiveTab("socials");
-                      onScrollToSocials?.();
-                      // Reset to Status tab after scrolling to socials
-                      setTimeout(() => {
-                        setActiveTab("items");
-                      }, 800);
-                    }}
-                  >
+                  <a onClick={handleSocialsClick}>
                     Socials
                   </a>
                 </li>
@@ -289,8 +281,8 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true, onScrollToSocials }) =
                   <div className={styles["pip-body"]}>
                     <div className={styles["dragon-container"]}>
                       <div className="vboy">
-                        {dragonArt.split("\n").map((line, index) => (
-                          <pre key={index} className={styles.asciiLine}>
+                        {dragonArt.split("\n").map((line) => (
+                          <pre key={line} className={styles.asciiLine}>
                             {line}
                           </pre>
                         ))}
@@ -413,9 +405,9 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true, onScrollToSocials }) =
                         Frontend Development
                       </h4>
                       <ul className={styles["skill-list"]}>
-                        {skillDetails.skill1.map((skill, index) => {
+                        {skillDetails.skill1.map((skill) => {
                           return (
-                            <li key={index}>
+                            <li key={skill.name}>
                               <div className={styles["skill-card"]}>
                                 <div className={styles["skill-name"]}>
                                   {skill.name}
@@ -435,9 +427,9 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true, onScrollToSocials }) =
                         Backend Development
                       </h4>
                       <ul className={styles["skill-list"]}>
-                        {skillDetails.skill2.map((skill, index) => {
+                        {skillDetails.skill2.map((skill) => {
                           return (
-                            <li key={index}>
+                            <li key={skill.name}>
                               <div className={styles["skill-card"]}>
                                 <div className={styles["skill-name"]}>
                                   {skill.name}
@@ -457,9 +449,9 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true, onScrollToSocials }) =
                         Database & Storage
                       </h4>
                       <ul className={styles["skill-list"]}>
-                        {skillDetails.skill3.map((skill, index) => {
+                        {skillDetails.skill3.map((skill) => {
                           return (
-                            <li key={index}>
+                            <li key={skill.name}>
                               <div className={styles["skill-card"]}>
                                 <div className={styles["skill-name"]}>
                                   {skill.name}
@@ -479,9 +471,9 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true, onScrollToSocials }) =
                         DevOps & Infrastructure
                       </h4>
                       <ul className={styles["skill-list"]}>
-                        {skillDetails.skill4.map((skill, index) => {
+                        {skillDetails.skill4.map((skill) => {
                           return (
-                            <li key={index}>
+                            <li key={skill.name}>
                               <div className={styles["skill-card"]}>
                                 <div className={styles["skill-name"]}>
                                   {skill.name}
@@ -522,12 +514,7 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true, onScrollToSocials }) =
                             className={
                               selectedColorIndex === index ? styles.focused : ""
                             }
-                            onClick={() => {
-                              setSelectedColorIndex(index);
-                              if (isTouchDevice) {
-                                setColor(colorOption);
-                              }
-                            }}
+                            onClick={handleColorLabelClick(index, colorOption)}
                           >
                             {colorOption.charAt(0).toUpperCase() +
                               colorOption.slice(1)}
@@ -543,7 +530,7 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true, onScrollToSocials }) =
             {/* Keystroke Info - Fixed Top Right */}
             {!isTouchDevice && (
               <div className={styles["keystroke-info"]}>
-                {getKeystrokeInfo()}
+                {keystrokeInfo}
               </div>
             )}
           </div>
@@ -556,14 +543,16 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true, onScrollToSocials }) =
             className={`${styles.piece} ${styles.scanlines} ${styles.noclick}`}
           ></div>
 
-          {/* Cursor */}
-          <div
-            className={`${styles.cursor} ${styles[`cursor-default`]}`}
-            style={{
-              left: `${cursorPosition.x}px`,
-              top: `${cursorPosition.y}px`,
-            }}
-          ></div>
+          {/* Custom Cursor (non-touch devices only) */}
+          {!isTouchDevice && (
+            <div
+              className={`${styles.cursor} ${styles["cursor-default"]}`}
+              style={{
+                left: `${cursorPosition.x}px`,
+                top: `${cursorPosition.y}px`,
+              }}
+            ></div>
+          )}
         </div>
       </div>
     </div>

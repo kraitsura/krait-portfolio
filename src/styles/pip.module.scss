@@ -44,6 +44,7 @@
     pointer-events: auto;
     text-shadow: 0rem 0.2rem 1rem currentColor;
     z-index: -1;
+    cursor: none !important;
 }
 
 .frame * {
@@ -138,6 +139,7 @@
     height: 100%;
     padding: 16px;
     z-index: 1;
+    cursor: none !important;
 }
 
 .pipboy::before,
@@ -1142,7 +1144,7 @@ html.black {
     }
 
     label {
-        cursor: pointer;
+        /* cursor removed for pipboy cursor implementation */
     }
 
     a:focus {
@@ -1175,6 +1177,7 @@ html.black {
     min-height: 550px;
     background: var(--black);
     z-index: 1;
+    cursor: none !important;
 }
 
 .level {

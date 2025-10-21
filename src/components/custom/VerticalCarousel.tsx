@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronUp, ChevronDown } from 'lucide-react';
@@ -10,8 +10,9 @@ interface VerticalCarouselProps {
   isTouchDevice?: boolean;
 }
 
-const VerticalCarousel: React.FC<VerticalCarouselProps> = ({ images, projectName, isTouchDevice = false }) => {
+const VerticalCarousel: React.FC<VerticalCarouselProps> = React.memo(({ images, projectName, isTouchDevice = false }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const carouselRef = useRef<HTMLDivElement>(null);
 
   const goToNext = useCallback(() => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
@@ -50,8 +51,32 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({ images, projectName
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [goToNext, goToPrevious]);
 
+  // Preload next image only when carousel is in viewport
+  useEffect(() => {
+    if (images.length <= 1) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const nextIndex = (currentIndex + 1) % images.length;
+            const img = new window.Image();
+            img.src = images[nextIndex];
+          }
+        });
+      },
+      { rootMargin: '100px' } // Start preloading 100px before entering viewport
+    );
+
+    if (carouselRef.current) {
+      observer.observe(carouselRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [currentIndex, images]);
+
   return (
-    <div className="relative w-full h-full flex items-center justify-center bg-gray-50">
+    <div ref={carouselRef} className="relative w-full h-full flex items-center justify-center bg-gray-50">
       {/* Main Image */}
       <div className="relative w-full h-full">
         <AnimatePresence mode="wait">
@@ -72,9 +97,11 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({ images, projectName
               <Image
                 src={images[currentIndex]}
                 alt={`${projectName} - Image ${currentIndex + 1}`}
-                layout="fill"
-                objectFit="contain"
+                fill
+                style={{ objectFit: 'contain' }}
                 priority={currentIndex === 0}
+                sizes="(max-width: 768px) 100vw, 90vw"
+                quality={90}
               />
             </div>
           </motion.div>
@@ -128,6 +155,8 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({ images, projectName
       )}
     </div>
   );
-};
+});
+
+VerticalCarousel.displayName = 'VerticalCarousel';
 
 export default VerticalCarousel;

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Roboto_Mono } from 'next/font/google';
@@ -18,7 +18,7 @@ const navItems: NavItem[] = [
   { label: 'Projects', href: '/projects' },
 ];
 
-const Header: React.FC = () => {
+const Header: React.FC = React.memo(() => {
   const { isTouchDevice } = useTouchDevice();
   const pathname = usePathname();
   const router = useRouter();
@@ -31,6 +31,10 @@ const Header: React.FC = () => {
       setSelectedIndex(currentIndex);
     }
   }, [pathname]);
+
+  const handleLinkClick = useCallback((index: number) => () => {
+    setSelectedIndex(index);
+  }, []);
 
   // Keyboard navigation
   useEffect(() => {
@@ -69,7 +73,7 @@ const Header: React.FC = () => {
               <li key={item.href}>
                 <Link
                   href={item.href}
-                  onClick={() => setSelectedIndex(index)}
+                  onClick={handleLinkClick(index)}
                   className={`theme-hover transition-all duration-200 ${
                     selectedIndex === index
                       ? 'text-shadow font-bold border-b-2 border-current'
@@ -92,6 +96,8 @@ const Header: React.FC = () => {
       </nav>
     </header>
   );
-};
+});
+
+Header.displayName = 'Header';
 
 export default Header;

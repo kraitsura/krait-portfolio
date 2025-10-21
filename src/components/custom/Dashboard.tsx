@@ -18,7 +18,7 @@ interface DashboardProps {
   isVisible?: boolean;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ isVisible = true }) => {
+const Dashboard: React.FC<DashboardProps> = React.memo(({ isVisible = true }) => {
   const { isTouchDevice } = useTouchDevice();
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<RocketScene | null>(null);
@@ -59,6 +59,11 @@ const Dashboard: React.FC<DashboardProps> = ({ isVisible = true }) => {
       }, 1000);
     });
   }, [isLaunching]);
+
+  const handleSocialClick = useCallback((index: number, url: string) => () => {
+    setSelectedIndex(index);
+    handleLaunch(url);
+  }, [handleLaunch]);
 
   useEffect(() => {
     if (!containerRef.current) {
@@ -118,6 +123,15 @@ const Dashboard: React.FC<DashboardProps> = ({ isVisible = true }) => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [selectedIndex, isLaunching, isVisible, handleLaunch, socialLinks]);
 
+  const buttonStyle = useMemo(() => ({
+    pointerEvents: 'auto' as const,
+    color: 'var(--theme-primary)'
+  }), []);
+
+  const textStyle = useMemo(() => ({
+    color: 'var(--theme-primary)'
+  }), []);
+
   return (
     <main className={`min-h-screen overflow-hidden ${robotoMono.className}`}>
       {/* Three.js container - Background */}
@@ -138,10 +152,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isVisible = true }) => {
             {socialLinks.map((link, index) => (
               <button
                 key={link.name}
-                onClick={() => {
-                  setSelectedIndex(index);
-                  handleLaunch(link.url);
-                }}
+                onClick={handleSocialClick(index, link.url)}
                 disabled={isLaunching}
                 className={`
                   relative p-4 sm:p-6
@@ -150,10 +161,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isVisible = true }) => {
                   border border-transparent rounded
                   ${selectedIndex === index ? "social-icon-selected" : ""}
                 `}
-                style={{
-                  pointerEvents: "auto",
-                  color: 'var(--theme-primary)'
-                }}
+                style={buttonStyle}
                 aria-label={link.name}
               >
                 <div className="scale-75 sm:scale-100">{link.icon}</div>
@@ -174,7 +182,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isVisible = true }) => {
               className="hidden sm:block text-left self-start mt-8"
               style={{ pointerEvents: "none" }}
             >
-              <div className="text-xs opacity-50 font-mono" style={{ color: 'var(--theme-primary)' }}>
+              <div className="text-xs opacity-50 font-mono" style={textStyle}>
                 h/l navigate | ⏎ launch
               </div>
             </div>
@@ -183,6 +191,8 @@ const Dashboard: React.FC<DashboardProps> = ({ isVisible = true }) => {
       </div>
     </main>
   );
-};
+});
+
+Dashboard.displayName = 'Dashboard';
 
 export default Dashboard;

@@ -16,7 +16,7 @@ interface ProjectCardProps {
 const playfair = Playfair_Display({ subsets: ['latin'] });
 const robotoMono = Roboto_Mono({ subsets: ['latin'] });
 
-const ProjectCard: React.FC<ProjectCardProps> = ({ project, index, onClick, isSelected, isHighlighted = false }) => {
+const ProjectCard: React.FC<ProjectCardProps> = React.memo(({ project, index, onClick, isSelected, isHighlighted = false }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [hoveredTag, setHoveredTag] = useState<number | null>(null);
@@ -81,6 +81,15 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, index, onClick, isSe
     return () => window.removeEventListener('resize', updateResponsiveValues);
   }, [calculateVisibleTags]);
 
+  // Preload next image only when card is highlighted (user is likely to interact)
+  useEffect(() => {
+    if (!isHighlighted || project.images.length <= 1) return;
+
+    const nextIndex = (currentImageIndex + 1) % project.images.length;
+    const img = new window.Image(); // Use window.Image to avoid conflict with Next.js Image
+    img.src = project.images[nextIndex];
+  }, [currentImageIndex, project.images, isHighlighted]);
+
   // Auto-cycle through images - only when highlighted
   useEffect(() => {
     if (project.images.length <= 1 || isPaused || !isHighlighted) return;
@@ -123,8 +132,10 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, index, onClick, isSe
             <Image
               src={project.images[currentImageIndex]}
               alt={`${project.title} - ${currentImageIndex + 1}`}
-              layout="fill"
-              objectFit="cover"
+              fill
+              style={{ objectFit: 'cover' }}
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              quality={85}
             />
           </motion.div>
         </AnimatePresence>
@@ -144,7 +155,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, index, onClick, isSe
 
           return IconComponent ? (
             <motion.div
-              key={tagIndex}
+              key={tag}
               className="relative backdrop-blur-md bg-black/40 border border-[var(--theme-primary)] rounded-full overflow-hidden cursor-pointer flex items-center"
               style={{
                 boxShadow: isHovered
@@ -241,10 +252,10 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, index, onClick, isSe
                 transition={{ duration: 0.2 }}
               >
                 <div className="flex flex-col gap-1">
-                  {project.tags.slice(visibleTagCount).map((tag, idx) => {
+                  {project.tags.slice(visibleTagCount).map((tag) => {
                     const IconComponent = iconMap[tag];
                     return IconComponent ? (
-                      <div key={idx} className="flex items-center gap-2">
+                      <div key={tag} className="flex items-center gap-2">
                         <IconComponent size={12} className="text-[var(--theme-primary)]" strokeWidth={2.5} />
                         <span className={`${robotoMono.className} text-[var(--theme-primary)] text-[10px] font-semibold`}>
                           {tag}
@@ -277,6 +288,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, index, onClick, isSe
       </motion.div>
     </motion.div>
   );
-};
+});
+
+ProjectCard.displayName = 'ProjectCard';
 
 export default ProjectCard;
