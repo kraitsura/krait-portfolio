@@ -1,0 +1,94 @@
+// ============================================================================
+// BASE STRUCTURAL STYLES
+// ============================================================================
+// Core container, frame, and output area styles
+
+@use 'variables' as *;
+
+// ============================================================================
+// UTILITY CLASSES
+// ============================================================================
+
+.noclick {
+    @include no-click;
+}
+
+.piece {
+    display: block;
+    @include full-absolute;
+}
+
+// ============================================================================
+// MAIN FRAME
+// ============================================================================
+
+.frame {
+    background-color: transparent;
+    border-radius: 30px;
+    border: 15px solid;
+    border-bottom-color: #0f0e0d;
+    border-left-color: #080807;
+    border-right-color: #080807;
+    border-top-color: #020202;
+    @include deep-shadow;
+    @include no-click;
+    max-width: 900px;
+    height: 520px;
+    width: 96%;
+    max-height: calc(100vh - 20px);
+    margin: 0 auto;
+    overflow: hidden;
+    position: relative;
+    min-height: 350px;
+    container-type: inline-size;
+    container-name: pipboy-frame;
+}
+
+.frame * {
+    @include hide-cursor;
+    font-weight: normal;
+}
+
+// ============================================================================
+// OUTPUT AREA
+// ============================================================================
+
+.output {
+    @include crt-flicker(crt-output);
+    background-color: var(--black);
+    position: absolute;
+    padding: 30px;
+    @include clickable;
+    @include text-glow;
+    z-index: -1;
+    @include hide-cursor;
+}
+
+// ============================================================================
+// DISABLED STATE
+// ============================================================================
+
+.frame .disabled {
+    color: rgb(var(--alt));
+    @include no-click;
+}
+
+// ============================================================================
+// BUTTONS
+// ============================================================================
+
+.frame button {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    color: rgb(var(--main));
+    border: 1px solid rgb(var(--main));
+    padding: 3px 10px;
+    @include smooth-transition;
+}
+
+.frame button:hover,
+.frame button:focus {
+    background: rgba(var(--alt), 0.25);
+    outline: 1px solid;
+}

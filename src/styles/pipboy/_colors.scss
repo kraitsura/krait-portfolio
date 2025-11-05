@@ -1,0 +1,121 @@
+// ============================================================================
+// COLOR PICKER & THEME SELECTOR
+// ============================================================================
+// Color grid, focus states, and selection indicators
+
+@use 'variables' as *;
+
+// ============================================================================
+// COLOR GRID
+// ============================================================================
+
+.colors {
+    display: grid;
+    grid-template-columns: 33.33% 33.33% 33.33%;
+    margin: 35px auto 0;
+    max-width: 400px;
+    padding: 0 20px;
+}
+
+.colors input {
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    @include no-click;
+    left: 0;
+    top: 0;
+}
+
+.colors label {
+    outline: 1px solid rgb(var(--main));
+    padding: 5px;
+    text-align: center;
+    @include smooth-transition;
+    margin: 5px;
+    position: relative;
+}
+
+// ============================================================================
+// FOCUSED STATE (KEYBOARD NAVIGATION)
+// ============================================================================
+
+.colors label.focused {
+    outline: 6px solid rgb(var(--main));
+    outline-offset: 0px;
+    box-shadow:
+        0 0 20px rgba(var(--main), 1),
+        0 0 40px rgba(var(--main), 0.6),
+        inset 0 0 20px rgba(var(--main), 0.4),
+        inset 0 0 0 2px rgba(255, 255, 255, 0.3);
+    background: rgba(var(--main), 0.15);
+    transform: scale(1.12);
+    animation: pulse-border 0.7s ease-in-out infinite;
+    z-index: 2;
+    font-weight: 600;
+}
+
+.colors label.focused::before {
+    content: "[ ";
+    position: absolute;
+    left: 5px;
+    font-weight: 900;
+    font-size: 1.2em;
+    animation: pulse-bracket 0.7s ease-in-out infinite;
+}
+
+.colors label.focused::after {
+    content: " ]";
+    position: absolute;
+    right: 5px;
+    font-weight: 900;
+    font-size: 1.2em;
+    animation: pulse-bracket 0.7s ease-in-out infinite;
+}
+
+// ============================================================================
+// CHECKED STATE (SELECTED COLOR)
+// ============================================================================
+
+.colors input:checked + label {
+    color: var(--black);
+    background: rgb(var(--main));
+    font-weight: 600;
+    box-shadow:
+        inset 0 0 0 2px var(--black),
+        inset 0 0 0 4px rgb(var(--main));
+    position: relative;
+}
+
+// ============================================================================
+// DEVICE-SPECIFIC INDICATORS
+// ============================================================================
+
+// Arrow indicator on non-touch devices
+.pipboy-global:not(:global(.touch-device)) .colors input:checked + label::before {
+    content: "▶ ";
+    position: absolute;
+    left: 8px;
+    color: var(--black);
+}
+
+// On non-touch devices, show arrow when both checked and focused
+.pipboy-global:not(:global(.touch-device)) .colors input:checked + label.focused::before {
+    content: "▶ ";
+    left: 8px;
+}
+
+.pipboy-global:not(:global(.touch-device)) .colors input:checked + label.focused::after {
+    content: "";
+}
+
+// On touch devices, keep corner brackets even when checked and focused
+.pipboy-global:global(.touch-device) .colors input:checked + label.focused::before {
+    content: "[ ";
+    left: 5px;
+}
+
+.pipboy-global:global(.touch-device) .colors input:checked + label.focused::after {
+    content: " ]";
+    right: 5px;
+}

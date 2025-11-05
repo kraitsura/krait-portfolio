@@ -1,0 +1,158 @@
+// ============================================================================
+// SKILLS SECTION
+// ============================================================================
+// Skills categories, cards, and progress bars with CRT-style effects
+
+@use 'variables' as *;
+
+// ============================================================================
+// SKILLS CONTAINER
+// ============================================================================
+
+.skills-section {
+    width: 100%;
+    padding: 20px 10px;
+    max-height: 400px;
+    overflow-y: auto;
+    @include custom-scrollbar;
+    container-type: inline-size;
+    container-name: skills-section;
+
+    h4 {
+        margin: 0;
+        // padding removed - let .skill-category control its own padding
+    }
+}
+
+// ============================================================================
+// SKILL CATEGORIES
+// ============================================================================
+
+.skill-category {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin: 25px 0 15px 0;
+    padding: 10px 15px 10px 35px; // Increased left padding to push text away from arrow
+    position: relative;
+    color: rgb(var(--main));
+    background: linear-gradient(
+        90deg,
+        rgba(var(--main), 0.1) 0%,
+        rgba(var(--main), 0.05) 50%,
+        transparent 100%
+    );
+    border-left: 3px solid rgb(var(--main));
+    box-shadow:
+        inset 0 1px 0 rgba(var(--main), 0.3),
+        inset 0 -1px 0 rgba(var(--main), 0.1);
+
+    &:first-child {
+        margin-top: 0;
+    }
+
+    &::before {
+        content: "▸";
+        position: absolute;
+        left: 5px; // Keep arrow in original position
+        opacity: 0.7;
+    }
+}
+
+// ============================================================================
+// SKILL LIST & CARDS
+// ============================================================================
+
+.skill-list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin: 12px 0 20px 0;
+    padding: 0;
+    list-style: none;
+    position: relative;
+
+    li {
+        position: relative;
+    }
+}
+
+.skill-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 8px;
+    background: rgba(var(--alt), 0.08);
+    border: 1px solid rgba(var(--main), 0.2);
+    @include smooth-transition(0.2s);
+    gap: 6px;
+    min-height: 60px;
+
+    &:hover {
+        background: rgba(var(--alt), 0.15);
+        border-color: rgba(var(--main), 0.5);
+        box-shadow:
+            0 0 10px rgba(var(--main), 0.1),
+            inset 0 0 10px rgba(var(--main), 0.05);
+    }
+}
+
+.skill-name {
+    font-size: 11px;
+    font-weight: 500;
+    text-align: center;
+    letter-spacing: 0.05em;
+    color: rgb(var(--main));
+    line-height: 1.2;
+}
+
+// ============================================================================
+// SKILL PROGRESS BAR (CRT-STYLE)
+// ============================================================================
+
+.skill-progress-bar {
+    width: 100%;
+    height: 16px;
+    background: rgba(0, 0, 0, 0.6); // Darker unfilled track for better contrast
+    border: 4px solid rgb(var(--main));
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+    box-shadow:
+        inset 0 4px 8px rgba(0, 0, 0, 0.7),
+        inset 0 -2px 4px rgba(var(--main), 0.3),
+        0 0 20px rgba(var(--main), 0.6),
+        0 0 40px rgba(var(--main), 0.3);
+    margin-top: 4px;
+}
+
+.skill-progress-fill {
+    height: 100%;
+    width: 0;
+    background: rgb(var(--main));
+    position: relative;
+    @include progress-bar-glow;
+    animation: fillProgress 1.2s ease-out forwards;
+
+    // Subtle scanline effect - reduced opacity to show fill better
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 1px,
+            rgba(0, 0, 0, 0.08) 1px,  // Much lighter scanlines
+            rgba(0, 0, 0, 0.08) 2px
+        );
+        pointer-events: none;
+    }
+
+    // Bright highlight on right edge
+    @include edge-highlight;
+}

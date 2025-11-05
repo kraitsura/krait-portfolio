@@ -1,0 +1,97 @@
+// ============================================================================
+// VISUAL EFFECTS
+// ============================================================================
+// CRT scanlines, glow effects, and custom cursor styles
+
+@use 'variables' as *;
+
+// ============================================================================
+// SCANLINES
+// ============================================================================
+
+.scanlines {
+    @include scanlines;
+    border-radius: 30px;
+    position: absolute;
+    @include full-absolute;
+    z-index: 0;
+}
+
+// ============================================================================
+// GLOW EFFECT
+// ============================================================================
+
+.glow {
+    animation: crt-glow 60s infinite;
+    @include crt-glow(0.15);
+    @include no-click;
+    position: fixed;
+    @include full-absolute;
+    z-index: 2;
+}
+
+// ============================================================================
+// CUSTOM CURSOR
+// ============================================================================
+
+.cursor {
+    position: absolute;
+    z-index: 9999;
+    @include no-click;
+    will-change: transform;
+}
+
+.cursor::before {
+    content: "";
+    display: block;
+    width: 20px;
+    height: 25px;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+// Cursor states
+.cursor.cursor-hidden::before {
+    background-image: unset;
+}
+
+.cursor.cursor-default::before {
+    background-image: url("/cursor/nv-cursor.png");
+    -webkit-filter: brightness(0.8);
+    filter: brightness(0.8);
+}
+
+.cursor.cursor-input::before {
+    background-image: url("/cursor/nv-cur-text.png");
+    -webkit-filter: brightness(0.8);
+    filter: brightness(0.8);
+}
+
+.cursor.cursor-active::before {
+    background-image: url("/cursor/nv-cursor.png");
+    -webkit-filter: brightness(1.15) saturate(1.15);
+    filter: brightness(1.15) saturate(1.15);
+}
+
+// ============================================================================
+// FADE SWAP ANIMATION
+// ============================================================================
+
+.fade-a {
+    animation: fade-swap 8s infinite;
+    animation-delay: -4s;
+    opacity: 1;
+}
+
+.fade-b {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    padding: 0 6px;
+    opacity: 0;
+    animation: fade-swap 8s infinite;
+}
+
+.pip-head .fade-b {
+    padding: 0 10px;
+}

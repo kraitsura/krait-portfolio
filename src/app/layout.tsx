@@ -5,6 +5,7 @@ import Header from "@/components/custom/Header";
 import StartSh from "@/components/custom/StartSh";
 import { TouchProvider } from "@/contexts/TouchContext";
 import { ThemeColorProvider } from "@/contexts/ThemeColorContext";
+import { FlashBangProvider } from "@/contexts/FlashBangContext";
 import "./globals.css";
 
 const geistSans = localFont({
@@ -57,10 +58,12 @@ export default function RootLayout({
       <body className={`${inter.className} flex flex-col min-h-screen`}>
         <ThemeColorProvider>
           <TouchProvider>
-            <StartSh>
-              <Header />
-              <main className="flex-grow">{children}</main>
-            </StartSh>
+            <FlashBangProvider>
+              <StartSh>
+                <Header />
+                <main className="flex-grow">{children}</main>
+              </StartSh>
+            </FlashBangProvider>
           </TouchProvider>
         </ThemeColorProvider>
       </body>

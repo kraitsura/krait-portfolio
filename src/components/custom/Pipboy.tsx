@@ -1,5 +1,14 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
-import styles from "@/styles/pip.module.scss";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+} from "react";
+// Toggle between old and new modular styles:
+// OLD VERSION (monolithic): import styles from "@/styles/pip.module.scss";
+// NEW VERSION (modular):    import styles from "@/styles/pip-new.module.scss";
+import styles from "@/styles/pip-new.module.scss";
 import { useTouchDevice } from "@/contexts/TouchContext";
 import { useThemeColor, type ThemeColor } from "@/contexts/ThemeColorContext";
 
@@ -8,7 +17,10 @@ interface PipboyProps {
   onScrollToSocials?: () => void;
 }
 
-const Pipboy: React.FC<PipboyProps> = ({ isActive = true, onScrollToSocials }) => {
+const Pipboy: React.FC<PipboyProps> = ({
+  isActive = true,
+  onScrollToSocials,
+}) => {
   const { isTouchDevice } = useTouchDevice();
   const { color, setColor } = useThemeColor();
   const [activeTab, setActiveTab] = useState("items");
@@ -137,36 +149,48 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true, onScrollToSocials }) =
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isActive, activeTab, selectedColorIndex, colorOptions, setColor]);
 
-  const handleColorChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setColor(e.target.value as ThemeColor);
-    // Update selectedColorIndex to match clicked color
-    const index = colorOptions.indexOf(e.target.value as ThemeColor);
-    if (index !== -1) {
+  const handleColorChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setColor(e.target.value as ThemeColor);
+      // Update selectedColorIndex to match clicked color
+      const index = colorOptions.indexOf(e.target.value as ThemeColor);
+      if (index !== -1) {
+        setSelectedColorIndex(index);
+      }
+    },
+    [colorOptions, setColor],
+  );
+
+  const handleTabChange = useCallback(
+    (tab: string) => (e: React.MouseEvent) => {
+      e.preventDefault();
+      setActiveTab(tab);
+    },
+    [],
+  );
+
+  const handleSocialsClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      setActiveTab("socials");
+      onScrollToSocials?.();
+      // Reset to Status tab after scrolling to socials
+      setTimeout(() => {
+        setActiveTab("items");
+      }, 800);
+    },
+    [onScrollToSocials],
+  );
+
+  const handleColorLabelClick = useCallback(
+    (index: number, colorOption: ThemeColor) => () => {
       setSelectedColorIndex(index);
-    }
-  }, [colorOptions, setColor]);
-
-  const handleTabChange = useCallback((tab: string) => (e: React.MouseEvent) => {
-    e.preventDefault();
-    setActiveTab(tab);
-  }, []);
-
-  const handleSocialsClick = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    setActiveTab("socials");
-    onScrollToSocials?.();
-    // Reset to Status tab after scrolling to socials
-    setTimeout(() => {
-      setActiveTab("items");
-    }, 800);
-  }, [onScrollToSocials]);
-
-  const handleColorLabelClick = useCallback((index: number, colorOption: ThemeColor) => () => {
-    setSelectedColorIndex(index);
-    if (isTouchDevice) {
-      setColor(colorOption);
-    }
-  }, [isTouchDevice, setColor]);
+      if (isTouchDevice) {
+        setColor(colorOption);
+      }
+    },
+    [isTouchDevice, setColor],
+  );
 
   // Get keystroke info based on active tab
   const keystrokeInfo = useMemo(() => {
@@ -186,33 +210,44 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true, onScrollToSocials }) =
 
   const skillDetails = {
     skill1: [
-      { name: "React", level: "Journeyman", percentage: 25 },
-      { name: "TypeScript", level: "Journeyman", percentage: 28 },
-      { name: "Next.js", level: "Apprentice", percentage: 18 },
-      { name: "Vue", level: "Apprentice", percentage: 15 },
-      { name: "TanStack Start", level: "Apprentice", percentage: 12 },
-      { name: "Tauri", level: "Apprentice", percentage: 20 },
+      { name: "JavaScript/TypeScript", level: "Proficient", percentage: 70 },
+      { name: "Python", level: "Intermediate", percentage: 55 },
+      { name: "Java", level: "Intermediate", percentage: 50 },
+      { name: "Go", level: "Learning", percentage: 40 },
+      { name: "SQL", level: "Intermediate", percentage: 60 },
+      { name: "Rust", level: "Learning", percentage: 30 },
     ],
     skill2: [
-      { name: "Python", level: "Apprentice", percentage: 22 },
-      { name: "FastAPI", level: "Apprentice", percentage: 17 },
-      { name: "Java", level: "Apprentice", percentage: 19 },
-      { name: "Spring Boot", level: "Apprentice", percentage: 14 },
-      { name: "Go", level: "Apprentice", percentage: 16 },
-      { name: "Rust", level: "Apprentice", percentage: 11 },
+      { name: "React & Next.js", level: "Proficient", percentage: 75 },
+      { name: "Tailwind CSS", level: "Proficient", percentage: 70 },
+      { name: "Zustand/Redux", level: "Intermediate", percentage: 60 },
+      { name: "TanStack Tools", level: "Intermediate", percentage: 55 },
+      { name: "Vue.js", level: "Learning", percentage: 45 },
+      { name: "Tauri", level: "Learning", percentage: 40 },
     ],
     skill3: [
-      { name: "Supabase", level: "Apprentice", percentage: 24 },
-      { name: "Convex", level: "Apprentice", percentage: 21 },
-      { name: "Elasticsearch", level: "Apprentice", percentage: 13 },
-      { name: "Redis", level: "Apprentice", percentage: 18 },
-      { name: "S3", level: "Apprentice", percentage: 26 },
+      { name: "Node.js/Express", level: "Proficient", percentage: 70 },
+      { name: "REST & GraphQL APIs", level: "Proficient", percentage: 65 },
+      { name: "FastAPI", level: "Intermediate", percentage: 55 },
+      { name: "tRPC", level: "Intermediate", percentage: 50 },
+      { name: "Spring Boot", level: "Learning", percentage: 40 },
+      { name: "WebSockets", level: "Intermediate", percentage: 50 },
     ],
     skill4: [
-      { name: "Docker", level: "Apprentice", percentage: 23 },
-      { name: "Nginx", level: "Apprentice", percentage: 15 },
-      { name: "CloudFront", level: "Apprentice", percentage: 19 },
-      { name: "Hetzner VPS", level: "Apprentice", percentage: 12 },
+      { name: "PostgreSQL", level: "Intermediate", percentage: 65 },
+      { name: "MongoDB", level: "Intermediate", percentage: 60 },
+      { name: "Redis", level: "Intermediate", percentage: 55 },
+      { name: "Supabase", level: "Intermediate", percentage: 60 },
+      { name: "Drizzle ORM", level: "Intermediate", percentage: 65 },
+      { name: "Elasticsearch", level: "Learning", percentage: 35 },
+    ],
+    skill5: [
+      { name: "AWS (S3, Lambda, EC2)", level: "Intermediate", percentage: 55 },
+      { name: "Docker & Kubernetes", level: "Intermediate", percentage: 50 },
+      { name: "Vercel & Netlify", level: "Proficient", percentage: 70 },
+      { name: "GitHub Actions", level: "Intermediate", percentage: 60 },
+      { name: "Nginx", level: "Learning", percentage: 45 },
+      { name: "Cloudflare", level: "Intermediate", percentage: 50 },
     ],
   };
 
@@ -240,30 +275,20 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true, onScrollToSocials }) =
             {/* Footer Navigation */}
             <ul className={styles["pip-foot"]}>
               <li className={activeTab === "items" ? styles.active : ""}>
-                <a onClick={handleTabChange("items")}>
-                  Status
-                </a>
+                <a onClick={handleTabChange("items")}>Status</a>
               </li>
               <li className={activeTab === "stats" ? styles.active : ""}>
-                <a onClick={handleTabChange("stats")}>
-                  Stats
-                </a>
+                <a onClick={handleTabChange("stats")}>Stats</a>
               </li>
               <li className={activeTab === "quests" ? styles.active : ""}>
-                <a onClick={handleTabChange("quests")}>
-                  Skills
-                </a>
+                <a onClick={handleTabChange("quests")}>Skills</a>
               </li>
               <li className={activeTab === "misc" ? styles.active : ""}>
-                <a onClick={handleTabChange("misc")}>
-                  Settings
-                </a>
+                <a onClick={handleTabChange("misc")}>Settings</a>
               </li>
               {isTouchDevice && (
                 <li className={activeTab === "socials" ? styles.active : ""}>
-                  <a onClick={handleSocialsClick}>
-                    Socials
-                  </a>
+                  <a onClick={handleSocialsClick}>Socials</a>
                 </li>
               )}
             </ul>
@@ -288,8 +313,8 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true, onScrollToSocials }) =
                         ))}
                       </div>
                       <div className={styles["dragon-text"]}>
-                        <p>Engineer</p>
-                        <p>the tinkering kind</p>
+                        <p>builder</p>
+                        <p>tinkering...</p>
                       </div>
                     </div>
 
@@ -402,7 +427,7 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true, onScrollToSocials }) =
                       className={styles["skills-section"]}
                     >
                       <h4 className={styles["skill-category"]}>
-                        Frontend Development
+                        Programming Languages
                       </h4>
                       <ul className={styles["skill-list"]}>
                         {skillDetails.skill1.map((skill) => {
@@ -412,11 +437,16 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true, onScrollToSocials }) =
                                 <div className={styles["skill-name"]}>
                                   {skill.name}
                                 </div>
-                                <span
-                                  className={`${styles["skill-level-badge"]} ${styles[`level-${skill.level.toLowerCase()}`]}`}
-                                >
-                                  {skill.level}
-                                </span>
+                                <div className={styles["skill-progress-bar"]}>
+                                  <div
+                                    className={styles["skill-progress-fill"]}
+                                    style={
+                                      {
+                                        "--progress": `${skill.percentage}%`,
+                                      } as React.CSSProperties
+                                    }
+                                  />
+                                </div>
                               </div>
                             </li>
                           );
@@ -424,7 +454,7 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true, onScrollToSocials }) =
                       </ul>
 
                       <h4 className={styles["skill-category"]}>
-                        Backend Development
+                        Frontend Stack
                       </h4>
                       <ul className={styles["skill-list"]}>
                         {skillDetails.skill2.map((skill) => {
@@ -434,11 +464,16 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true, onScrollToSocials }) =
                                 <div className={styles["skill-name"]}>
                                   {skill.name}
                                 </div>
-                                <span
-                                  className={`${styles["skill-level-badge"]} ${styles[`level-${skill.level.toLowerCase()}`]}`}
-                                >
-                                  {skill.level}
-                                </span>
+                                <div className={styles["skill-progress-bar"]}>
+                                  <div
+                                    className={styles["skill-progress-fill"]}
+                                    style={
+                                      {
+                                        "--progress": `${skill.percentage}%`,
+                                      } as React.CSSProperties
+                                    }
+                                  />
+                                </div>
                               </div>
                             </li>
                           );
@@ -446,7 +481,7 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true, onScrollToSocials }) =
                       </ul>
 
                       <h4 className={styles["skill-category"]}>
-                        Database & Storage
+                        Backend & APIs
                       </h4>
                       <ul className={styles["skill-list"]}>
                         {skillDetails.skill3.map((skill) => {
@@ -456,11 +491,16 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true, onScrollToSocials }) =
                                 <div className={styles["skill-name"]}>
                                   {skill.name}
                                 </div>
-                                <span
-                                  className={`${styles["skill-level-badge"]} ${styles[`level-${skill.level.toLowerCase()}`]}`}
-                                >
-                                  {skill.level}
-                                </span>
+                                <div className={styles["skill-progress-bar"]}>
+                                  <div
+                                    className={styles["skill-progress-fill"]}
+                                    style={
+                                      {
+                                        "--progress": `${skill.percentage}%`,
+                                      } as React.CSSProperties
+                                    }
+                                  />
+                                </div>
                               </div>
                             </li>
                           );
@@ -468,7 +508,7 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true, onScrollToSocials }) =
                       </ul>
 
                       <h4 className={styles["skill-category"]}>
-                        DevOps & Infrastructure
+                        Databases & ORMs
                       </h4>
                       <ul className={styles["skill-list"]}>
                         {skillDetails.skill4.map((skill) => {
@@ -478,11 +518,43 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true, onScrollToSocials }) =
                                 <div className={styles["skill-name"]}>
                                   {skill.name}
                                 </div>
-                                <span
-                                  className={`${styles["skill-level-badge"]} ${styles[`level-${skill.level.toLowerCase()}`]}`}
-                                >
-                                  {skill.level}
-                                </span>
+                                <div className={styles["skill-progress-bar"]}>
+                                  <div
+                                    className={styles["skill-progress-fill"]}
+                                    style={
+                                      {
+                                        "--progress": `${skill.percentage}%`,
+                                      } as React.CSSProperties
+                                    }
+                                  />
+                                </div>
+                              </div>
+                            </li>
+                          );
+                        })}
+                      </ul>
+
+                      <h4 className={styles["skill-category"]}>
+                        Cloud & Infrastructure
+                      </h4>
+                      <ul className={styles["skill-list"]}>
+                        {skillDetails.skill5.map((skill) => {
+                          return (
+                            <li key={skill.name}>
+                              <div className={styles["skill-card"]}>
+                                <div className={styles["skill-name"]}>
+                                  {skill.name}
+                                </div>
+                                <div className={styles["skill-progress-bar"]}>
+                                  <div
+                                    className={styles["skill-progress-fill"]}
+                                    style={
+                                      {
+                                        "--progress": `${skill.percentage}%`,
+                                      } as React.CSSProperties
+                                    }
+                                  />
+                                </div>
                               </div>
                             </li>
                           );
@@ -529,9 +601,7 @@ const Pipboy: React.FC<PipboyProps> = ({ isActive = true, onScrollToSocials }) =
 
             {/* Keystroke Info - Fixed Top Right */}
             {!isTouchDevice && (
-              <div className={styles["keystroke-info"]}>
-                {keystrokeInfo}
-              </div>
+              <div className={styles["keystroke-info"]}>{keystrokeInfo}</div>
             )}
           </div>
 

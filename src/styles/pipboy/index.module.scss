@@ -1,0 +1,140 @@
+// ============================================================================
+// PIPBOY MODULAR STYLES - MAIN INDEX
+// ============================================================================
+// Refactored from pip.module.scss into modular architecture
+// Organized by feature and concern for better maintainability
+// Import order determines cascade (later imports override earlier ones)
+
+// ============================================================================
+// IMPORT ALL PARTIALS
+// ============================================================================
+// Import order: base → effects → layout → navigation → components → themes → responsive
+// This ensures proper cascade and specificity
+
+// Global wrapper and variables (must be first)
+@use 'global';
+
+// Base structural styles and utilities
+@use 'base';
+
+// Visual effects (scanlines, glow, cursor)
+@use 'effects';
+
+// Main layout structure (pipboy container, borders, tabs)
+@use 'layout';
+
+// Navigation components (footer, side menu, options)
+@use 'navigation';
+
+// Feature-specific components
+@use 'stats';
+@use 'skills';
+@use 'content';
+@use 'colors';
+
+// Color themes and browser-specific adjustments
+@use 'themes';
+
+// Media queries and container queries (highest specificity)
+@use 'responsive';
+
+// ============================================================================
+// MODULE EXPORTS
+// ============================================================================
+// Export all class names for CSS Modules
+:export {
+    // Base
+    noclick: noclick;
+    piece: piece;
+    frame: frame;
+    output: output;
+    disabled: disabled;
+
+    // Effects
+    scanlines: scanlines;
+    glow: glow;
+    cursor: cursor;
+    cursorHidden: cursor-hidden;
+    cursorDefault: cursor-default;
+    cursorInput: cursor-input;
+    cursorActive: cursor-active;
+    fadeA: fade-a;
+    fadeB: fade-b;
+
+    // Layout
+    pipboy: pipboy;
+    pipTitle: pip-title;
+    pipHead: pip-head;
+    pipBody: pip-body;
+    tabContent: tab-content;
+    tabPane: tab-pane;
+
+    // Navigation
+    pipFoot: pip-foot;
+    sideMenu: side-menu;
+    options: options;
+    rightOptions: right-options;
+    active: active;
+
+    // Stats
+    statusInfo: status-info;
+    levelDisplay: level-display;
+    levelLabel: level-label;
+    levelValue: level-value;
+    attributesGrid: attributes-grid;
+    attribute: attribute;
+    attrLabel: attr-label;
+    attrBar: attr-bar;
+    attrFill: attr-fill;
+    attrValue: attr-value;
+    statsPage: stats-page;
+    condition: condition;
+    fill: fill;
+
+    // Skills
+    skillsSection: skills-section;
+    skillCategory: skill-category;
+    skillList: skill-list;
+    skillCard: skill-card;
+    skillName: skill-name;
+    skillProgressBar: skill-progress-bar;
+    skillProgressFill: skill-progress-fill;
+
+    // Content
+    info: info;
+    infoTable: info-table;
+    extra: extra;
+    itemIcon: item-icon;
+    icon: icon;
+    post: post;
+    level: level;
+    levelApprentice: level-apprentice;
+    levelJourneyman: level-journeyman;
+    levelAdept: level-adept;
+    levelExpert: level-expert;
+    levelMaster: level-master;
+    vboy: vboy;
+    vboyWrap: vboy-wrap;
+    asciiLine: asciiLine;
+    dragonContainer: dragon-container;
+    dragonText: dragon-text;
+
+    // Colors
+    colors: colors;
+    focused: focused;
+
+    // Global
+    pipboyGlobal: pipboy-global;
+    keystrokeInfo: keystroke-info;
+
+    // Themes (applied via className)
+    amber: amber;
+    white: white;
+    red: red;
+    green: green;
+    blue: blue;
+    black: black;
+    filter: filter;
+    chrome: chrome;
+    safari: safari;
+}

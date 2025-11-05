@@ -1,0 +1,156 @@
+// ============================================================================
+// NAVIGATION
+// ============================================================================
+// Footer navigation, side menu, and navigation-related styles
+
+@use 'variables' as *;
+
+// ============================================================================
+// FOOTER NAVIGATION
+// ============================================================================
+
+.pip-foot {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2%;
+    position: absolute;
+    bottom: -14px;
+    width: calc(100% - 60px);
+    left: 30px;
+    z-index: 0;
+}
+
+.pip-foot li {
+    display: contents;
+}
+
+.pip-foot a {
+    border-radius: 0;
+    display: block;
+    width: 20%;
+    height: 28px;
+    margin: 0;
+    text-align: center;
+    position: relative;
+    line-height: 25px;
+}
+
+.pip-foot a::after {
+    content: "";
+    position: absolute;
+    background: var(--black);
+    width: 100%;
+    height: 2px;
+    left: 0;
+    bottom: 12px;
+    z-index: -1;
+}
+
+// ============================================================================
+// SIDE MENU
+// ============================================================================
+
+.pipboy .side-menu {
+    width: 60px;
+    position: fixed;
+}
+
+.side-menu a {
+    display: block;
+    width: 60px;
+    line-height: 25px;
+    padding: 0 10px 2px 10px;
+    margin: 6px 0;
+}
+
+// ============================================================================
+// OPTIONS MENU
+// ============================================================================
+
+.options {
+    display: block;
+    width: 300px;
+    max-width: 32%;
+    position: fixed;
+}
+
+.options input {
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    @include no-click;
+    left: 0;
+    top: 0;
+}
+
+.options label,
+.options a {
+    display: block;
+    padding: 5px 5px 5px 25px;
+    margin: 5px 0 0 -25px;
+    position: relative;
+    @include outline-transparent;
+    width: 100%;
+}
+
+.options .active a {
+    outline: 0px solid transparent;
+}
+
+.frame label:hover,
+.options a:hover,
+.frame label:focus {
+    @include interactive-focus;
+}
+
+.options label::before,
+.options a::before {
+    content: "";
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    left: 8px;
+    top: 9px;
+    outline: 1.5px solid transparent;
+}
+
+.options label:hover::before,
+.options a:hover::before {
+    outline-color: currentColor;
+}
+
+.options input:checked + label::before,
+.options .active a::before {
+    background: currentColor;
+    outline-color: currentColor;
+}
+
+// ============================================================================
+// RIGHT OPTIONS
+// ============================================================================
+
+.right-options {
+    display: block;
+    float: right;
+    padding-right: 1px;
+    max-width: 33%;
+    white-space: nowrap;
+}
+
+#items .right-options {
+    margin-bottom: 100px;
+}
+
+.right-options a {
+    display: block;
+    text-align: right;
+    padding: 5px;
+    margin-bottom: 5px;
+}
+
+.right-options a::after {
+    content: "»";
+    padding-left: 5px;
+}

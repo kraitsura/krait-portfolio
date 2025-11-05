@@ -1,5 +1,14 @@
 "use client";
-import React, { useState, useEffect, useRef, useCallback, memo, useMemo, lazy, Suspense } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  memo,
+  useMemo,
+  lazy,
+  Suspense,
+} from "react";
 import Image from "next/image";
 import styles from "@/styles/fadeIn.module.css";
 import Pipboy from "@/components/custom/Pipboy";
@@ -9,7 +18,7 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 const Dashboard = lazy(() => import("./Dashboard"));
 
 interface IntroPageProps {
-  images: string[];
+  image: string;
 }
 
 // Memoized NavigationArrow component extracted for performance
@@ -26,7 +35,6 @@ const NavigationArrow = memo(
       className={`
       hover:text-green-400
       transition-colors
-      cursor-pointer
       p-2
       relative
       ${styles["bounce-and-shimmer"]}
@@ -53,17 +61,27 @@ const NavigationArrow = memo(
 
 NavigationArrow.displayName = "NavigationArrow";
 
-const IntroPage: React.FC<IntroPageProps> = ({ images }) => {
+const IntroPage: React.FC<IntroPageProps> = ({ image }) => {
   const { isTouchDevice } = useTouchDevice();
   const [scrollState, setScrollState] = useState({
     percentage: 0,
     isAtBottom: false,
     isAtTop: true,
   });
-  const [randomImageIndex] = useState(() =>
-    Math.floor(Math.random() * images.length),
-  );
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Detect if the image is a video file
+  const isVideo = useMemo(() => {
+    const ext = image.split(".").pop()?.toLowerCase();
+    return ext === "mp4" || ext === "webm";
+  }, [image]);
+
+  // Get video MIME type
+  const videoType = useMemo(() => {
+    if (image.endsWith(".mp4")) return "video/mp4";
+    if (image.endsWith(".webm")) return "video/webm";
+    return "video/mp4";
+  }, [image]);
 
   const handleScroll = useCallback(() => {
     if (containerRef.current) {
@@ -134,14 +152,17 @@ const IntroPage: React.FC<IntroPageProps> = ({ images }) => {
 
   const isFullyDarkened = scrollState.percentage >= 95;
 
-  const gradientStyle = useMemo(() => ({
-    background: `
+  const gradientStyle = useMemo(
+    () => ({
+      background: `
       linear-gradient(to bottom,
         rgba(0,0,0,${0.2 + scrollState.percentage * 0.008}) 0%,
         rgba(0,0,0,${0.6 + scrollState.percentage * 0.004}) 50%,
         rgba(0,0,0,1) 100%)
     `,
-  }), [scrollState.percentage]);
+    }),
+    [scrollState.percentage],
+  );
 
   return (
     <div className={styles.fadeIn}>
@@ -151,15 +172,29 @@ const IntroPage: React.FC<IntroPageProps> = ({ images }) => {
       >
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute inset-0">
-            <Image
-              src={images[randomImageIndex]}
-              alt="Background"
-              fill
-              style={{ objectFit: 'cover' }}
-              quality={75}
-              priority
-              sizes="100vw"
-            />
+            {isVideo ? (
+              <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload="auto"
+                className="w-full h-full object-cover"
+                style={{ objectFit: "cover" }}
+              >
+                <source src={image} type={videoType} />
+              </video>
+            ) : (
+              <Image
+                src={image}
+                alt="Background"
+                fill
+                style={{ objectFit: "cover" }}
+                quality={75}
+                priority
+                sizes="100vw"
+              />
+            )}
           </div>
         </div>
         <div
@@ -203,7 +238,9 @@ const IntroPage: React.FC<IntroPageProps> = ({ images }) => {
             }`}
           >
             <div className={styles.pipboyContainer}>
-              <ErrorBoundary fallback={<div className="min-h-screen bg-black" />}>
+              <ErrorBoundary
+                fallback={<div className="min-h-screen bg-black" />}
+              >
                 <Suspense fallback={<div className="min-h-screen bg-black" />}>
                   <Dashboard isVisible={isFullyDarkened} />
                 </Suspense>
@@ -219,7 +256,9 @@ const IntroPage: React.FC<IntroPageProps> = ({ images }) => {
               >
                 <NavigationArrow direction="up" onClick={scrollToTop} />
                 {!isTouchDevice && (
-                  <div className="text-[10px] text-white opacity-40 mt-1">⇧K</div>
+                  <div className="text-[10px] text-white opacity-40 mt-1">
+                    ⇧K
+                  </div>
                 )}
               </div>
             </div>

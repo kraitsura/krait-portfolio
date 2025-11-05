@@ -1,0 +1,251 @@
+// ============================================================================
+// CONTENT SECTIONS
+// ============================================================================
+// Info tables, ASCII art, icons, posts, and dragon container
+
+@use 'variables' as *;
+
+// ============================================================================
+// INFO SECTION
+// ============================================================================
+
+.info {
+    width: 60%;
+    float: right;
+    padding-top: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+// ============================================================================
+// INFO TABLE
+// ============================================================================
+
+.info-table {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 3px;
+    width: 100%;
+
+    li {
+        float: none;
+        margin: 0;
+        width: auto;
+        border-top: 2px solid;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        &:nth-child(2n) {
+            clear: none;
+        }
+
+        b {
+            float: none;
+            margin-right: 0;
+        }
+    }
+}
+
+.info-table li::after,
+.extra::after {
+    @include pseudo-border(2px, 100%, var(--main));
+    right: 0;
+    top: 0;
+}
+
+.info-table .vboy-wrap {
+    border: none;
+}
+
+.info-table .vboy-wrap::after {
+    display: none;
+}
+
+// ============================================================================
+// EXTRA INFO
+// ============================================================================
+
+.extra {
+    border-top: 2px solid;
+    float: left;
+    clear: both;
+    width: 98.7%;
+    position: relative;
+    padding: 5px 6px;
+    margin: 0 0 0 1.3%;
+    padding-left: 34.6%;
+}
+
+.extra b {
+    position: absolute;
+    left: 6px;
+}
+
+// ============================================================================
+// ICONS
+// ============================================================================
+
+.item-icon {
+    position: absolute;
+    bottom: 4px;
+    left: 0;
+}
+
+.icon {
+    float: left;
+    width: 40px;
+    height: 40px;
+    margin-top: -20px;
+    margin-right: 7px;
+    border: 2px solid;
+    object-fit: contain;
+}
+
+.icon img {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+// ============================================================================
+// POST CONTENT
+// ============================================================================
+
+.post {
+    line-height: 1.5em;
+    padding-right: 20px;
+    font-size: 14px;
+}
+
+// ============================================================================
+// LEVEL BADGES
+// ============================================================================
+
+.level {
+    display: inline-block;
+    padding: 2px 6px;
+    margin-left: 8px;
+    font-size: 0.9em;
+    border: 1px solid;
+}
+
+.level-apprentice {
+    color: #6b9955;
+    border-color: #6b9955;
+    background: rgba(107, 153, 85, 0.1);
+}
+
+.level-journeyman {
+    color: #5599b5;
+    border-color: #5599b5;
+    background: rgba(85, 153, 181, 0.1);
+}
+
+.level-adept {
+    color: #9955b5;
+    border-color: #9955b5;
+    background: rgba(153, 85, 181, 0.1);
+}
+
+.level-expert {
+    color: #b55999;
+    border-color: #b55999;
+    background: rgba(181, 89, 153, 0.1);
+}
+
+.level-master {
+    color: #b59955;
+    border-color: #b59955;
+    background: rgba(181, 153, 85, 0.1);
+}
+
+// ============================================================================
+// ASCII ART (VBOY)
+// ============================================================================
+
+.vboy {
+    height: auto;
+    @include no-click;
+    font-family: monospace;
+    white-space: pre;
+    line-height: 1.5;
+    font-size: 12px;
+    display: inline-block;
+    padding: 15px;
+    text-align: center;
+    letter-spacing: 0;
+    margin: 0 auto;
+    min-width: unset;
+}
+
+.vboy-wrap {
+    width: 100%;
+    overflow-x: auto;
+    border: none;
+    margin-bottom: 20px;
+    text-align: center;
+    max-width: 100%;
+}
+
+.asciiLine {
+    margin: 0;
+    padding: 0;
+    font-family: monospace;
+    white-space: pre;
+    display: block;
+    line-height: 1.2;
+    height: 1em;
+    width: max-content;
+    user-select: none;
+    -webkit-user-select: none;
+    text-rendering: geometricPrecision;
+    -webkit-font-smoothing: none;
+    -moz-osx-font-smoothing: grayscale;
+    transform: scale(0.8);
+}
+
+// ============================================================================
+// DRAGON CONTAINER
+// ============================================================================
+
+.dragon-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 20px;
+    position: relative;
+    margin-top: 20px;
+}
+
+.dragon-text {
+    text-align: center;
+    margin-top: 20px;
+    font-weight: 300;
+    font-size: 14px;
+    letter-spacing: 0.05em;
+    line-height: 1.8;
+    opacity: 0.9;
+    position: relative;
+
+    p {
+        margin: 4px 0;
+        font-weight: 300;
+        color: rgb(var(--main));
+
+        &:first-child {
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+        }
+
+        &:last-child {
+            font-size: 13px;
+            opacity: 0.8;
+            font-style: italic;
+        }
+    }
+}

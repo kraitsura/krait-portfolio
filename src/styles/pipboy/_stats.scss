@@ -1,0 +1,180 @@
+// ============================================================================
+// STATS & ATTRIBUTES
+// ============================================================================
+// SPECIAL stats, status info, level display, and attribute bars
+
+@use 'variables' as *;
+
+// ============================================================================
+// STATUS INFO CONTAINER
+// ============================================================================
+
+.status-info {
+    width: 100%;
+    padding: 20px 10px;
+    margin-bottom: 20px;
+    container-type: inline-size;
+    container-name: status-info;
+}
+
+// ============================================================================
+// LEVEL DISPLAY
+// ============================================================================
+
+.level-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 25px;
+    padding: 15px;
+    border: 2px solid rgba(var(--main), 0.3);
+    background: rgba(var(--main), 0.05);
+}
+
+.level-label {
+    font-size: 18px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: rgb(var(--main));
+    opacity: 0.8;
+}
+
+.level-value {
+    font-size: 32px;
+    font-weight: 600;
+    color: rgb(var(--main));
+    letter-spacing: 0.1em;
+}
+
+// ============================================================================
+// ATTRIBUTES GRID (SPECIAL STATS)
+// ============================================================================
+
+.attributes-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px 20px;
+    width: 100%;
+}
+
+.attribute {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.attr-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgb(var(--main));
+    opacity: 0.9;
+    min-width: 95px;
+    flex-shrink: 0;
+}
+
+.attr-bar {
+    position: relative;
+    height: 20px;
+    background: rgba(var(--alt), 0.2);
+    border: 1px solid rgba(var(--main), 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 6px;
+    flex: 1;
+}
+
+.attr-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    background: rgba(var(--main), 0.4);
+    border-right: 2px solid rgb(var(--main));
+    @include smooth-transition(0.3s);
+}
+
+.attr-value {
+    position: relative;
+    z-index: 1;
+    font-size: 12px;
+    font-weight: 600;
+    color: rgb(var(--main));
+    min-width: 15px;
+    text-align: right;
+}
+
+// ============================================================================
+// STATS PAGE LAYOUT
+// ============================================================================
+
+.stats-page {
+    display: block;
+    width: calc(100% - 80px);
+    float: right;
+    position: relative;
+    padding-right: 10px;
+}
+
+.stats-page h4 {
+    border-bottom: 2px solid rgba(var(--main), 0.25);
+    margin: 10px 0 0 0;
+    padding-bottom: 10px;
+    text-transform: uppercase;
+}
+
+.stats-page li {
+    padding: 10px 0;
+    border-bottom: 2px solid rgba(var(--main), 0.25);
+}
+
+.stats-page .right-options {
+    position: absolute;
+    right: 0;
+    top: 50px;
+    max-width: max-content;
+}
+
+// ============================================================================
+// CONDITION BAR
+// ============================================================================
+
+.condition {
+    display: block;
+    background: rgba(var(--alt), 0.25);
+    float: right;
+    height: 1em;
+    width: 70px;
+    max-width: calc(100% - 35px);
+    margin: 2px 2px 0 -5px;
+    position: relative;
+}
+
+.condition .fill {
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    background: rgb(var(--main));
+}
+
+.condition::after {
+    content: "";
+    position: absolute;
+    right: 23%;
+    height: 100%;
+    top: 0;
+    width: 2px;
+    background: linear-gradient(
+        to bottom,
+        var(--black) 0%,
+        rgba(0, 0, 0, 0) 40%,
+        rgba(0, 0, 0, 0) 60%,
+        var(--black) 100%
+    );
+}

@@ -1,0 +1,160 @@
+// ============================================================================
+// LAYOUT & STRUCTURE
+// ============================================================================
+// Main pipboy container, borders, title, header, and tab content
+
+@use 'variables' as *;
+
+// ============================================================================
+// PIPBOY CONTAINER
+// ============================================================================
+
+.pipboy {
+  border-color: rgb(var(--main));
+  position: relative;
+  height: 100%;
+  padding: 16px;
+  z-index: 1;
+  @include hide-cursor;
+}
+
+// ============================================================================
+// PIPBOY TITLE
+// ============================================================================
+
+.pip-title {
+  font-size: 22px;
+  background: none;
+  border: none;
+  color: rgb(var(--main));
+  position: absolute;
+  padding: 0 5px;
+  text-transform: uppercase;
+  top: -25px;
+  left: 40px;
+  z-index: 2;
+  letter-spacing: 0.1em;
+}
+
+.pip-title::after {
+  background: var(--black);
+  content: "";
+  height: 3px;
+  width: 100%;
+  left: 0;
+  top: 13px;
+  position: absolute;
+  z-index: -1;
+}
+
+// ============================================================================
+// PIPBOY HEADER
+// ============================================================================
+
+.pip-head {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: max-content;
+  max-width: 100%;
+  text-align: right;
+  background: linear-gradient(to bottom,
+      var(--black) 0%,
+      rgba(0, 0, 0, 0) 100%);
+  z-index: 1;
+}
+
+.pip-head li {
+  float: left;
+  margin-left: 10px;
+  padding: 5px 10px;
+  min-width: 120px;
+  position: relative;
+}
+
+.pip-head li::before {
+  content: "";
+  position: absolute;
+  background: var(--black);
+  width: 10px;
+  height: 2px;
+  top: -2px;
+  left: -10px;
+}
+
+.pip-head li::after {
+  @include pseudo-border(2px, 100%, var(--main));
+  right: 0;
+  top: 0;
+}
+
+.pip-head li b {
+  float: left;
+  margin-right: 1em;
+}
+
+// ============================================================================
+// COMMON ELEMENTS
+// ============================================================================
+
+.pipboy a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.pipboy ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+// ============================================================================
+// TAB CONTENT
+// ============================================================================
+
+.pipboy>.tab-content {
+  line-height: 1.2em;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: block;
+  height: 100%;
+  padding-right: 1px;
+  scroll-behavior: smooth;
+  @include custom-scrollbar;
+}
+
+.pipboy>.tab-content>.tab-pane {
+  padding-left: 30px;
+  height: 100%;
+  overflow-y: auto;
+  @include custom-scrollbar;
+}
+
+// Tab-specific styles
+#items,
+#stats {
+  margin-top: 15px;
+}
+
+#items {
+  overflow: hidden !important;
+  height: 100%;
+
+  .pip-body {
+    overflow: hidden;
+    height: 100%;
+  }
+}
+
+#stats.tab-pane {
+  padding-left: 2px;
+}
+
+// ============================================================================
+// BODY CONTAINER
+// ============================================================================
+
+.pip-body {
+  position: relative;
+  z-index: 0;
+}

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { Roboto_Mono } from "next/font/google";
 import * as THREE from "three";
 import { ParallaxStarField } from "../three/ParallaxStarField";
@@ -8,6 +9,7 @@ import { SpaceDistortionPass } from "../three/RadialBlur";
 import { AtmosphericEffects, GlowPass } from "../three/AtmosphericEffects";
 import { loadTiffTexture } from "@/utils/tiffLoader";
 import { useTouchDevice } from "@/contexts/TouchContext";
+import { useFlashBang } from "@/contexts/FlashBangContext";
 
 const robotoMono = Roboto_Mono({ subsets: ["latin"] });
 
@@ -24,17 +26,56 @@ interface StartShProps {
 
 const StartSh: React.FC<StartShProps> = ({ children }) => {
   const { isTouchDevice } = useTouchDevice();
+  const { triggerFlash } = useFlashBang();
+  const router = useRouter();
   const [started, setStarted] = useState(false);
   const [currentInfo, setCurrentInfo] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [displayedText, setDisplayedText] = useState("");
   const [infoItems, setInfoItems] = useState<string[]>([]);
   const [showKeystroke, setShowKeystroke] = useState(false);
+  const [shadowColor, setShadowColor] = useState('#ff0000');
 
   // Loading states for smooth transitions
   const [sceneLoaded, setSceneLoaded] = useState(false);
   const [sceneVisible, setSceneVisible] = useState(false);
   const [terminalVisible, setTerminalVisible] = useState(false);
+
+  // Generate random vibrant color
+  const getRandomVibrantColor = () => {
+    const vibrantColors = [
+      '#FF0080', // Hot pink
+      '#00FF00', // Lime
+      '#0080FF', // Azure
+      '#FF00FF', // Magenta
+      '#FFFF00', // Yellow
+      '#00FFFF', // Cyan
+      '#FF4500', // Orange red
+      '#8B00FF', // Electric violet
+      '#00FF80', // Spring green
+      '#FF0040', // Neon red
+    ];
+    return vibrantColors[Math.floor(Math.random() * vibrantColors.length)];
+  };
+
+  // Handler for start.sh button
+  const handleStartClick = () => {
+    setStarted(true);
+    router.push('/');
+  };
+
+  // Handler for summarize.sh button
+  const handleSummarizeClick = async () => {
+    await triggerFlash();
+    setStarted(true);
+    router.push('/summarize');
+  };
+
+  const handleSummarizeHover = () => {
+    setShadowColor(getRandomVibrantColor());
+    // Prefetch the route on hover for instant loading
+    router.prefetch('/summarize');
+  };
 
   // Memoized navigation handlers
   const goToNext = useCallback(() => {
@@ -205,13 +246,32 @@ const StartSh: React.FC<StartShProps> = ({ children }) => {
             <span className="animate-pulse">_</span>&quot;
           </p>
         </div>
-        <div className="flex justify-between items-center">
-          <button
-            onClick={() => setStarted(true)}
-            className="px-6 py-2 bg-green-600 text-black font-semibold rounded hover:bg-green-500 transition-colors duration-300"
-          >
-            ./start.sh
-          </button>
+        <div className="flex justify-between items-end">
+          <div className="flex flex-col gap-2 w-auto items-start">
+            <button
+              onClick={handleStartClick}
+              className="px-2 py-1.5 bg-green-600 text-black font-bold hover:bg-green-500 transition-colors duration-300 text-sm"
+            >
+              ./start.sh
+            </button>
+            <button
+              onClick={handleSummarizeClick}
+              onMouseEnter={handleSummarizeHover}
+              className="px-2 py-1.5 font-bold text-black transition-all duration-150 hover:translate-x-[3px] hover:translate-y-[3px] active:translate-x-0 active:translate-y-0 active:shadow-none tracking-tight text-sm text-left"
+              style={{
+                backgroundColor: '#FFFBF0',
+                boxShadow: `0 0 0 transparent`,
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.boxShadow = `6px 6px 0 ${shadowColor}`;
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.boxShadow = `0 0 0 transparent`;
+              }}
+            >
+              ./summarize.sh
+            </button>
+          </div>
           <div className="flex flex-col items-end gap-1">
             <p className="text-sm text-green-600">v1.0.0</p>
             {!isTouchDevice && (

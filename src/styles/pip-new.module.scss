@@ -1,0 +1,20 @@
+// ============================================================================
+// PIPBOY STYLES - NEW MODULAR VERSION
+// ============================================================================
+// This is a drop-in replacement for pip.module.scss
+// Uses the new modular architecture from /pipboy/ directory
+//
+// To switch from old to new version in Pipboy.tsx:
+//   OLD: import styles from "@/styles/pip.module.scss"
+//   NEW: import styles from "@/styles/pip-new.module.scss"
+//
+// Benefits:
+//   - Modular structure (13 separate files by feature)
+//   - CSS @layer for better cascade control
+//   - Container queries for responsive design
+//   - Extracted mixins to reduce code duplication
+//   - Improved maintainability and organization
+//   - Performance optimizations
+
+// Simply forward all exports from the modular index
+@forward 'pipboy/index.module.scss';

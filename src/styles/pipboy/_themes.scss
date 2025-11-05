@@ -1,0 +1,175 @@
+// ============================================================================
+// COLOR THEMES
+// ============================================================================
+// Theme definitions and browser-specific color filters
+
+@use 'variables' as *;
+
+// ============================================================================
+// THEME COLOR DEFINITIONS
+// ============================================================================
+
+html.amber {
+    --main: 255, 170, 60;
+    --alt: 120, 75, 20;
+}
+
+.amber .filter,
+.amber .cursor {
+    filter: sepia(1) saturate(3) brightness(0.9) hue-rotate(-10deg);
+}
+
+html.white {
+    --main: 245, 245, 245;
+    --alt: 130, 130, 130;
+}
+
+.white .filter,
+.white .cursor {
+    filter: saturate(0) brightness(1.15);
+}
+
+html.red {
+    --main: 255, 40, 0;
+    --alt: 160, 20, 0;
+}
+
+.red .filter,
+.red .cursor {
+    filter: sepia(1) saturate(7) brightness(0.65) hue-rotate(-35deg);
+}
+
+html.green {
+    --main: 0, 230, 50;
+    --alt: 0, 160, 30;
+}
+
+.green .filter,
+.green .cursor {
+    filter: sepia(1) saturate(5) brightness(0.85) hue-rotate(65deg);
+}
+
+html.blue {
+    --main: 50, 150, 255;
+    --alt: 20, 80, 160;
+}
+
+.blue .filter,
+.blue .cursor {
+    filter: sepia(1) saturate(5) hue-rotate(165deg);
+}
+
+html.black {
+    --main: 200, 220, 250;
+    --alt: 90, 100, 150;
+}
+
+.black .filter,
+.black .cursor {
+    filter: sepia(1) invert(1);
+}
+
+// ============================================================================
+// BLACK THEME SPECIAL EFFECTS
+// ============================================================================
+
+.piece::before,
+.piece::after {
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 0%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    @include no-click;
+    opacity: 0;
+    @include smooth-transition(0.5s);
+}
+
+.black .piece::before {
+    background-image: url("https://cybersandbox.ca/wp-content/uploads/2021/11/the-eye.gif");
+    background-size: 110vmax auto;
+    opacity: 0.8;
+    height: 100%;
+    top: 0;
+    background-color: #2f3748;
+    filter: sepia(1) hue-rotate(170deg);
+}
+
+.black .piece::after {
+    background-image: url("https://cybersandbox.ca/wp-content/uploads/2021/11/b-noise.gif");
+    opacity: 0.2;
+    height: 100%;
+    top: 0;
+}
+
+// ============================================================================
+// BROWSER-SPECIFIC FILTERS (CHROME/EDGE)
+// ============================================================================
+
+.chrome.amber .filter,
+.chrome.amber .cursor {
+    filter: sepia(1) saturate(6) brightness(0.9) hue-rotate(-10deg);
+}
+
+.chrome.white .filter,
+.chrome.white .cursor {
+    filter: saturate(0) brightness(1.15);
+}
+
+.chrome.red .filter,
+.chrome.red .cursor {
+    filter: sepia(1) saturate(7) brightness(0.65) hue-rotate(-35deg);
+}
+
+.chrome.green .filter,
+.chrome.green .cursor {
+    filter: sepia(1) saturate(5) brightness(1) hue-rotate(65deg);
+}
+
+.chrome.blue .filter,
+.chrome.blue .cursor {
+    filter: sepia(1) saturate(5) hue-rotate(165deg);
+}
+
+.chrome.black .filter,
+.chrome.black .cursor {
+    filter: sepia(1) invert(1);
+}
+
+// ============================================================================
+// BROWSER-SPECIFIC FILTERS (SAFARI)
+// ============================================================================
+
+.safari.amber .filter,
+.safari.amber .cursor {
+    filter: sepia(1) saturate(2.5) brightness(0.95) hue-rotate(-15deg);
+}
+
+.safari.white .filter,
+.safari.white .cursor {
+    filter: saturate(0) brightness(1.1);
+}
+
+.safari.red .filter,
+.safari.red .cursor {
+    filter: sepia(1) saturate(6) brightness(0.7) hue-rotate(-40deg);
+}
+
+.safari.green .filter,
+.safari.green .cursor {
+    filter: sepia(1) saturate(4.5) brightness(0.9) hue-rotate(60deg);
+}
+
+.safari.blue .filter,
+.safari.blue .cursor {
+    filter: sepia(1) saturate(4.5) hue-rotate(160deg);
+}
+
+.safari.black .filter,
+.safari.black .cursor {
+    filter: sepia(1) invert(1) brightness(0.95);
+}

@@ -1,0 +1,318 @@
+// ============================================================================
+// RESPONSIVE STYLES
+// ============================================================================
+// Mobile and tablet breakpoints with container queries
+
+@use 'variables' as *;
+
+// ============================================================================
+// MOBILE (MAX-WIDTH: 800px)
+// ============================================================================
+
+@media only screen and (max-width: 800px) {
+
+  // Frame adjustments
+  .frame {
+    height: calc(100vh - 200px);
+    width: 100%;
+    max-height: unset;
+    border: none;
+  }
+
+  .output {
+    padding: 25px 15px 30px 15px;
+  }
+
+  // Pipboy container
+  .pipboy {
+    padding: 10px 16px 20px 16px;
+  }
+
+  .pipboy>.tab-content {
+    padding-right: 0;
+  }
+
+  // Tab spacing
+  #items,
+  #stats {
+    margin-top: 55px;
+    padding-top: 15px;
+  }
+
+  #skills {
+    margin-top: 75px;
+    padding-top: 10px;
+  }
+
+  // Header adjustments
+  .pip-head {
+    width: 100%;
+    background: transparent;
+  }
+
+  .pip-head li {
+    width: calc(50% - 10px);
+    border-top: 2px solid;
+    margin-bottom: 10px;
+    margin-top: -2px;
+    padding-top: 10px;
+  }
+
+  .pip-head li:not(:nth-of-type(2))::before {
+    display: none;
+  }
+
+  // Body options
+  .pip-body .options {
+    width: 100%;
+    max-width: unset;
+    position: relative;
+  }
+
+  .pip-body {
+    position: relative;
+  }
+
+  .pip-body .info {
+    width: calc(100% + 30px);
+    margin-left: -30px;
+    margin-top: 10px;
+    position: relative;
+    padding-bottom: 10px;
+    float: none;
+    height: 100%;
+  }
+
+  .pip-body .info::after,
+  .pip-head::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 2px;
+    width: 100%;
+    @include border-gradient-horizontal(var(--main));
+  }
+
+  .options label,
+  .options a {
+    width: calc(100% + 24px);
+    max-width: unset;
+  }
+
+  .pip-head::after {
+    top: unset;
+    bottom: 5px;
+  }
+
+  .stats-page {
+    padding: 0;
+  }
+
+  .post {
+    padding: 10px;
+  }
+
+  // Footer navigation
+  .pipboy .pip-foot {
+    bottom: -18px;
+    width: 98%;
+    margin: 0 1%;
+    left: 0;
+    gap: 1%;
+  }
+
+  .pip-foot a {
+    width: 22%;
+    height: 35px;
+    margin: 0;
+    line-height: 32px;
+    overflow: hidden;
+    font-size: 0.85em;
+  }
+
+  .pip-foot a::after {
+    bottom: -2px;
+  }
+
+  // Cursor adjustment
+  .cursor.cursor-active::before {
+    background-image: url("/cursor/nv-cursor.png");
+    -webkit-filter: brightness(1);
+    filter: brightness(1);
+  }
+
+  // Keystroke info
+  .keystroke-info {
+    top: 80px;
+    right: 8px;
+    font-size: 9px;
+    padding: 2px 6px;
+    opacity: 0.7;
+  }
+
+  // Title adjustment
+  .pip-title {
+    top: -20px;
+    font-size: 18px;
+  }
+
+  // Dragon container
+  .dragon-container {
+    padding: 15px;
+  }
+
+  .dragon-text {
+    font-size: 13px;
+
+    p:first-child {
+      font-size: 15px;
+    }
+
+    p:last-child {
+      font-size: 12px;
+    }
+  }
+
+  // Skills section
+  .skills-section {
+    padding: 0;
+    max-height: calc(100vh - 200px);
+  }
+
+  .skill-category:first-child {
+    margin-top: 35px;
+  }
+
+  .skill-list {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+    margin: 10px 0 15px 0;
+  }
+
+  .skill-category {
+    font-size: 12px;
+    margin: 15px 0 10px 0;
+    padding: 8px 12px 8px 30px; // Maintain left padding to push text away from arrow
+  }
+
+  .skill-card {
+    padding: 10px 6px;
+    min-height: 50px;
+    gap: 4px;
+  }
+
+  .skill-name {
+    font-size: 10px;
+  }
+
+  .skill-progress-bar {
+    height: 14px;
+    border-width: 3px;
+  }
+
+  // Status info
+  .status-info {
+    padding: 30px 5px 15px 5px;
+  }
+
+  .level-display {
+    padding: 12px;
+    margin-bottom: 20px;
+  }
+
+  .level-label {
+    font-size: 16px;
+  }
+
+  .level-value {
+    font-size: 28px;
+  }
+
+  .attributes-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .attr-label {
+    font-size: 11px;
+    min-width: 85px;
+  }
+
+  .attr-bar {
+    height: 18px;
+  }
+}
+
+// ============================================================================
+// MOBILE LANDSCAPE (MAX-WIDTH: 767px)
+// ============================================================================
+
+@media only screen and (max-width: 767px) {
+
+  .piece::before,
+  .piece::after {
+    top: 0;
+    left: 50%;
+    width: 0;
+    height: 100%;
+  }
+
+  .black .piece::before {
+    background-size: cover;
+    width: 100%;
+    left: 0;
+  }
+
+  .black .piece::after {
+    background-size: cover;
+    width: 100%;
+    left: 0;
+  }
+}
+
+// ============================================================================
+// LARGE SCREENS (MIN-WIDTH: 1310px)
+// ============================================================================
+
+@media only screen and (min-width: 1310px) {
+  .black .piece::before {
+    background-size: 1300px auto;
+  }
+}
+
+// ============================================================================
+// CONTAINER QUERIES (MODERN BROWSERS)
+// ============================================================================
+
+// When pipboy-frame is small, adjust layout
+@container pipboy-frame (max-width: 700px) {
+  .pip-head li {
+    min-width: 100px;
+    font-size: 0.9em;
+  }
+
+  .pip-foot a {
+    font-size: 0.8em;
+  }
+}
+
+// When status-info container is small, stack attributes
+@container status-info (max-width: 400px) {
+  .attributes-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+// When skills-section container is small, reduce columns
+@container skills-section (max-width: 500px) {
+  .skill-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@container skills-section (max-width: 300px) {
+  .skill-list {
+    grid-template-columns: 1fr;
+  }
+}
