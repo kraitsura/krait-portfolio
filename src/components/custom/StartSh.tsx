@@ -1,17 +1,20 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useCallback, Suspense } from "react";
 import { useRouter } from "next/navigation";
-import { Roboto_Mono } from "next/font/google";
-import * as THREE from "three";
-import { ParallaxStarField } from "../three/ParallaxStarField";
-import { SpaceDistortionPass } from "../three/RadialBlur";
-import { AtmosphericEffects, GlowPass } from "../three/AtmosphericEffects";
-import { loadTiffTexture } from "@/utils/tiffLoader";
+import dynamic from "next/dynamic";
 import { useTouchDevice } from "@/contexts/TouchContext";
-import { useFlashBang } from "@/contexts/FlashBangContext";
 
-const robotoMono = Roboto_Mono({ subsets: ["latin"] });
+// Dynamically import ParticlesBackground to code-split Three.js (~150KB)
+const ParticlesBackground = dynamic(
+  () => import("./ParticlesBackground"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="absolute inset-0 -z-10 bg-black" />
+    ),
+  }
+);
 
 interface WeatherData {
   city: string;
@@ -20,19 +23,23 @@ interface WeatherData {
   time: string;
 }
 
-interface StartShProps {
-  children: React.ReactNode;
-}
-
-const StartSh: React.FC<StartShProps> = ({ children }) => {
+const StartSh: React.FC = () => {
   const { isTouchDevice } = useTouchDevice();
-  const { triggerFlash } = useFlashBang();
   const router = useRouter();
   const [started, setStarted] = useState(false);
   const [currentInfo, setCurrentInfo] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [displayedText, setDisplayedText] = useState("");
-  const [infoItems, setInfoItems] = useState<string[]>([]);
+  // Initialize with date immediately for instant display
+  const [infoItems, setInfoItems] = useState<string[]>(() => {
+    const today = new Date();
+    return [today.toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })];
+  });
   const [showKeystroke, setShowKeystroke] = useState(false);
   const [shadowColor, setShadowColor] = useState('#ff0000');
 
@@ -40,6 +47,19 @@ const StartSh: React.FC<StartShProps> = ({ children }) => {
   const [sceneLoaded, setSceneLoaded] = useState(false);
   const [sceneVisible, setSceneVisible] = useState(false);
   const [terminalVisible, setTerminalVisible] = useState(false);
+
+  // Preload home page video for instant loading on navigation
+  useEffect(() => {
+    const video = document.createElement('video');
+    video.preload = 'auto';
+    video.muted = true;
+    video.src = '/gifs/skyscrape.webm';
+    // Start loading the video
+    video.load();
+
+    // Also prefetch the /home route
+    router.prefetch('/home');
+  }, [router]);
 
   // Generate random vibrant color
   const getRandomVibrantColor = () => {
@@ -59,14 +79,26 @@ const StartSh: React.FC<StartShProps> = ({ children }) => {
   };
 
   // Handler for start.sh button
-  const handleStartClick = () => {
+  const handleStartClick = useCallback(() => {
     setStarted(true);
-    router.push('/');
-  };
+    router.push('/home');
+  }, [router]);
+
+  // Preload video on hover for faster loading
+  const handleStartHover = useCallback(() => {
+    // Create video element and preload aggressively
+    const video = document.createElement('video');
+    video.preload = 'auto';
+    video.muted = true;
+    video.src = '/gifs/skyscrape.webm';
+    video.load();
+
+    // Also prefetch the route
+    router.prefetch('/home');
+  }, [router]);
 
   // Handler for summarize.sh button
-  const handleSummarizeClick = async () => {
-    await triggerFlash();
+  const handleSummarizeClick = () => {
     setStarted(true);
     router.push('/summarize');
   };
@@ -95,46 +127,23 @@ const StartSh: React.FC<StartShProps> = ({ children }) => {
     setSceneLoaded(true);
   }, []);
 
-  // Fetch weather data on mount
+  // Fetch weather data on mount (non-blocking - date already shown)
   useEffect(() => {
     const fetchWeatherData = async () => {
       try {
         const response = await fetch("/api/weather");
         const data = await response.json();
 
-        const items: string[] = [];
-
-        // Add today's date
-        const today = new Date();
-        const dateStr = today.toLocaleDateString("en-US", {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        });
-        items.push(dateStr);
-
-        // Add weather for each city
+        // Add weather for each city to the existing date
         if (data.weather && Array.isArray(data.weather)) {
-          data.weather.forEach((weather: WeatherData) => {
-            items.push(
-              `${weather.city}: ${weather.time}, ${weather.temp}°F, ${weather.description}`,
-            );
-          });
+          const weatherItems = data.weather.map((weather: WeatherData) =>
+            `${weather.city}: ${weather.time}, ${weather.temp}°F, ${weather.description}`
+          );
+          setInfoItems(prev => [...prev, ...weatherItems]);
         }
-
-        setInfoItems(items);
       } catch (error) {
         console.error("Failed to fetch weather:", error);
-        // Fallback to just showing the date
-        const today = new Date();
-        const dateStr = today.toLocaleDateString("en-US", {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        });
-        setInfoItems([dateStr, "Weather data unavailable"]);
+        // Silently fail - date is already showing
       }
     };
 
@@ -203,21 +212,17 @@ const StartSh: React.FC<StartShProps> = ({ children }) => {
         goToPrev();
       } else if (e.key === "Enter") {
         e.preventDefault();
-        setStarted(true);
+        handleStartClick();
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [started, goToNext, goToPrev]);
-
-  if (started) {
-    return <>{children}</>;
-  }
+  }, [started, goToNext, goToPrev, handleStartClick]);
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center ${robotoMono.className}`}
+      className="fixed inset-0 z-50 flex items-center justify-center font-mono"
     >
       <ParticlesBackground onReady={handleSceneReady} visible={sceneVisible} />
       <div
@@ -250,6 +255,7 @@ const StartSh: React.FC<StartShProps> = ({ children }) => {
           <div className="flex flex-col gap-2 w-auto items-start">
             <button
               onClick={handleStartClick}
+              onMouseEnter={handleStartHover}
               className="px-2 py-1.5 bg-green-600 text-black font-bold hover:bg-green-500 transition-colors duration-300 text-sm"
             >
               ./start.sh
@@ -289,253 +295,5 @@ const StartSh: React.FC<StartShProps> = ({ children }) => {
     </div>
   );
 };
-
-interface ParticlesBackgroundProps {
-  onReady: () => void;
-  visible: boolean;
-}
-
-const ParticlesBackground: React.FC<ParticlesBackgroundProps> = React.memo(
-  ({ onReady, visible }) => {
-    const containerRef = useRef<HTMLDivElement>(null);
-    const textureLoadedRef = useRef(false);
-    const sceneReadyRef = useRef(false);
-
-    useEffect(() => {
-      if (!containerRef.current) return;
-
-      // Scene setup
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(
-        75,
-        window.innerWidth / window.innerHeight,
-        0.1,
-        1000,
-      );
-      const renderer = new THREE.WebGLRenderer({
-        antialias: true,
-        alpha: false,
-      });
-
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Optimize performance
-      containerRef.current.appendChild(renderer.domElement);
-      camera.position.z = 1;
-
-      // Load background TIFF texture with blur filtering
-      const backgroundTexture = loadTiffTexture(
-        "/images/starbg.tif",
-        (texture) => {
-          // Apply filtering for soft blur effect
-          texture.minFilter = THREE.LinearFilter;
-          texture.magFilter = THREE.LinearFilter;
-          texture.needsUpdate = true;
-
-          // Mark texture as loaded and signal ready if scene is ready
-          textureLoadedRef.current = true;
-          if (sceneReadyRef.current) {
-            onReady();
-          }
-        },
-      );
-
-      // Calculate plane size for full screen coverage at z=-500
-      const planeZPosition = -500;
-      const planeDistance = camera.position.z - planeZPosition; // Actual distance from camera (1 - (-500) = 501)
-      const vFOV = camera.fov * (Math.PI / 180); // Convert to radians
-      const planeHeightAtDistance = 2 * Math.tan(vFOV / 2) * planeDistance;
-      const planeWidthAtDistance = planeHeightAtDistance * camera.aspect;
-
-      // Add 50% buffer to ensure full coverage at edges and during distortion
-      // For mobile (rotated 90°), swap dimensions to maintain proper coverage
-      const planeHeight = planeHeightAtDistance * 1.5;
-      const planeWidth = planeWidthAtDistance * 1.5;
-
-      const backgroundGeometry = new THREE.PlaneGeometry(
-        planeWidth,
-        planeHeight,
-      );
-      const backgroundMaterial = new THREE.MeshBasicMaterial({
-        map: backgroundTexture,
-        side: THREE.FrontSide,
-        depthWrite: false,
-        transparent: true,
-        opacity: 0.8, // More faded to hide low resolution
-      });
-      const backgroundPlane = new THREE.Mesh(
-        backgroundGeometry,
-        backgroundMaterial,
-      );
-      backgroundPlane.position.z = planeZPosition;
-
-      // Rotation state for smooth transitions
-      let targetRotation = 0;
-      let currentRotation = 0;
-
-      // Function to update target rotation based on window size
-      const updateRotation = () => {
-        const isMobile = window.innerWidth < 768; // Tailwind's md breakpoint
-        targetRotation = isMobile ? Math.PI / 2 : 0;
-      };
-
-      // Set initial rotation
-      updateRotation();
-      currentRotation = targetRotation; // Start at target
-      backgroundPlane.rotation.z = currentRotation;
-
-      scene.add(backgroundPlane);
-
-      // Atmospheric effects (fog, ambient light) - no solid background color since we have image
-      const atmosphere = new AtmosphericEffects(scene, false);
-
-      // Multi-layer parallax star field
-      const starField = new ParallaxStarField();
-      scene.add(starField);
-
-      // Create render targets for post-processing
-      const renderTarget1 = new THREE.WebGLRenderTarget(
-        window.innerWidth,
-        window.innerHeight,
-        {
-          minFilter: THREE.LinearFilter,
-          magFilter: THREE.LinearFilter,
-          format: THREE.RGBAFormat,
-        },
-      );
-      const renderTarget2 = new THREE.WebGLRenderTarget(
-        window.innerWidth,
-        window.innerHeight,
-        {
-          minFilter: THREE.LinearFilter,
-          magFilter: THREE.LinearFilter,
-          format: THREE.RGBAFormat,
-        },
-      );
-
-      // Post-processing passes
-      const distortionPass = new SpaceDistortionPass(0.06, 0.12); // Subtle distortion with lighter vignette
-      const glowPass = new GlowPass(0.25, 0.5); // Enhanced glow on bright stars
-
-      let animationId: number;
-      const startTime = Date.now();
-
-      const animate = () => {
-        animationId = requestAnimationFrame(animate);
-
-        // Calculate elapsed time for animations
-        const elapsedTime = (Date.now() - startTime) / 1000; // Convert to seconds
-
-        // Smooth rotation interpolation (LERP)
-        const rotationSpeed = 0.08; // Smooth transition speed
-        currentRotation += (targetRotation - currentRotation) * rotationSpeed;
-        backgroundPlane.rotation.z = currentRotation;
-
-        // Very slow zoom effect on background (oscillates between 1.0 and 1.12 over ~80 seconds)
-        const zoomSpeed = 0.04; // Very slow
-        const maxZoom = 0.2; // Maximum 12% zoom
-        const isMobile = window.innerWidth < 768;
-        const baseScale = isMobile ? 1.1 : 0.8; // Larger scale on mobile
-        const zoomFactor =
-          baseScale + Math.sin(elapsedTime * zoomSpeed) * maxZoom;
-
-        // Apply zoom while preserving aspect ratio correction from resize
-        const vFOV = camera.fov * (Math.PI / 180);
-        const actualDistance = camera.position.z - planeZPosition;
-        const currentPlaneHeightAtDistance =
-          2 * Math.tan(vFOV / 2) * actualDistance;
-        const currentPlaneWidthAtDistance =
-          currentPlaneHeightAtDistance * camera.aspect;
-
-        const scaleX =
-          (currentPlaneWidthAtDistance * 1.5 * zoomFactor) / planeWidth;
-        const scaleY =
-          (currentPlaneHeightAtDistance * 1.5 * zoomFactor) / planeHeight;
-        backgroundPlane.scale.set(scaleX, scaleY, 1);
-
-        // Update star field
-        starField.update();
-
-        // Render scene to first render target
-        renderer.setRenderTarget(renderTarget1);
-        renderer.clear();
-        renderer.render(scene, camera);
-
-        // Apply distortion pass (warps space)
-        renderer.setRenderTarget(renderTarget2);
-        distortionPass.render(renderer, renderTarget2, renderTarget1);
-
-        // Apply glow pass and render to screen
-        glowPass.renderToScreen = true;
-        glowPass.render(renderer, renderTarget1, renderTarget2);
-
-        renderer.setRenderTarget(null);
-      };
-
-      const handleResize = () => {
-        const width = window.innerWidth;
-        const height = window.innerHeight;
-
-        camera.aspect = width / height;
-        camera.updateProjectionMatrix();
-        renderer.setSize(width, height);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-        renderTarget1.setSize(width, height);
-        renderTarget2.setSize(width, height);
-
-        // Update rotation based on new window size
-        updateRotation();
-
-        // Background plane scale is handled in animate loop with zoom effect
-      };
-
-      window.addEventListener("resize", handleResize);
-
-      // Mark scene as ready and start animation
-      sceneReadyRef.current = true;
-
-      // If texture is already loaded, signal ready immediately
-      if (textureLoadedRef.current) {
-        onReady();
-      }
-
-      animate();
-
-      // Copy ref to local variable for cleanup
-      const container = containerRef.current;
-
-      return () => {
-        window.removeEventListener("resize", handleResize);
-        cancelAnimationFrame(animationId);
-
-        if (container?.contains(renderer.domElement)) {
-          container.removeChild(renderer.domElement);
-        }
-
-        renderer.dispose();
-        renderTarget1.dispose();
-        renderTarget2.dispose();
-        distortionPass.dispose();
-        glowPass.dispose();
-        atmosphere.dispose();
-        starField.dispose();
-        backgroundGeometry.dispose();
-        backgroundMaterial.dispose();
-        backgroundTexture.dispose();
-      };
-    }, [onReady]);
-
-    return (
-      <div
-        ref={containerRef}
-        className={`absolute inset-0 -z-10 transition-opacity duration-1000 ease-in-out ${
-          visible ? "opacity-100" : "opacity-0"
-        }`}
-      />
-    );
-  },
-);
-
-ParticlesBackground.displayName = "ParticlesBackground";
 
 export default StartSh;

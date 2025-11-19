@@ -27,36 +27,42 @@ const NavigationArrow = memo(
     direction,
     onClick,
   }: {
-    direction: "up" | "down";
+    direction: "up" | "down" | "left";
     onClick: () => void;
-  }) => (
-    <button
-      onClick={onClick}
-      className={`
-      hover:text-green-400
-      transition-colors
-      p-2
-      relative
-      ${styles["bounce-and-shimmer"]}
-    `}
-      aria-label={`Scroll to ${direction === "up" ? "top" : "bottom"}`}
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className={`h-8 w-24 opacity-30 pointer-events-none ${direction === "up" ? "-rotate-180" : ""}`}
-        viewBox="0 0 48 12"
-        fill="none"
-        stroke="currentColor"
+  }) => {
+    const isHorizontal = direction === "left";
+    const rotationClass = direction === "up" ? "-rotate-180" : direction === "left" ? "rotate-90" : "";
+    const ariaLabel = direction === "left" ? "Go to projects" : `Scroll to ${direction === "up" ? "top" : "bottom"}`;
+
+    return (
+      <button
+        onClick={onClick}
+        className={`
+        hover:text-green-400
+        transition-colors
+        p-2
+        relative
+        ${styles["bounce-and-shimmer"]}
+      `}
+        aria-label={ariaLabel}
       >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={1.5}
-          d="M2 2 L24 10 L46 2"
-        />
-      </svg>
-    </button>
-  ),
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className={`${isHorizontal ? "h-8 w-12" : "h-8 w-24"} opacity-30 pointer-events-none ${rotationClass}`}
+          viewBox={isHorizontal ? "0 0 12 48" : "0 0 48 12"}
+          fill="none"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.5}
+            d={isHorizontal ? "M10 2 L2 24 L10 46" : "M2 2 L24 10 L46 2"}
+          />
+        </svg>
+      </button>
+    );
+  },
 );
 
 NavigationArrow.displayName = "NavigationArrow";
@@ -68,7 +74,12 @@ const IntroPage: React.FC<IntroPageProps> = ({ image }) => {
     isAtBottom: false,
     isAtTop: true,
   });
+  // Loading sequence: video loads → video fades in → UI fades in
+  const [mediaLoaded, setMediaLoaded] = useState(false);
+  const [mediaVisible, setMediaVisible] = useState(false);
+  const [uiVisible, setUiVisible] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   // Detect if the image is a video file
   const isVideo = useMemo(() => {
@@ -82,6 +93,51 @@ const IntroPage: React.FC<IntroPageProps> = ({ image }) => {
     if (image.endsWith(".webm")) return "video/webm";
     return "video/mp4";
   }, [image]);
+
+  // Handler for when media is ready to display
+  const handleMediaLoaded = useCallback(() => {
+    if (!mediaLoaded) {
+      setMediaLoaded(true);
+    }
+  }, [mediaLoaded]);
+
+  // Loading sequence: media loads → media fades in → UI fades in
+  useEffect(() => {
+    if (!mediaLoaded) return;
+
+    // Start media fade-in immediately
+    setMediaVisible(true);
+
+    // After media transition completes, show UI
+    const uiTimer = setTimeout(() => {
+      setUiVisible(true);
+    }, 800);
+
+    return () => clearTimeout(uiTimer);
+  }, [mediaLoaded]);
+
+  // Poll for video ready state + fallback timeout
+  useEffect(() => {
+    if (mediaLoaded) return;
+
+    // Poll every 50ms to check if video is ready
+    const pollInterval = setInterval(() => {
+      if (videoRef.current && videoRef.current.readyState >= 3) {
+        setMediaLoaded(true);
+        clearInterval(pollInterval);
+      }
+    }, 50);
+
+    // Fallback: if video takes too long, show anyway after 4s
+    const fallbackTimer = setTimeout(() => {
+      setMediaLoaded(true);
+    }, 4000);
+
+    return () => {
+      clearInterval(pollInterval);
+      clearTimeout(fallbackTimer);
+    };
+  }, [mediaLoaded]);
 
   const handleScroll = useCallback(() => {
     if (containerRef.current) {
@@ -165,20 +221,29 @@ const IntroPage: React.FC<IntroPageProps> = ({ image }) => {
   );
 
   return (
-    <div className={styles.fadeIn}>
-      <div
-        ref={containerRef}
-        className={`h-screen w-full overflow-y-scroll relative bg-black text-white`}
-      >
+    <div
+      ref={containerRef}
+      className="h-screen w-full overflow-y-scroll relative bg-black text-white"
+    >
+        {/* Loading overlay - covers everything until video is ready */}
+        <div
+          className={`absolute inset-0 bg-black z-50 transition-opacity duration-1000 ease-out ${
+            mediaVisible ? "opacity-0 pointer-events-none" : "opacity-100"
+          }`}
+        />
+
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute inset-0">
             {isVideo ? (
               <video
+                ref={videoRef}
                 autoPlay
                 loop
                 muted
                 playsInline
                 preload="auto"
+                onLoadedData={handleMediaLoaded}
+                onCanPlayThrough={handleMediaLoaded}
                 className="w-full h-full object-cover"
                 style={{ objectFit: "cover" }}
               >
@@ -193,6 +258,7 @@ const IntroPage: React.FC<IntroPageProps> = ({ image }) => {
                 quality={75}
                 priority
                 sizes="100vw"
+                onLoad={handleMediaLoaded}
               />
             )}
           </div>
@@ -203,7 +269,11 @@ const IntroPage: React.FC<IntroPageProps> = ({ image }) => {
         />
         <div className="min-h-[200vh] relative z-10">
           <div className="h-screen flex items-center justify-center">
-            <div className="h-full w-full flex flex-col items-center justify-center gap-8">
+            <div
+              className={`h-full w-full flex flex-col items-center justify-center gap-8 transition-all duration-700 ease-out ${
+                uiVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+              }`}
+            >
               <div className="w-full max-w-[800px]">
                 <Pipboy
                   isActive={scrollState.percentage < 70}
@@ -264,7 +334,6 @@ const IntroPage: React.FC<IntroPageProps> = ({ image }) => {
             </div>
           </div>
         </div>
-      </div>
     </div>
   );
 };

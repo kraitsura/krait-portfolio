@@ -1,5 +1,5 @@
 'use client';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { useEffect, useState, useCallback } from 'react';
 import { projects } from '@/utils/projectList';
 import { motion } from 'framer-motion';
@@ -9,25 +9,35 @@ import VerticalCarousel from '@/components/custom/VerticalCarousel';
 const ProjectDetail: React.FC = () => {
   const router = useRouter();
   const { id } = useParams() as { id: string };
+  const searchParams = useSearchParams();
   const [isTouchDevice, setIsTouchDevice] = useState(false);
+
+  // Track where user came from
+  const fromSource = searchParams.get('from');
 
   // Find project directly
   const project = projects.find(p => p.id.toString() === id);
   const currentIndex = projects.findIndex(p => p.id.toString() === id);
 
   const handleGoBack = useCallback(() => {
-    router.push('/projects');
-  }, [router]);
+    if (fromSource === 'summarize') {
+      router.push('/summarize?tab=projects');
+    } else {
+      router.push('/projects');
+    }
+  }, [router, fromSource]);
 
   const goToPreviousProject = useCallback(() => {
     const prevIndex = (currentIndex - 1 + projects.length) % projects.length;
-    router.push(`/projects/${projects[prevIndex].id}`);
-  }, [currentIndex, router]);
+    const fromParam = fromSource ? `?from=${fromSource}` : '';
+    router.push(`/projects/${projects[prevIndex].id}${fromParam}`);
+  }, [currentIndex, router, fromSource]);
 
   const goToNextProject = useCallback(() => {
     const nextIndex = (currentIndex + 1) % projects.length;
-    router.push(`/projects/${projects[nextIndex].id}`);
-  }, [currentIndex, router]);
+    const fromParam = fromSource ? `?from=${fromSource}` : '';
+    router.push(`/projects/${projects[nextIndex].id}${fromParam}`);
+  }, [currentIndex, router, fromSource]);
 
   // Detect touch device
   useEffect(() => {
@@ -181,20 +191,39 @@ const ProjectDetail: React.FC = () => {
             )}
           </div>
 
-          {/* GitHub Link */}
-          {project.github && (
-            <div className="mb-4 pb-4 border-b border-gray-100">
-              <h3 className="text-[10px] font-thin text-gray-400 uppercase tracking-widest mb-1">
-                Repository
-              </h3>
-              <a
-                href={project.github}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm font-thin text-gray-900 hover:text-gray-600 underline break-all"
-              >
-                {project.github.replace('https://github.com/', '')}
-              </a>
+          {/* Links Row */}
+          {(project.link || project.github) && (
+            <div className="mb-4 pb-4 border-b border-gray-100 grid grid-cols-2 gap-3">
+              {project.link && (
+                <div>
+                  <h3 className="text-[10px] font-thin text-gray-400 uppercase tracking-widest mb-1">
+                    Live Site
+                  </h3>
+                  <a
+                    href={project.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm font-thin text-gray-900 hover:text-gray-600 underline break-all"
+                  >
+                    {project.link.replace('https://', '')}
+                  </a>
+                </div>
+              )}
+              {project.github && (
+                <div>
+                  <h3 className="text-[10px] font-thin text-gray-400 uppercase tracking-widest mb-1">
+                    Repository
+                  </h3>
+                  <a
+                    href={project.github}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm font-thin text-gray-900 hover:text-gray-600 underline break-all"
+                  >
+                    {project.github.replace('https://github.com/', '')}
+                  </a>
+                </div>
+              )}
             </div>
           )}
 

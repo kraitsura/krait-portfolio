@@ -244,16 +244,12 @@ body {
 /* Brutalist Highlight Border for Keyboard Navigation */
 .project-card-highlighted {
     position: relative;
-    border: 2px solid transparent !important;
-    background: rgba(220, 38, 38, 0.08);
-    outline: 2px solid rgba(220, 38, 38, 0.6);
-    outline-offset: 2px;
 }
 
 .project-card-highlighted::before {
     content: "";
     position: absolute;
-    inset: -8px;
+    inset: -12px;
     background:
         linear-gradient(to right, #DC2626, #DC2626) top left,
         linear-gradient(to bottom, #DC2626, #DC2626) top left,

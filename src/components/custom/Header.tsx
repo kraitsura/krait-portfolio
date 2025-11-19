@@ -3,25 +3,19 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Roboto_Mono } from 'next/font/google';
 import { useTouchDevice } from '@/contexts/TouchContext';
-import { useFlashBang } from '@/contexts/FlashBangContext';
 
 interface NavItem {
   label: string;
   href: string;
 }
 
-const robotoMono = Roboto_Mono({ subsets: ['latin'] });
-
 const navItems: NavItem[] = [
-  { label: 'Home', href: '/' },
-  { label: 'Projects', href: '/projects' },
+  { label: 'Home', href: '/home' },
 ];
 
 const Header: React.FC = React.memo(() => {
   const { isTouchDevice } = useTouchDevice();
-  const { triggerFlash } = useFlashBang();
   const pathname = usePathname();
   const router = useRouter();
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -45,8 +39,7 @@ const Header: React.FC = React.memo(() => {
     return vibrantColors[Math.floor(Math.random() * vibrantColors.length)];
   };
 
-  const handleSummarizeClick = async () => {
-    await triggerFlash();
+  const handleSummarizeClick = () => {
     router.push('/summarize');
   };
 
@@ -76,9 +69,15 @@ const Header: React.FC = React.memo(() => {
   };
 
   // Update selected index based on current pathname
+  // -1 = summarize button, 0 = Home
   useEffect(() => {
-    const currentIndex = navItems.findIndex(item => item.href === pathname);
-    setSelectedIndex(currentIndex);
+    if (pathname === '/summarize') {
+      setSelectedIndex(-1);
+    } else {
+      const currentIndex = navItems.findIndex(item => item.href === pathname);
+      // Default to Home (0) if page not found in navItems
+      setSelectedIndex(currentIndex === -1 ? 0 : currentIndex);
+    }
   }, [pathname]);
 
   const handleLinkClick = useCallback((index: number) => () => {
@@ -86,18 +85,31 @@ const Header: React.FC = React.memo(() => {
   }, []);
 
   // Keyboard navigation
+  // Total items: 3 (-1 = summarize, 0 = Home, 1 = Projects)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Check for Shift + L (next) or Shift + H (previous)
       if (e.shiftKey && (e.key === 'L' || e.key === 'l')) {
         e.preventDefault();
-        setSelectedIndex((prev) => (prev + 1) % navItems.length);
+        setSelectedIndex((prev) => {
+          // -1 -> 0 -> 1 -> -1
+          const next = prev + 1;
+          return next >= navItems.length ? -1 : next;
+        });
       } else if (e.shiftKey && (e.key === 'H' || e.key === 'h')) {
         e.preventDefault();
-        setSelectedIndex((prev) => (prev - 1 + navItems.length) % navItems.length);
+        setSelectedIndex((prev) => {
+          // -1 -> 1 -> 0 -> -1
+          const next = prev - 1;
+          return next < -1 ? navItems.length - 1 : next;
+        });
       } else if (e.shiftKey && e.key === 'Enter' && document.activeElement?.tagName !== 'INPUT') {
         e.preventDefault();
-        router.push(navItems[selectedIndex].href);
+        if (selectedIndex === -1) {
+          router.push('/summarize');
+        } else {
+          router.push(navItems[selectedIndex].href);
+        }
       }
     };
 
@@ -105,8 +117,8 @@ const Header: React.FC = React.memo(() => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedIndex, router]);
 
-  // Hide header on project detail pages
-  if (pathname?.startsWith('/projects/') && pathname !== '/projects') {
+  // Hide header on splash screen and project detail pages
+  if (pathname === '/' || (pathname?.startsWith('/projects/') && pathname !== '/projects')) {
     return null;
   }
 
@@ -114,22 +126,26 @@ const Header: React.FC = React.memo(() => {
     <header
       className={`fixed top-0 left-0 right-0 z-50 bg-transparent theme-text p-4 transition-opacity duration-300`}
     >
-      <nav className={`${robotoMono.className} theme-body container mx-auto flex justify-between items-start gap-2`}>
+      <nav className="font-mono theme-body container mx-auto flex justify-between items-start gap-2">
         {/* Brutalist button on the left */}
         <div className="w-auto sm:w-[200px]">
           <button
             onClick={handleSummarizeClick}
             onMouseEnter={handleSummarizeHover}
-            className="w-full px-3 py-1 sm:px-4 sm:py-1.5 font-bold text-black transition-all duration-150 hover:translate-x-[3px] hover:translate-y-[3px] active:translate-x-0 active:translate-y-0 active:shadow-none tracking-tight text-xs sm:text-sm"
+            className={`w-full px-3 py-1 sm:px-4 sm:py-1.5 font-bold text-black transition-all duration-150 hover:translate-x-[3px] hover:translate-y-[3px] active:translate-x-0 active:translate-y-0 active:shadow-none tracking-tight text-xs sm:text-sm ${
+              selectedIndex === -1 && pathname !== '/summarize' ? 'ring-2 ring-black ring-offset-2' : ''
+            }`}
             style={{
               backgroundColor: '#FFFBF0',
-              boxShadow: `0 0 0 transparent`,
+              boxShadow: selectedIndex === -1 && pathname !== '/summarize' ? `6px 6px 0 ${shadowColor}` : `0 0 0 transparent`,
             }}
             onMouseOver={(e) => {
               e.currentTarget.style.boxShadow = `6px 6px 0 ${shadowColor}`;
             }}
             onMouseOut={(e) => {
-              e.currentTarget.style.boxShadow = `0 0 0 transparent`;
+              if (!(selectedIndex === -1 && pathname !== '/summarize')) {
+                e.currentTarget.style.boxShadow = `0 0 0 transparent`;
+              }
             }}
           >
             ./summarize.sh

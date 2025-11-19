@@ -2,10 +2,8 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { Inter, Roboto_Mono, Playfair_Display } from "next/font/google";
 import Header from "@/components/custom/Header";
-import StartSh from "@/components/custom/StartSh";
 import { TouchProvider } from "@/contexts/TouchContext";
 import { ThemeColorProvider } from "@/contexts/ThemeColorContext";
-import { FlashBangProvider } from "@/contexts/FlashBangContext";
 import "./globals.css";
 
 const geistSans = localFont({
@@ -58,12 +56,8 @@ export default function RootLayout({
       <body className={`${inter.className} flex flex-col min-h-screen`}>
         <ThemeColorProvider>
           <TouchProvider>
-            <FlashBangProvider>
-              <StartSh>
-                <Header />
-                <main className="flex-grow">{children}</main>
-              </StartSh>
-            </FlashBangProvider>
+            <Header />
+            <main className="flex-grow">{children}</main>
           </TouchProvider>
         </ThemeColorProvider>
       </body>

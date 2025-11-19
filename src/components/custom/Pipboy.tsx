@@ -5,12 +5,14 @@ import React, {
   useMemo,
   useCallback,
 } from "react";
+import { useRouter } from "next/navigation";
 // Toggle between old and new modular styles:
 // OLD VERSION (monolithic): import styles from "@/styles/pip.module.scss";
 // NEW VERSION (modular):    import styles from "@/styles/pip-new.module.scss";
 import styles from "@/styles/pip-new.module.scss";
 import { useTouchDevice } from "@/contexts/TouchContext";
 import { useThemeColor, type ThemeColor } from "@/contexts/ThemeColorContext";
+import { skillDetails, dragonArt } from "@/data/pipboy-data";
 
 interface PipboyProps {
   isActive?: boolean;
@@ -23,6 +25,7 @@ const Pipboy: React.FC<PipboyProps> = ({
 }) => {
   const { isTouchDevice } = useTouchDevice();
   const { color, setColor } = useThemeColor();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("items");
   const [browser, setBrowser] = useState("chrome");
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
@@ -192,6 +195,14 @@ const Pipboy: React.FC<PipboyProps> = ({
     [isTouchDevice, setColor],
   );
 
+  const handleProjectsClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      router.push("/projects");
+    },
+    [router],
+  );
+
   // Get keystroke info based on active tab
   const keystrokeInfo = useMemo(() => {
     switch (activeTab) {
@@ -208,63 +219,6 @@ const Pipboy: React.FC<PipboyProps> = ({
     }
   }, [activeTab]);
 
-  const skillDetails = {
-    skill1: [
-      { name: "JavaScript/TypeScript", level: "Proficient", percentage: 70 },
-      { name: "Python", level: "Intermediate", percentage: 55 },
-      { name: "Java", level: "Intermediate", percentage: 50 },
-      { name: "Go", level: "Learning", percentage: 40 },
-      { name: "SQL", level: "Intermediate", percentage: 60 },
-      { name: "Rust", level: "Learning", percentage: 30 },
-    ],
-    skill2: [
-      { name: "React & Next.js", level: "Proficient", percentage: 75 },
-      { name: "Tailwind CSS", level: "Proficient", percentage: 70 },
-      { name: "Zustand/Redux", level: "Intermediate", percentage: 60 },
-      { name: "TanStack Tools", level: "Intermediate", percentage: 55 },
-      { name: "Vue.js", level: "Learning", percentage: 45 },
-      { name: "Tauri", level: "Learning", percentage: 40 },
-    ],
-    skill3: [
-      { name: "Node.js/Express", level: "Proficient", percentage: 70 },
-      { name: "REST & GraphQL APIs", level: "Proficient", percentage: 65 },
-      { name: "FastAPI", level: "Intermediate", percentage: 55 },
-      { name: "tRPC", level: "Intermediate", percentage: 50 },
-      { name: "Spring Boot", level: "Learning", percentage: 40 },
-      { name: "WebSockets", level: "Intermediate", percentage: 50 },
-    ],
-    skill4: [
-      { name: "PostgreSQL", level: "Intermediate", percentage: 65 },
-      { name: "MongoDB", level: "Intermediate", percentage: 60 },
-      { name: "Redis", level: "Intermediate", percentage: 55 },
-      { name: "Supabase", level: "Intermediate", percentage: 60 },
-      { name: "Drizzle ORM", level: "Intermediate", percentage: 65 },
-      { name: "Elasticsearch", level: "Learning", percentage: 35 },
-    ],
-    skill5: [
-      { name: "AWS (S3, Lambda, EC2)", level: "Intermediate", percentage: 55 },
-      { name: "Docker & Kubernetes", level: "Intermediate", percentage: 50 },
-      { name: "Vercel & Netlify", level: "Proficient", percentage: 70 },
-      { name: "GitHub Actions", level: "Intermediate", percentage: 60 },
-      { name: "Nginx", level: "Learning", percentage: 45 },
-      { name: "Cloudflare", level: "Intermediate", percentage: 50 },
-    ],
-  };
-
-  const dragonArt = [
-    "   ⣴⣶⣤⡤⠦⣤⣀⣤⠆     ⣈⣭⣿⣶⣿⣦⣼⣆          ",
-    "    ⠉⠻⢿⣿⠿⣿⣿⣶⣦⠤⠄⡠⢾⣿⣿⡿⠋⠉⠉⠻⣿⣿⡛⣦       ",
-    "          ⠈⢿⣿⣟⠦ ⣾⣿⣿⣷     ⠻⠿⢿⣿⣧⣄     ",
-    "           ⣸⣿⣿⢧ ⢻⠻⣿⣿⣷⣄⣀⠄⠢⣀⡀⠈⠙⠿⠄    ",
-    "          ⢠⣿⣿⣿⠈    ⣻⣿⣿⣿⣿⣿⣿⣿⣛⣳⣤⣀⣀   ",
-    "   ⢠⣧⣶⣥⡤⢄ ⣸⣿⣿⠘  ⢀⣴⣿⣿⡿⠛⣿⣿⣧⠈⢿⠿⠟⠛⠻⠿⠄  ",
-    "  ⣰⣿⣿⠛⠻⣿⣿⡦⢹⣿⣷   ⢊⣿⣿⡏  ⢸⣿⣿⡇ ⢀⣠⣄⣾⠄   ",
-    " ⣠⣿⠿⠛ ⢀⣿⣿⣷⠘⢿⣿⣦⡀ ⢸⢿⣿⣿⣄ ⣸⣿⣿⡇⣪⣿⡿⠿⣿⣷⡄  ",
-    " ⠙⠃   ⣼⣿⡟  ⠈⠻⣿⣿⣦⣌⡇⠻⣿⣿⣷⣿⣿⣿ ⣿⣿⡇ ⠛⠻⢷⣄ ",
-    "      ⢻⣿⣿⣄   ⠈⠻⣿⣿⣿⣷⣿⣿⣿⣿⣿⡟ ⠫⢿⣿⡆     ",
-    "       ⠻⣿⣿⣿⣿⣶⣶⣾⣿⣿⣿⣿⣿⣿⣿⣿⡟⢀⣀⣤⣾⡿⠃     ",
-  ].join("\n");
-
   return (
     <div
       className={`${styles["pipboy-global"]} ${styles[color]} ${styles[browser]} ${isTouchDevice ? "touch-device" : ""}`}
@@ -279,6 +233,9 @@ const Pipboy: React.FC<PipboyProps> = ({
               </li>
               <li className={activeTab === "stats" ? styles.active : ""}>
                 <a onClick={handleTabChange("stats")}>Stats</a>
+              </li>
+              <li>
+                <a onClick={handleProjectsClick}>Projects</a>
               </li>
               <li className={activeTab === "quests" ? styles.active : ""}>
                 <a onClick={handleTabChange("quests")}>Skills</a>

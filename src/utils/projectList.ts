@@ -1,9 +1,9 @@
 // /utils/projects.ts
-import projectImagesData from '@/data/project-images.json';
+import projectImagesData from "@/data/project-images.json";
 
 // Define project categories
 export type ProjectCategory =
-  | "Enterprise/Production Apps"
+  | "Production Apps"
   | "Productivity Tools"
   | "Creative/Experimental"
   | "Client Projects";
@@ -33,29 +33,32 @@ export const projects: Project[] = [
     tags: ["Next.js", "Rust", "Nginx", "Redis"],
     category: "Productivity Tools",
     status: "Completed",
+    github: "https://github.com/kraitsura/md-pastebin",
     content:
       "High-performance markdown pastebin optimized for AI prompts. Rust/Actix backend delivers sub-20ms response times, Next.js frontend provides real-time markdown review, and Redis enables sliding-window TTL expiry. Containerized microservices architecture with Nginx reverse proxy, horizontal scaling, rate limiting, and production-ready security.",
   },
   {
     id: "atoms-tech",
-    title: "Atoms.tech",
+    title: "Atoms",
     description:
       "Requirements management dashboard for req engineers with AI workflows",
     images: projectImagesData["atoms-tech"],
     tags: ["Next.js", "Supabase", "Gumloop"],
-    category: "Enterprise/Production Apps",
+    category: "Client Projects",
     status: "Completed",
+    link: "https://atoms.tech",
     content:
       "Enterprise requirements management dashboard designed for requirements engineers. Integrates AI workflows via Gumloop to automate documentation tasks, analyze requirements consistency, and generate test scenarios. Built with Next.js and Supabase for a scalable, real-time collaborative environment.",
   },
   {
     id: "colosseum-tech",
-    title: "Colosseum.tech",
+    title: "Colosseum",
     description: "Sports CRM purpose built for client",
     images: projectImagesData["colosseum-tech"],
     tags: ["TanStack Start", "Convex", "Clerk", "S3", "Nylas", "Hono"],
-    category: "Enterprise/Production Apps",
-    status: "Completed",
+    category: "Production Apps",
+    status: "In Progress",
+    link: "https://thecolosseum.tech",
     content:
       "Custom-built CRM system tailored for sports organizations. Features include athlete management, scheduling, email integration via Nylas, file storage with S3, and authentication through Clerk. Built with modern stack using TanStack Start and Convex for real-time data synchronization.",
   },
@@ -68,6 +71,7 @@ export const projects: Project[] = [
     category: "Creative/Experimental",
     date: "2023-09-01",
     status: "Completed",
+    link: "https://films.kraitsura.com",
     github: "https://github.com/kraitsura/MovieHub",
     content:
       "A dynamic movie library website built with React. Browse, search, and discover movies with a clean and intuitive interface. Features movie details, ratings, and recommendations powered by external APIs.",
@@ -80,7 +84,7 @@ export const projects: Project[] = [
     tags: ["React", "FastAPI", "Nginx"],
     category: "Creative/Experimental",
     date: "2024-05-01",
-    status: "Completed",
+    status: "In Progress",
     github: "https://github.com/kraitsura/gameOfLife",
     content:
       "An advanced particle simulation system featuring multi-species interactions and emergent behaviors. Built with React for visualization and FastAPI backend for high-performance calculations. Watch as particles interact, reproduce, and evolve based on customizable rules.",
@@ -92,7 +96,8 @@ export const projects: Project[] = [
     images: projectImagesData["log-cli"],
     tags: ["Go", "Bubble Tea", "CLI"],
     category: "Productivity Tools",
-    status: "Completed",
+    status: "In Progress",
+    github: "https://github.com/kraitsura/log_cli",
     content:
       "A beautiful command-line day logging tool for personal accountability and reflection. Built with Go and Bubble Tea for an elegant terminal UI. Track daily activities, set goals, and review progress - all from your terminal.",
   },
@@ -103,7 +108,7 @@ export const projects: Project[] = [
     images: projectImagesData["glutton-cli"],
     tags: ["Go", "Bubble Tea", "CLI"],
     category: "Creative/Experimental",
-    status: "Completed",
+    status: "In Progress",
     content:
       "A quick and easy wishlist manager for the command line. Store items you want to buy, track prices, and organize your shopping lists. Built with Go and Bubble Tea for a smooth terminal experience.",
   },
@@ -126,6 +131,7 @@ export const projects: Project[] = [
     tags: ["Next.js"],
     category: "Client Projects",
     status: "Completed",
+    link: "https://wiinday.com",
     content:
       "Professional landing page designed and developed for Wiin, a nicotine pouch brand. Features modern design, smooth animations, product showcases, and optimized user experience. Built with Next.js for fast loading and SEO optimization.",
   },
@@ -136,7 +142,8 @@ export const projects: Project[] = [
     images: projectImagesData["conduit"],
     tags: ["React", "Tauri", "Rust"],
     category: "Productivity Tools",
-    status: "Completed",
+    status: "In Progress",
+    github: "https://github.com/kraitsura/conduit",
     content:
       "A desktop application for deep work sessions enhanced by AI workflows. Built with Tauri and React for a native experience with web technologies. Features AI-powered note-taking, task management, and focus tracking to help you achieve flow state.",
   },
@@ -147,20 +154,29 @@ export const projects: Project[] = [
     images: projectImagesData["grimoire"],
     tags: ["React", "Tauri", "Rust"],
     category: "Productivity Tools",
-    status: "Completed",
+    status: "In Progress",
     content:
       "A comprehensive library and workspace for organizing and managing AI prompts. Store, categorize, and quickly access your favorite prompts. Built as a desktop app with Tauri for speed and privacy, keeping your prompts local and secure.",
   },
   {
-    id: "event-chat",
-    title: "Event Chat",
-    description: "Group chat event planner with AI assistant",
-    images: projectImagesData["event-chat"],
-    tags: ["AI"],
-    category: "Creative/Experimental",
-    status: "Coming Soon",
+    id: "delphi",
+    title: "Delphi",
+    description: "Agentic Event Planning Group Chat",
+    images: projectImagesData["delphi"],
+    tags: [
+      "TanStack Start",
+      "Convex",
+      "Cloudflare Workers",
+      "Durable Objects",
+      "Firecrawl",
+      "AI",
+    ],
+    category: "Production Apps",
+    link: "https://delphi.kraitsura.com",
+    github: "https://github.com/kraitsura/delphi",
+    status: "In Progress",
     content:
-      "An innovative group chat application with an integrated AI assistant for event planning. Coordinate schedules, suggest venues, manage RSVPs, and plan events collaboratively with help from AI. Currently in development.",
+      "Agentic event planning platform with stateful agents running on Cloudflare Durable Objects. Features a fluid UI system that generates interfaces on-demand by agents, web search agents powered by Firecrawl for finding vendors and venues, and intelligent event coordination. Events are collections of group chats with collaborators, workers, and vendors/venues, where agents plan according to the conversation context.",
   },
   {
     id: "soccer-stats",
@@ -169,8 +185,8 @@ export const projects: Project[] = [
       "Soccer stats scraped and analyzed live with nice frontend displaying custom analysis",
     images: projectImagesData["soccer-stats"],
     tags: ["Data Science"],
-    category: "Enterprise/Production Apps",
-    status: "Coming Soon",
+    category: "Production Apps",
+    status: "In Progress",
     content:
       "Real-time soccer statistics scraper and analyzer with custom visualizations. Live data collection, advanced analytics, and beautiful charts to help understand player and team performance. Currently in development with plans for predictive modeling.",
   },
@@ -189,9 +205,7 @@ export const projects: Project[] = [
 
 // Group projects by category
 export const projectsByCategory: Record<ProjectCategory, Project[]> = {
-  "Enterprise/Production Apps": projects.filter(
-    (p) => p.category === "Enterprise/Production Apps",
-  ),
+  "Production Apps": projects.filter((p) => p.category === "Production Apps"),
   "Productivity Tools": projects.filter(
     (p) => p.category === "Productivity Tools",
   ),
@@ -203,7 +217,7 @@ export const projectsByCategory: Record<ProjectCategory, Project[]> = {
 
 // Order of categories for display
 export const categoryOrder: ProjectCategory[] = [
-  "Enterprise/Production Apps",
+  "Production Apps",
   "Productivity Tools",
   "Creative/Experimental",
   "Client Projects",

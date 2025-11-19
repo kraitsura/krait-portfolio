@@ -1,13 +1,9 @@
 import React from "react";
-import IntroPage from "@/components/custom/IntroPage";
+import StartSh from "@/components/custom/StartSh";
 
-const Home: React.FC = () => {
-  return (
-    <>
-      <IntroPage image="/gifs/skyscrape.webm" />
-    </>
-  );
+const SplashPage: React.FC = () => {
+  return <StartSh />;
 };
 
-export default Home;
+export default SplashPage;
 

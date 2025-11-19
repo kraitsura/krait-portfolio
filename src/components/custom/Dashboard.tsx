@@ -1,12 +1,9 @@
 "use client";
 
 import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
-import { RocketScene } from "../three/RocketScene";
+import type { RocketScene } from "../three/RocketScene";
 import { Github, Linkedin, Twitter } from "lucide-react";
-import { Roboto_Mono } from "next/font/google";
 import { useTouchDevice } from "@/contexts/TouchContext";
-
-const robotoMono = Roboto_Mono({ subsets: ["latin"] });
 
 interface SocialLink {
   name: string;
@@ -50,9 +47,22 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isVisible = true }) =>
     setIsLaunching(true);
     console.log("Initiating launch sequence...");
 
+    // Create a hidden anchor element immediately (during user interaction)
+    // This maintains the user interaction chain for pop-up blockers
+    const link = document.createElement('a');
+    link.href = url;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.style.display = 'none';
+    document.body.appendChild(link);
+
     sceneRef.current.shootOff(() => {
-      // After animation completes, navigate
-      window.open(url, "_blank");
+      // After animation completes, trigger the link
+      link.click();
+
+      // Clean up the temporary link element
+      document.body.removeChild(link);
+
       // Reset after a delay
       setTimeout(() => {
         setIsLaunching(false);
@@ -70,8 +80,15 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isVisible = true }) =>
       return;
     }
 
-    // Initialize the rocket scene
-    sceneRef.current = new RocketScene(containerRef.current);
+    let mounted = true;
+
+    // Dynamically import RocketScene to code-split Three.js
+    import("../three/RocketScene").then(({ RocketScene }) => {
+      if (!mounted || !containerRef.current) return;
+
+      // Initialize the rocket scene
+      sceneRef.current = new RocketScene(containerRef.current);
+    });
 
     // Handle window resize
     const handleResize = () => {
@@ -85,6 +102,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isVisible = true }) =>
 
     // Cleanup
     return () => {
+      mounted = false;
       window.removeEventListener("resize", handleResize);
       sceneRef.current?.dispose();
       if (container) {
@@ -133,7 +151,7 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isVisible = true }) =>
   }), []);
 
   return (
-    <main className={`min-h-screen overflow-hidden ${robotoMono.className}`}>
+    <main className="min-h-screen overflow-hidden font-mono">
       {/* Three.js container - Background */}
       <div
         ref={containerRef}

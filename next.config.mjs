@@ -17,6 +17,16 @@ const nextConfig = {
         includePaths: [join(__dirname, 'styles')],
         modules: true,
     },
+    // Performance optimizations
+    experimental: {
+        // Optimize imports for better tree-shaking
+        optimizePackageImports: ['lucide-react', 'three', 'framer-motion'],
+    },
+    // Compiler optimizations
+    compiler: {
+        // Remove console.log in production
+        removeConsole: process.env.NODE_ENV === 'production',
+    },
 }
 
 export default nextConfig;
