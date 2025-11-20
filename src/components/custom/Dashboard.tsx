@@ -142,9 +142,9 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isVisible = true }) =>
   }, [selectedIndex, isLaunching, isVisible, handleLaunch, socialLinks]);
 
   const buttonStyle = useMemo(() => ({
-    pointerEvents: 'auto' as const,
+    pointerEvents: (isVisible ? 'auto' : 'none') as React.CSSProperties['pointerEvents'],
     color: 'var(--theme-primary)'
-  }), []);
+  }), [isVisible]);
 
   const textStyle = useMemo(() => ({
     color: 'var(--theme-primary)'
@@ -163,7 +163,10 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isVisible = true }) =>
       />
 
       {/* Social Navigation - Centered */}
-      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
+      <div
+        className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50"
+        style={{ pointerEvents: isVisible ? 'auto' : 'none' }}
+      >
         <div className="flex flex-col items-center gap-6">
           {/* Social buttons */}
           <div className="flex items-center justify-center gap-8 sm:gap-12">

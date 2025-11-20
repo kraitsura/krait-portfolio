@@ -13,6 +13,8 @@ import Image from "next/image";
 import styles from "@/styles/fadeIn.module.css";
 import Pipboy from "@/components/custom/Pipboy";
 import { useTouchDevice } from "@/contexts/TouchContext";
+import { isSafari, getVideoFormat, getVideoMimeType } from "@/utils/browser";
+import { videoPreloader } from "@/utils/videoPreloader";
 import ErrorBoundary from "@/components/ErrorBoundary";
 
 const Dashboard = lazy(() => import("./Dashboard"));
@@ -78,8 +80,10 @@ const IntroPage: React.FC<IntroPageProps> = ({ image }) => {
   const [mediaLoaded, setMediaLoaded] = useState(false);
   const [mediaVisible, setMediaVisible] = useState(false);
   const [uiVisible, setUiVisible] = useState(false);
+  const [useTransplantedVideo, setUseTransplantedVideo] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const videoContainerRef = useRef<HTMLDivElement>(null);
 
   // Detect if the image is a video file
   const isVideo = useMemo(() => {
@@ -87,19 +91,45 @@ const IntroPage: React.FC<IntroPageProps> = ({ image }) => {
     return ext === "mp4" || ext === "webm";
   }, [image]);
 
+  // Use correct video format based on browser
+  const actualVideoPath = useMemo(() => {
+    if (!isVideo) return image;
+    // Use MP4 for Safari, keep original for others
+    return isSafari() ? getVideoFormat(image) : image;
+  }, [image, isVideo]);
+
   // Get video MIME type
   const videoType = useMemo(() => {
-    if (image.endsWith(".mp4")) return "video/mp4";
-    if (image.endsWith(".webm")) return "video/webm";
-    return "video/mp4";
-  }, [image]);
+    return getVideoMimeType(actualVideoPath);
+  }, [actualVideoPath]);
+
+  // Use preloaded video if available
+  const videoSrc = useMemo(() => {
+    // Try to get cached blob URL from the preloader service
+    const cachedUrl = videoPreloader.getCachedUrl(image);
+    return cachedUrl || actualVideoPath;
+  }, [image, actualVideoPath]);
 
   // Handler for when media is ready to display
   const handleMediaLoaded = useCallback(() => {
     if (!mediaLoaded) {
-      setMediaLoaded(true);
+      // Double requestAnimationFrame ensures the browser has painted the first frame
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setMediaLoaded(true);
+        });
+      });
     }
   }, [mediaLoaded]);
+
+  // Handler for video loading errors
+  const handleVideoError = useCallback(() => {
+    // If video fails to load, show content anyway after a delay
+    setTimeout(() => {
+      setMediaLoaded(true);
+      setMediaVisible(true);
+    }, 500);
+  }, []);
 
   // Loading sequence: media loads → media fades in → UI fades in
   useEffect(() => {
@@ -108,10 +138,10 @@ const IntroPage: React.FC<IntroPageProps> = ({ image }) => {
     // Start media fade-in immediately
     setMediaVisible(true);
 
-    // After media transition completes, show UI
+    // Wait longer before showing UI to ensure video is visible first
     const uiTimer = setTimeout(() => {
       setUiVisible(true);
-    }, 800);
+    }, 1200); // Increased to ensure video is fully visible before UI
 
     return () => clearTimeout(uiTimer);
   }, [mediaLoaded]);
@@ -120,24 +150,53 @@ const IntroPage: React.FC<IntroPageProps> = ({ image }) => {
   useEffect(() => {
     if (mediaLoaded) return;
 
-    // Poll every 50ms to check if video is ready
-    const pollInterval = setInterval(() => {
-      if (videoRef.current && videoRef.current.readyState >= 3) {
-        setMediaLoaded(true);
-        clearInterval(pollInterval);
-      }
-    }, 50);
+    // Check immediately if we have a cached video
+    if (videoPreloader.getCachedUrl(image)) {
+      // We have a cached blob URL, mark as loaded immediately
+      handleMediaLoaded();
+      return;
+    }
 
-    // Fallback: if video takes too long, show anyway after 4s
+    let pollInterval: NodeJS.Timeout | undefined;
+
+    // For Safari, rely more on events than polling
+    if (isSafari() && videoRef.current) {
+      // Set up event listeners for Safari
+      const handleCanPlay = () => {
+        handleMediaLoaded();
+        if (pollInterval) clearInterval(pollInterval);
+      };
+
+      videoRef.current.addEventListener('canplaythrough', handleCanPlay, { once: true });
+
+      // Still poll but less frequently for Safari
+      pollInterval = setInterval(() => {
+        if (videoRef.current && videoRef.current.readyState >= 3) {
+          handleMediaLoaded();
+          clearInterval(pollInterval);
+        }
+      }, 50); // Less frequent polling for Safari
+    } else {
+      // Chrome/Firefox: use more aggressive polling
+      pollInterval = setInterval(() => {
+        if (videoRef.current && videoRef.current.readyState === 4) {
+          // HAVE_ENOUGH_DATA
+          handleMediaLoaded();
+          clearInterval(pollInterval);
+        }
+      }, 25);
+    }
+
+    // Fallback: if video takes too long, show anyway after 1s (reduced further)
     const fallbackTimer = setTimeout(() => {
-      setMediaLoaded(true);
-    }, 4000);
+      handleMediaLoaded();
+    }, 1000);
 
     return () => {
-      clearInterval(pollInterval);
+      if (pollInterval) clearInterval(pollInterval);
       clearTimeout(fallbackTimer);
     };
-  }, [mediaLoaded]);
+  }, [mediaLoaded, image, handleMediaLoaded]);
 
   const handleScroll = useCallback(() => {
     if (containerRef.current) {
@@ -220,10 +279,62 @@ const IntroPage: React.FC<IntroPageProps> = ({ image }) => {
     [scrollState.percentage],
   );
 
+  // Remove loading state when component mounts
+  useEffect(() => {
+    document.body.removeAttribute('data-loading');
+  }, []);
+
+  // Transplant preloaded video element if available (not for Safari)
+  useEffect(() => {
+    if (!isVideo || !videoContainerRef.current) return;
+
+    // Safari has issues with video element transplanting - skip for Safari
+    if (isSafari()) {
+      return;
+    }
+
+    const preloadedVideo = (window as any).__preloadedVideoElement;
+    if (preloadedVideo && preloadedVideo.parentNode) {
+      // Found a preloaded video element, transplant it
+
+      // Remove from current location
+      preloadedVideo.remove();
+
+      // Reset styles for proper display
+      preloadedVideo.style.position = '';
+      preloadedVideo.style.left = '';
+      preloadedVideo.style.width = '100%';
+      preloadedVideo.style.height = '100%';
+      preloadedVideo.style.opacity = '';
+      preloadedVideo.style.pointerEvents = '';
+      preloadedVideo.className = 'w-full h-full object-cover';
+      preloadedVideo.style.objectFit = 'cover';
+
+      // Add event handlers
+      preloadedVideo.onloadeddata = handleMediaLoaded;
+      preloadedVideo.oncanplaythrough = handleMediaLoaded;
+
+      // Append to our container
+      videoContainerRef.current.appendChild(preloadedVideo);
+
+      // Store reference - type assertion needed since we're manually managing the video element
+      (videoRef as React.MutableRefObject<HTMLVideoElement | null>).current = preloadedVideo;
+      setUseTransplantedVideo(true);
+
+      // If video is already ready, trigger loaded immediately
+      if (preloadedVideo.readyState === 4) {
+        handleMediaLoaded();
+      }
+
+      // Clear the global reference
+      delete (window as any).__preloadedVideoElement;
+    }
+  }, [isVideo, handleMediaLoaded]);
+
   return (
     <div
       ref={containerRef}
-      className="h-screen w-full overflow-y-scroll relative bg-black text-white"
+      className="intro-container h-screen w-full overflow-y-scroll relative bg-black text-white"
     >
         {/* Loading overlay - covers everything until video is ready */}
         <div
@@ -233,22 +344,31 @@ const IntroPage: React.FC<IntroPageProps> = ({ image }) => {
         />
 
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute inset-0">
+          <div className={`absolute inset-0 transition-opacity duration-1500 ease-out ${
+            mediaVisible ? "opacity-100" : "opacity-0"
+          }`}>
             {isVideo ? (
-              <video
-                ref={videoRef}
-                autoPlay
-                loop
-                muted
-                playsInline
-                preload="auto"
-                onLoadedData={handleMediaLoaded}
-                onCanPlayThrough={handleMediaLoaded}
-                className="w-full h-full object-cover"
-                style={{ objectFit: "cover" }}
-              >
-                <source src={image} type={videoType} />
-              </video>
+              useTransplantedVideo ? (
+                // Container for transplanted video
+                <div ref={videoContainerRef} className="w-full h-full" />
+              ) : (
+                // Regular video element
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  preload="auto"
+                  onLoadedData={handleMediaLoaded}
+                  onCanPlayThrough={handleMediaLoaded}
+                  onError={handleVideoError}
+                  className="w-full h-full object-cover"
+                  style={{ objectFit: "cover" }}
+                >
+                  <source src={videoSrc} type={videoType} />
+                </video>
+              )
             ) : (
               <Image
                 src={image}
@@ -270,7 +390,7 @@ const IntroPage: React.FC<IntroPageProps> = ({ image }) => {
         <div className="min-h-[200vh] relative z-10">
           <div className="h-screen flex items-center justify-center">
             <div
-              className={`h-full w-full flex flex-col items-center justify-center gap-8 transition-all duration-700 ease-out ${
+              className={`ui-content h-full w-full flex flex-col items-center justify-center gap-8 transition-all duration-700 ease-out ${
                 uiVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
               }`}
             >
@@ -303,8 +423,8 @@ const IntroPage: React.FC<IntroPageProps> = ({ image }) => {
             </div>
           </div>
           <div
-            className={`transition-all duration-1000 pointer-events-none ${
-              isFullyDarkened ? "opacity-100" : "opacity-0"
+            className={`transition-all duration-1000 ${
+              isFullyDarkened ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
             }`}
           >
             <div className={styles.pipboyContainer}>
@@ -334,6 +454,7 @@ const IntroPage: React.FC<IntroPageProps> = ({ image }) => {
             </div>
           </div>
         </div>
+
     </div>
   );
 };

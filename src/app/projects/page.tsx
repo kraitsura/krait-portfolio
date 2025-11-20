@@ -69,26 +69,37 @@ const Projects: React.FC = () => {
     return 0;
   }, []);
 
-  // Keyboard navigation: k/j (prev/next project), h/l (prev/next section), Enter (open)
+  // Keyboard navigation: j/k/arrows (prev/next project), h/l/arrows (prev/next section), Enter (open), Backspace (back to home)
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       const sectionStarts = getSectionStartIndices();
 
-      if (event.key === 'j') {
+      if (event.key === 'Backspace') {
+        // Navigate back to home, prevent default only if not in an input/textarea
+        const target = event.target as HTMLElement;
+        if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA' && !target.isContentEditable) {
+          event.preventDefault();
+          router.push('/home');
+        }
+      } else if (event.key === 'j' || event.key === 'ArrowDown') {
         // Next project
+        event.preventDefault();
         setHighlightedIndex((prev) => (prev + 1) % allProjects.length);
-      } else if (event.key === 'k') {
+      } else if (event.key === 'k' || event.key === 'ArrowUp') {
         // Previous project
+        event.preventDefault();
         setHighlightedIndex((prev) =>
           prev === 0 ? allProjects.length - 1 : prev - 1
         );
-      } else if (event.key === 'l') {
+      } else if (event.key === 'l' || event.key === 'ArrowRight') {
         // Next section (jump to first project of next category)
+        event.preventDefault();
         const currentSection = getSectionForIndex(highlightedIndex);
         const nextSection = (currentSection + 1) % sectionStarts.length;
         setHighlightedIndex(sectionStarts[nextSection]);
-      } else if (event.key === 'h') {
+      } else if (event.key === 'h' || event.key === 'ArrowLeft') {
         // Previous section (jump to first project of previous category)
+        event.preventDefault();
         const currentSection = getSectionForIndex(highlightedIndex);
         const prevSection = currentSection === 0 ? sectionStarts.length - 1 : currentSection - 1;
         setHighlightedIndex(sectionStarts[prevSection]);
@@ -103,7 +114,7 @@ const Projects: React.FC = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [allProjects, getSectionForIndex, handleProjectClick, highlightedIndex]);
+  }, [allProjects, getSectionForIndex, handleProjectClick, highlightedIndex, router]);
 
   // Auto-scroll to highlighted project
   useEffect(() => {
@@ -157,16 +168,20 @@ const Projects: React.FC = () => {
           className="keystroke-info-projects"
         >
           <div className="keystroke-item">
-            <kbd>k/j</kbd>
+            <kbd>j/k/↑↓</kbd>
             <span>project</span>
           </div>
           <div className="keystroke-item">
-            <kbd>h/l</kbd>
+            <kbd>h/l/←→</kbd>
             <span>section</span>
           </div>
           <div className="keystroke-item">
             <kbd>↵</kbd>
             <span>open</span>
+          </div>
+          <div className="keystroke-item">
+            <kbd>⌫</kbd>
+            <span>back</span>
           </div>
         </motion.div>
       )}

@@ -6,4 +6,3 @@ const SplashPage: React.FC = () => {
 };
 
 export default SplashPage;
-

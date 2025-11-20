@@ -21,6 +21,8 @@ const nextConfig = {
     experimental: {
         // Optimize imports for better tree-shaking
         optimizePackageImports: ['lucide-react', 'three', 'framer-motion'],
+        // Enable React Compiler for automatic optimization
+        reactCompiler: true,
     },
     // Compiler optimizations
     compiler: {

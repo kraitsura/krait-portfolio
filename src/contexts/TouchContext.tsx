@@ -13,8 +13,11 @@ export function TouchProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Check if device has coarse pointer (touch)
-    const hasTouchCapability = window.matchMedia('(pointer: coarse)').matches;
-    setIsTouchDevice(hasTouchCapability);
+    // Guard for SSR - only run on client
+    if (typeof window !== 'undefined') {
+      const hasTouchCapability = window.matchMedia('(pointer: coarse)').matches;
+      setIsTouchDevice(hasTouchCapability);
+    }
   }, []);
 
   return (

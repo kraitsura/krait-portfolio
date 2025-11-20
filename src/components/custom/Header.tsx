@@ -130,6 +130,7 @@ const Header: React.FC = React.memo(() => {
         {/* Brutalist button on the left */}
         <div className="w-auto sm:w-[200px]">
           <button
+            suppressHydrationWarning
             onClick={handleSummarizeClick}
             onMouseEnter={handleSummarizeHover}
             className={`w-full px-3 py-1 sm:px-4 sm:py-1.5 font-bold text-black transition-all duration-150 hover:translate-x-[3px] hover:translate-y-[3px] active:translate-x-0 active:translate-y-0 active:shadow-none tracking-tight text-xs sm:text-sm ${
@@ -158,8 +159,9 @@ const Header: React.FC = React.memo(() => {
             {navItems.map((item, index) => {
               const hoverColor = navHoverColors[index];
               return (
-                <li key={item.href}>
+                <li key={item.href} suppressHydrationWarning>
                   <Link
+                    suppressHydrationWarning
                     href={item.href}
                     onClick={handleLinkClick(index)}
                     onMouseEnter={() => handleNavHover(index)}

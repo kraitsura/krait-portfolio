@@ -2,6 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Critical: Hide content during navigation to prevent flash */
+body[data-loading="true"] * {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+body[data-loading="true"] {
+  background: black !important;
+}
+
+/* Ensure video loading state is respected */
+.intro-container[data-video-loading="true"] .ui-content {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
 :root {
     /* Theme Colors */
     --theme-primary: #d4af37;
@@ -213,35 +230,17 @@ body {
     opacity: 0 !important;
 }
 
-/* Corner Pulse Animation - More Dramatic */
-@keyframes cornerPulse {
+/* Subtle Oriental Corner Bracket Fade */
+@keyframes orientalFade {
     0%, 100% {
-        opacity: 0.5;
-        filter: drop-shadow(0 0 6px rgba(220, 38, 38, 0.5)) drop-shadow(0 0 10px rgba(220, 38, 38, 0.4));
+        opacity: 0.6;
     }
     50% {
         opacity: 1;
-        filter: drop-shadow(0 0 12px rgba(220, 38, 38, 0.9)) drop-shadow(0 0 20px rgba(220, 38, 38, 0.7));
     }
 }
 
-/* Glow Pulse Animation */
-@keyframes glowPulse {
-    0%, 100% {
-        box-shadow:
-            0 0 8px 2px rgba(220, 38, 38, 0.3),
-            0 0 16px 4px rgba(220, 38, 38, 0.2),
-            0 0 24px rgba(220, 38, 38, 0.1);
-    }
-    50% {
-        box-shadow:
-            0 0 12px 3px rgba(220, 38, 38, 0.6),
-            0 0 24px 6px rgba(220, 38, 38, 0.4),
-            0 0 36px rgba(220, 38, 38, 0.3);
-    }
-}
-
-/* Brutalist Highlight Border for Keyboard Navigation */
+/* Oriental Corner Brackets - Minimal & Sleek */
 .project-card-highlighted {
     position: relative;
 }
@@ -251,17 +250,17 @@ body {
     position: absolute;
     inset: -12px;
     background:
-        linear-gradient(to right, #DC2626, #DC2626) top left,
-        linear-gradient(to bottom, #DC2626, #DC2626) top left,
-        linear-gradient(to left, #DC2626, #DC2626) top right,
-        linear-gradient(to bottom, #DC2626, #DC2626) top right,
-        linear-gradient(to right, #DC2626, #DC2626) bottom left,
-        linear-gradient(to top, #DC2626, #DC2626) bottom left,
-        linear-gradient(to left, #DC2626, #DC2626) bottom right,
-        linear-gradient(to top, #DC2626, #DC2626) bottom right;
-    background-size: 35px 10px, 10px 35px, 35px 10px, 10px 35px, 35px 10px, 10px 35px, 35px 10px, 10px 35px;
+        linear-gradient(to right, var(--theme-primary), var(--theme-primary)) top left,
+        linear-gradient(to bottom, var(--theme-primary), var(--theme-primary)) top left,
+        linear-gradient(to left, var(--theme-primary), var(--theme-primary)) top right,
+        linear-gradient(to bottom, var(--theme-primary), var(--theme-primary)) top right,
+        linear-gradient(to right, var(--theme-primary), var(--theme-primary)) bottom left,
+        linear-gradient(to top, var(--theme-primary), var(--theme-primary)) bottom left,
+        linear-gradient(to left, var(--theme-primary), var(--theme-primary)) bottom right,
+        linear-gradient(to top, var(--theme-primary), var(--theme-primary)) bottom right;
+    background-size: 20px 1.5px, 1.5px 20px, 20px 1.5px, 1.5px 20px, 20px 1.5px, 1.5px 20px, 20px 1.5px, 1.5px 20px;
     background-repeat: no-repeat;
-    animation: cornerPulse 0.6s steps(4) infinite 0.2s;
+    animation: orientalFade 2s ease-in-out infinite;
     opacity: 0;
     animation-fill-mode: forwards;
     pointer-events: none;
@@ -439,4 +438,19 @@ body {
     animation: subtle-pulse 2s ease-in-out infinite;
     border: 1px solid rgba(var(--theme-primary-rgb), 0.3);
     border-radius: 4px;
+}
+
+/* Retro Game Style Flashing Text */
+@keyframes retro-flash {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
+}
+
+.retro-flash-text {
+    animation: retro-flash 1.2s steps(2, jump-none) infinite;
+    font-family: 'Roboto Mono', monospace;
 }

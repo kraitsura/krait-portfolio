@@ -85,7 +85,7 @@ const Pipboy: React.FC<PipboyProps> = ({
       if (e.shiftKey) return;
 
       const scrollAmount = 50;
-      const tabs = ["items", "stats", "quests", "misc"];
+      const tabs = ["items", "stats", "projects", "quests", "misc"];
       const currentIndex = tabs.indexOf(activeTab);
 
       // Settings tab - j/k for navigation, Enter to select
@@ -101,6 +101,13 @@ const Pipboy: React.FC<PipboyProps> = ({
         } else if (e.key === "Enter") {
           e.preventDefault();
           setColor(colorOptions[selectedColorIndex] as ThemeColor);
+        }
+      }
+      // Projects tab - Enter to navigate
+      else if (activeTab === "projects") {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          router.push("/projects");
         }
       }
       // Other tabs - j/k for scrolling
@@ -150,7 +157,7 @@ const Pipboy: React.FC<PipboyProps> = ({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isActive, activeTab, selectedColorIndex, colorOptions, setColor]);
+  }, [isActive, activeTab, selectedColorIndex, colorOptions, setColor, router]);
 
   const handleColorChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -214,6 +221,8 @@ const Pipboy: React.FC<PipboyProps> = ({
         return "h/l: Tabs | j/k: Scroll";
       case "misc":
         return "h/l: Tabs | j/k: Nav | ⏎: Select";
+      case "projects":
+        return "h/l: Tabs | ⏎: Open";
       default:
         return "h/l: Tabs";
     }
@@ -234,7 +243,7 @@ const Pipboy: React.FC<PipboyProps> = ({
               <li className={activeTab === "stats" ? styles.active : ""}>
                 <a onClick={handleTabChange("stats")}>Stats</a>
               </li>
-              <li>
+              <li className={activeTab === "projects" ? styles.active : ""}>
                 <a onClick={handleProjectsClick}>Projects</a>
               </li>
               <li className={activeTab === "quests" ? styles.active : ""}>
@@ -394,16 +403,6 @@ const Pipboy: React.FC<PipboyProps> = ({
                                 <div className={styles["skill-name"]}>
                                   {skill.name}
                                 </div>
-                                <div className={styles["skill-progress-bar"]}>
-                                  <div
-                                    className={styles["skill-progress-fill"]}
-                                    style={
-                                      {
-                                        "--progress": `${skill.percentage}%`,
-                                      } as React.CSSProperties
-                                    }
-                                  />
-                                </div>
                               </div>
                             </li>
                           );
@@ -420,16 +419,6 @@ const Pipboy: React.FC<PipboyProps> = ({
                               <div className={styles["skill-card"]}>
                                 <div className={styles["skill-name"]}>
                                   {skill.name}
-                                </div>
-                                <div className={styles["skill-progress-bar"]}>
-                                  <div
-                                    className={styles["skill-progress-fill"]}
-                                    style={
-                                      {
-                                        "--progress": `${skill.percentage}%`,
-                                      } as React.CSSProperties
-                                    }
-                                  />
                                 </div>
                               </div>
                             </li>
@@ -448,16 +437,6 @@ const Pipboy: React.FC<PipboyProps> = ({
                                 <div className={styles["skill-name"]}>
                                   {skill.name}
                                 </div>
-                                <div className={styles["skill-progress-bar"]}>
-                                  <div
-                                    className={styles["skill-progress-fill"]}
-                                    style={
-                                      {
-                                        "--progress": `${skill.percentage}%`,
-                                      } as React.CSSProperties
-                                    }
-                                  />
-                                </div>
                               </div>
                             </li>
                           );
@@ -475,16 +454,6 @@ const Pipboy: React.FC<PipboyProps> = ({
                                 <div className={styles["skill-name"]}>
                                   {skill.name}
                                 </div>
-                                <div className={styles["skill-progress-bar"]}>
-                                  <div
-                                    className={styles["skill-progress-fill"]}
-                                    style={
-                                      {
-                                        "--progress": `${skill.percentage}%`,
-                                      } as React.CSSProperties
-                                    }
-                                  />
-                                </div>
                               </div>
                             </li>
                           );
@@ -501,16 +470,6 @@ const Pipboy: React.FC<PipboyProps> = ({
                               <div className={styles["skill-card"]}>
                                 <div className={styles["skill-name"]}>
                                   {skill.name}
-                                </div>
-                                <div className={styles["skill-progress-bar"]}>
-                                  <div
-                                    className={styles["skill-progress-fill"]}
-                                    style={
-                                      {
-                                        "--progress": `${skill.percentage}%`,
-                                      } as React.CSSProperties
-                                    }
-                                  />
                                 </div>
                               </div>
                             </li>
@@ -550,6 +509,37 @@ const Pipboy: React.FC<PipboyProps> = ({
                           </label>
                         </React.Fragment>
                       ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Projects Tab */}
+              {activeTab === "projects" && (
+                <div id="projects">
+                  <h3 className={styles["pip-title"]}>Projects</h3>
+                  <div className={styles["pip-body"]}>
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      height: '200px',
+                      gap: '24px'
+                    }}>
+                      <p style={{ opacity: 0.7, fontSize: '14px' }}>
+                        View all projects
+                      </p>
+                      <span
+                        className="retro-flash-text"
+                        style={{
+                          fontSize: '12px',
+                          letterSpacing: '2px',
+                          textTransform: 'uppercase'
+                        }}
+                      >
+                        press enter
+                      </span>
                     </div>
                   </div>
                 </div>

@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, Suspense } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { useTouchDevice } from "@/contexts/TouchContext";
+import { videoPreloader } from "@/utils/videoPreloader";
 
 // Dynamically import ParticlesBackground to code-split Three.js (~150KB)
 const ParticlesBackground = dynamic(
@@ -16,30 +17,11 @@ const ParticlesBackground = dynamic(
   }
 );
 
-interface WeatherData {
-  city: string;
-  temp: number;
-  description: string;
-  time: string;
-}
 
 const StartSh: React.FC = () => {
   const { isTouchDevice } = useTouchDevice();
   const router = useRouter();
   const [started, setStarted] = useState(false);
-  const [currentInfo, setCurrentInfo] = useState("");
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [displayedText, setDisplayedText] = useState("");
-  // Initialize with date immediately for instant display
-  const [infoItems, setInfoItems] = useState<string[]>(() => {
-    const today = new Date();
-    return [today.toLocaleDateString("en-US", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    })];
-  });
   const [showKeystroke, setShowKeystroke] = useState(false);
   const [shadowColor, setShadowColor] = useState('#ff0000');
 
@@ -48,16 +30,12 @@ const StartSh: React.FC = () => {
   const [sceneVisible, setSceneVisible] = useState(false);
   const [terminalVisible, setTerminalVisible] = useState(false);
 
-  // Preload home page video for instant loading on navigation
+  // Preload home page video and route for instant navigation
   useEffect(() => {
-    const video = document.createElement('video');
-    video.preload = 'auto';
-    video.muted = true;
-    video.src = '/gifs/skyscrape.webm';
-    // Start loading the video
-    video.load();
+    // Preload video using centralized service
+    videoPreloader.preloadVideo('/gifs/skyscrape.webm');
 
-    // Also prefetch the /home route
+    // Prefetch the /home route
     router.prefetch('/home');
   }, [router]);
 
@@ -80,21 +58,19 @@ const StartSh: React.FC = () => {
 
   // Handler for start.sh button
   const handleStartClick = useCallback(() => {
+    // Add loading state to prevent flash of content
+    document.body.setAttribute('data-loading', 'true');
     setStarted(true);
     router.push('/home');
   }, [router]);
 
   // Preload video on hover for faster loading
   const handleStartHover = useCallback(() => {
-    // Create video element and preload aggressively
-    const video = document.createElement('video');
-    video.preload = 'auto';
-    video.muted = true;
-    video.src = '/gifs/skyscrape.webm';
-    video.load();
-
-    // Also prefetch the route
+    // Immediately prefetch the route
     router.prefetch('/home');
+
+    // Trigger aggressive preloading
+    videoPreloader.aggressivePreload('/gifs/skyscrape.webm');
   }, [router]);
 
   // Handler for summarize.sh button
@@ -109,46 +85,12 @@ const StartSh: React.FC = () => {
     router.prefetch('/summarize');
   };
 
-  // Memoized navigation handlers
-  const goToNext = useCallback(() => {
-    setCurrentIndex((prev) => (prev + 1) % infoItems.length);
-    setCurrentInfo("");
-    setDisplayedText("");
-  }, [infoItems.length]);
-
-  const goToPrev = useCallback(() => {
-    setCurrentIndex((prev) => (prev - 1 + infoItems.length) % infoItems.length);
-    setCurrentInfo("");
-    setDisplayedText("");
-  }, [infoItems.length]);
 
   // Handler for when scene is ready
   const handleSceneReady = useCallback(() => {
     setSceneLoaded(true);
   }, []);
 
-  // Fetch weather data on mount (non-blocking - date already shown)
-  useEffect(() => {
-    const fetchWeatherData = async () => {
-      try {
-        const response = await fetch("/api/weather");
-        const data = await response.json();
-
-        // Add weather for each city to the existing date
-        if (data.weather && Array.isArray(data.weather)) {
-          const weatherItems = data.weather.map((weather: WeatherData) =>
-            `${weather.city}: ${weather.time}, ${weather.temp}°F, ${weather.description}`
-          );
-          setInfoItems(prev => [...prev, ...weatherItems]);
-        }
-      } catch (error) {
-        console.error("Failed to fetch weather:", error);
-        // Silently fail - date is already showing
-      }
-    };
-
-    fetchWeatherData();
-  }, []);
 
   // Loading sequence: scene loads → scene fades in → terminal fades in
   useEffect(() => {
@@ -165,31 +107,6 @@ const StartSh: React.FC = () => {
     return () => clearTimeout(terminalTimer);
   }, [sceneLoaded]);
 
-  useEffect(() => {
-    if (infoItems.length === 0) return;
-
-    const infoInterval = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % infoItems.length);
-      setCurrentInfo("");
-      setDisplayedText("");
-    }, 10000);
-    return () => clearInterval(infoInterval);
-  }, [infoItems]);
-
-  useEffect(() => {
-    if (infoItems.length > 0) {
-      setCurrentInfo(infoItems[currentIndex]);
-    }
-  }, [currentIndex, infoItems]);
-
-  useEffect(() => {
-    if (displayedText.length < currentInfo.length) {
-      const timer = setTimeout(() => {
-        setDisplayedText(currentInfo.slice(0, displayedText.length + 1));
-      }, 50);
-      return () => clearTimeout(timer);
-    }
-  }, [displayedText, currentInfo]);
 
   // Fade in keystroke info after a delay
   useEffect(() => {
@@ -204,21 +121,19 @@ const StartSh: React.FC = () => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (started) return; // Only work on intro screen
 
-      if (e.shiftKey && (e.key === "J" || e.key === "j")) {
+      if (e.key === "Enter") {
         e.preventDefault();
-        goToNext();
-      } else if (e.shiftKey && (e.key === "K" || e.key === "k")) {
-        e.preventDefault();
-        goToPrev();
-      } else if (e.key === "Enter") {
-        e.preventDefault();
-        handleStartClick();
+        if (e.shiftKey) {
+          handleSummarizeClick();
+        } else {
+          handleStartClick();
+        }
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [started, goToNext, goToPrev, handleStartClick]);
+  }, [started, handleStartClick, handleSummarizeClick]);
 
   return (
     <div
@@ -245,12 +160,6 @@ const StartSh: React.FC = () => {
         <h1 className="text-xl md:text-2xl font-bold mb-6 text-green-400">
           Welcome Home, spacecowboy
         </h1>
-        <div className="h-24 flex items-center justify-center mb-6">
-          <p className="text-base md:text-lg text-green-400">
-            $ echo &quot;{displayedText}
-            <span className="animate-pulse">_</span>&quot;
-          </p>
-        </div>
         <div className="flex justify-between items-end">
           <div className="flex flex-col gap-2 w-auto items-start">
             <button
@@ -286,7 +195,7 @@ const StartSh: React.FC = () => {
                   showKeystroke ? "opacity-60" : "opacity-0"
                 }`}
               >
-                ⇧J/⇧K: Info | ⏎: Start
+                ⏎: Start | ⇧⏎: Summarize
               </p>
             )}
           </div>

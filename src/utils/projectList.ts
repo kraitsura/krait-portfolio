@@ -108,7 +108,7 @@ export const projects: Project[] = [
     images: projectImagesData["glutton-cli"],
     tags: ["Go", "Bubble Tea", "CLI"],
     category: "Creative/Experimental",
-    status: "In Progress",
+    status: "Coming Soon",
     content:
       "A quick and easy wishlist manager for the command line. Store items you want to buy, track prices, and organize your shopping lists. Built with Go and Bubble Tea for a smooth terminal experience.",
   },
@@ -119,7 +119,7 @@ export const projects: Project[] = [
     images: projectImagesData["pomo-cli"],
     tags: ["Python", "CLI"],
     category: "Productivity Tools",
-    status: "Completed",
+    status: "Coming Soon",
     content:
       "My first ever CLI tool - a simple but effective Pomodoro timer built with Python. Helps maintain focus and productivity using the Pomodoro Technique with work sessions and breaks tracked right in your terminal.",
   },
@@ -154,7 +154,7 @@ export const projects: Project[] = [
     images: projectImagesData["grimoire"],
     tags: ["React", "Tauri", "Rust"],
     category: "Productivity Tools",
-    status: "In Progress",
+    status: "Coming Soon",
     content:
       "A comprehensive library and workspace for organizing and managing AI prompts. Store, categorize, and quickly access your favorite prompts. Built as a desktop app with Tauri for speed and privacy, keeping your prompts local and secure.",
   },
@@ -186,7 +186,7 @@ export const projects: Project[] = [
     images: projectImagesData["soccer-stats"],
     tags: ["Data Science"],
     category: "Production Apps",
-    status: "In Progress",
+    status: "Coming Soon",
     content:
       "Real-time soccer statistics scraper and analyzer with custom visualizations. Live data collection, advanced analytics, and beautiful charts to help understand player and team performance. Currently in development with plans for predictive modeling.",
   },

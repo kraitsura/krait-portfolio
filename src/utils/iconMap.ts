@@ -3,7 +3,8 @@
 import {
   Globe, Cpu, Brain, Leaf, BarChart, Recycle, Star, Database,
   Code2, Box, Wrench, Server, Zap, Shield, Cloud,
-  Layers, Terminal, Gamepad2, Coffee, Activity, Mail, Webhook
+  Layers, Terminal, Gamepad2, Coffee, Activity, Mail, Webhook,
+  Flame, Network, Search
 } from 'lucide-react';
 
 // Icon mapping for project tags
@@ -43,11 +44,14 @@ export const iconMap: { [key: string]: React.ElementType } = {
   // Infrastructure
   'Nginx': Server,
   'Tauri': Box,
+  'Cloudflare Workers': Cloud,
+  'Durable Objects': Network,
 
   // Auth & Services
   'Clerk': Shield,
   'Nylas': Mail,
   'Gumloop': Webhook,
+  'Firecrawl': Search,
 
   // CLI & Tools
   'Bubble Tea': Coffee,

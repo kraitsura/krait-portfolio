@@ -1,7 +1,6 @@
 'use client';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 
 interface VerticalCarouselProps {
@@ -12,6 +11,7 @@ interface VerticalCarouselProps {
 
 const VerticalCarousel: React.FC<VerticalCarouselProps> = React.memo(({ images, projectName, isTouchDevice = false }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
 
   const goToNext = useCallback(() => {
@@ -22,17 +22,26 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = React.memo(({ images, 
     setCurrentIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length);
   }, [images.length]);
 
-  // Handle swipe gestures
-  const handleDragEnd = (_: unknown, info: { offset: { y: number } }) => {
+  // Handle touch gestures
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.touches[0].clientY);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStart) return;
+
+    const touchEnd = e.changedTouches[0].clientY;
+    const diff = touchStart - touchEnd;
     const swipeThreshold = 50;
 
-    if (info.offset.y > swipeThreshold) {
-      // Swiped down -> go to previous
-      goToPrevious();
-    } else if (info.offset.y < -swipeThreshold) {
-      // Swiped up -> go to next
-      goToNext();
+    if (Math.abs(diff) > swipeThreshold) {
+      if (diff > 0) {
+        goToNext(); // Swiped up
+      } else {
+        goToPrevious(); // Swiped down
+      }
     }
+    setTouchStart(null);
   };
 
   // Vim-style navigation (j/k)
@@ -76,36 +85,48 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = React.memo(({ images, 
   }, [currentIndex, images]);
 
   return (
-    <div ref={carouselRef} className="relative w-full h-full flex items-center justify-center bg-gray-50">
+    <div
+      ref={carouselRef}
+      className="relative w-full h-full flex items-center justify-center bg-gray-50"
+      onTouchStart={isTouchDevice ? handleTouchStart : undefined}
+      onTouchEnd={isTouchDevice ? handleTouchEnd : undefined}
+    >
       {/* Main Image */}
       <div className="relative w-full h-full">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentIndex}
-            initial={{ y: 50, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -50, opacity: 0 }}
-            transition={{ duration: 0.3, ease: 'easeInOut' }}
-            className="absolute inset-0 flex items-center justify-center p-4 md:p-8"
-            // Enable drag only on touch devices
-            drag={isTouchDevice ? "y" : false}
-            dragConstraints={{ top: 0, bottom: 0 }}
-            dragElastic={0.2}
-            onDragEnd={handleDragEnd}
-          >
-            <div className="relative w-full h-full pointer-events-none">
-              <Image
-                src={images[currentIndex]}
-                alt={`${projectName} - Image ${currentIndex + 1}`}
-                fill
-                style={{ objectFit: 'contain' }}
-                priority={currentIndex === 0}
-                sizes="(max-width: 768px) 100vw, 90vw"
-                quality={90}
-              />
+        {images.map((img, idx) => {
+          const isVideo = img.endsWith('.webm') || img.endsWith('.mp4');
+          return (
+            <div
+              key={idx}
+              className={`absolute inset-0 flex items-center justify-center p-4 md:p-8 transition-opacity duration-300 ${
+                idx === currentIndex ? 'opacity-100' : 'opacity-0 pointer-events-none'
+              }`}
+            >
+              <div className="relative w-full h-full">
+                {isVideo ? (
+                  <video
+                    src={img}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full h-full object-contain"
+                  />
+                ) : (
+                  <Image
+                    src={img}
+                    alt={`${projectName} - Image ${idx + 1}`}
+                    fill
+                    style={{ objectFit: 'contain' }}
+                    priority={idx === 0}
+                    sizes="(max-width: 768px) 100vw, 90vw"
+                    quality={90}
+                  />
+                )}
+              </div>
             </div>
-          </motion.div>
-        </AnimatePresence>
+          );
+        })}
       </div>
 
       {/* Navigation Arrows - Sleek Floating */}
