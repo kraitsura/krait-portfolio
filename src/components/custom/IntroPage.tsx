@@ -293,7 +293,7 @@ const IntroPage: React.FC<IntroPageProps> = ({ image }) => {
       return;
     }
 
-    const preloadedVideo = (window as any).__preloadedVideoElement;
+    const preloadedVideo = (window as Window & { __preloadedVideoElement?: HTMLVideoElement }).__preloadedVideoElement;
     if (preloadedVideo && preloadedVideo.parentNode) {
       // Found a preloaded video element, transplant it
 
@@ -327,7 +327,7 @@ const IntroPage: React.FC<IntroPageProps> = ({ image }) => {
       }
 
       // Clear the global reference
-      delete (window as any).__preloadedVideoElement;
+      delete (window as Window & { __preloadedVideoElement?: HTMLVideoElement }).__preloadedVideoElement;
     }
   }, [isVideo, handleMediaLoaded]);
 

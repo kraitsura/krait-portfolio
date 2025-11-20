@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import ProjectsIndex from "@/components/custom/ProjectsIndex";
 import SocialsIndex from "@/components/custom/SocialsIndex";
@@ -14,7 +14,9 @@ const socialLinks = [
   { name: "x", url: "https://x.com/kraitsura" },
 ];
 
-export default function SummarizePage() {
+const tabs: TabType[] = ["about", "projects", "socials"];
+
+function SummarizeContent() {
   const [isVisible, setIsVisible] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -26,8 +28,6 @@ export default function SummarizePage() {
   const initialTab: TabType =
     tabParam === "projects" || tabParam === "socials" ? tabParam : "about";
   const [activeTab, setActiveTab] = useState<TabType>(initialTab);
-
-  const tabs: TabType[] = ["about", "projects", "socials"];
 
   // Reset selected index when tab changes
   useEffect(() => {
@@ -159,7 +159,7 @@ export default function SummarizePage() {
                   I build software that feels good to use, from agentic event
                   planning systems to high-performance tools that respond in
                   under 20ms. Most of my time goes into production apps like
-                  Colosseum (an agentic CRM I'm building with TanStack Start)
+                  Colosseum (an agentic CRM I&apos;m building with TanStack Start)
                   and Delphi (group chat event coordination with stateful agents
                   over Cloudflare Durable Objects).
                 </p>
@@ -168,8 +168,8 @@ export default function SummarizePage() {
                   I also make tools I actually use: CLIs for day logging and
                   deep work tracking, desktop apps for AI workflows, and
                   utilities like pastebins. I like projects where performance
-                  matters, where the interface disappears, and where I'm solving
-                  problems I have myself. Right now I'm particularly interested
+                  matters, where the interface disappears, and where I&apos;m solving
+                  problems I have myself. Right now I&apos;m particularly interested
                   in agentic systems, real-time data processing, and tinkering
                   on the next generation frontend interface for the age of
                   intelligence.
@@ -224,5 +224,13 @@ export default function SummarizePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SummarizePage() {
+  return (
+    <Suspense fallback={<div className="h-screen overflow-hidden bg-[#FFFBF0]" />}>
+      <SummarizeContent />
+    </Suspense>
   );
 }

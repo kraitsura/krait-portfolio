@@ -148,7 +148,7 @@ class VideoPreloaderService {
       if (videoPath.includes('skyscrape')) {
         window.__preloadedVideo = blobUrl;
       }
-    } catch (error) {
+    } catch {
       // Silently fail - video preloading is not critical
     }
   }
@@ -156,7 +156,8 @@ class VideoPreloaderService {
   /**
    * Checks if a video is small enough for blob caching
    */
-  private isSmallVideo(videoPath: string): boolean {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  private isSmallVideo(_videoPath: string): boolean {
     // Assume videos under 1MB are safe to blob cache
     // This is a heuristic - adjust based on your needs
     return true;

@@ -9,7 +9,7 @@ export const isSafari = (): boolean => {
   if (typeof window === 'undefined' || !navigator) return false;
 
   const userAgent = navigator.userAgent.toLowerCase();
-  const vendor = (navigator as any).vendor?.toLowerCase() || '';
+  const vendor = (navigator as Navigator & { vendor?: string }).vendor?.toLowerCase() || '';
 
   // Check for Safari browser (not Chrome which includes 'safari' in UA)
   const isSafariBrowser = /^((?!chrome|android).)*safari/i.test(userAgent) ||

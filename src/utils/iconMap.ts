@@ -4,7 +4,7 @@ import {
   Globe, Cpu, Brain, Leaf, BarChart, Recycle, Star, Database,
   Code2, Box, Wrench, Server, Zap, Shield, Cloud,
   Layers, Terminal, Gamepad2, Coffee, Activity, Mail, Webhook,
-  Flame, Network, Search
+  Network, Search
 } from 'lucide-react';
 
 // Icon mapping for project tags

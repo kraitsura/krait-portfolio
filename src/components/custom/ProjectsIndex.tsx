@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
-import { projects, projectsByCategory, categoryOrder } from "@/utils/projectList";
+import { useEffect, useRef, useState, useCallback } from "react";
+import { projectsByCategory, categoryOrder } from "@/utils/projectList";
 
 interface ProjectsIndexProps {
   selectedIndex: number;
@@ -79,6 +79,7 @@ export default function ProjectsIndex({
       setCenterIndex(selectedIndex);
       setIsInitialScroll(false);
     }, 800); // 700ms entrance animation + 50ms delay + 50ms buffer
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Helper to get section start indices
@@ -98,7 +99,7 @@ export default function ProjectsIndex({
   };
 
   // Helper to find which section an index belongs to
-  const getSectionForIndex = (index: number): number => {
+  const getSectionForIndex = useCallback((index: number): number => {
     const sectionStarts = getSectionStartIndices();
     for (let i = sectionStarts.length - 1; i >= 0; i--) {
       if (index >= sectionStarts[i]) {
@@ -106,7 +107,7 @@ export default function ProjectsIndex({
       }
     }
     return 0;
-  };
+  }, []);
 
   // Handle j/k/h/l and arrow key navigation
   useEffect(() => {
@@ -156,7 +157,7 @@ export default function ProjectsIndex({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [centerIndex, setSelectedIndex, orderedProjects.length]);
+  }, [centerIndex, setSelectedIndex, orderedProjects.length, getSectionForIndex]);
 
   // Handle page-wide scrolling
   useEffect(() => {

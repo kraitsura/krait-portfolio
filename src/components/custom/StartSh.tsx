@@ -74,10 +74,10 @@ const StartSh: React.FC = () => {
   }, [router]);
 
   // Handler for summarize.sh button
-  const handleSummarizeClick = () => {
+  const handleSummarizeClick = useCallback(() => {
     setStarted(true);
     router.push('/summarize');
-  };
+  }, [router]);
 
   const handleSummarizeHover = () => {
     setShadowColor(getRandomVibrantColor());
