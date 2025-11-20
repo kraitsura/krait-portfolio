@@ -105,11 +105,11 @@ function SummarizeContent() {
   }, [router, activeTab, selectedIndex]);
 
   return (
-    <div className="h-screen overflow-hidden bg-[#FFFBF0] px-4 sm:px-6 py-16 sm:py-20">
-      {/* Sidebar Navigation - Mobile: in flow, Desktop: fixed to viewport */}
+    <div className="h-screen overflow-y-auto bg-[#FFFBF0] px-4 sm:px-6 py-16 sm:py-20">
+      {/* Sidebar Navigation - Mobile: sticky at top, Desktop: fixed to viewport */}
       <nav
         suppressHydrationWarning
-        className={`flex flex-col gap-2 mb-8 lg:mb-0 lg:fixed lg:top-1/2 lg:-translate-y-1/2 lg:left-[calc(50%-325px-100px)] transition-all duration-700 ease-out ${
+        className={`sticky top-0 z-10 bg-[#FFFBF0] pb-4 flex flex-col gap-2 mb-8 lg:mb-0 lg:pb-0 lg:bg-transparent lg:static lg:fixed lg:top-1/2 lg:-translate-y-1/2 lg:left-[calc(50%-325px-100px)] transition-all duration-700 ease-out ${
           isVisible ? "opacity-100" : "opacity-0"
         }`}
         style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
