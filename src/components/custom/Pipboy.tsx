@@ -16,12 +16,10 @@ import { skillDetails, dragonArt } from "@/data/pipboy-data";
 
 interface PipboyProps {
   isActive?: boolean;
-  onScrollToSocials?: () => void;
 }
 
 const Pipboy: React.FC<PipboyProps> = ({
   isActive = true,
-  onScrollToSocials,
 }) => {
   const { isTouchDevice } = useTouchDevice();
   const { color, setColor } = useThemeColor();
@@ -85,73 +83,79 @@ const Pipboy: React.FC<PipboyProps> = ({
       if (e.shiftKey) return;
 
       const scrollAmount = 50;
-      const tabs = ["items", "stats", "projects", "quests", "misc"];
+      const tabs = ["items", "stats", "quests", "projects", "misc"];
       const currentIndex = tabs.indexOf(activeTab);
 
-      // Settings tab - j/k for navigation, Enter to select
-      if (activeTab === "misc") {
-        if (e.key === "j") {
-          e.preventDefault();
-          setSelectedColorIndex((prev) => (prev + 1) % colorOptions.length);
-        } else if (e.key === "k") {
-          e.preventDefault();
-          setSelectedColorIndex(
-            (prev) => (prev - 1 + colorOptions.length) % colorOptions.length,
-          );
-        } else if (e.key === "Enter") {
-          e.preventDefault();
-          setColor(colorOptions[selectedColorIndex] as ThemeColor);
-        }
-      }
-      // Projects tab - Enter to navigate
-      else if (activeTab === "projects") {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          router.push("/projects");
-        }
-      }
-      // Other tabs - j/k for scrolling
-      else if (e.key === "j" && activeTab !== "items") {
-        e.preventDefault();
-        // Scroll skills section if on quests tab, otherwise scroll main content
-        if (activeTab === "quests" && skillsSectionRef.current) {
-          skillsSectionRef.current.scrollBy({
-            top: scrollAmount,
-            behavior: "smooth",
-          });
-        } else if (tabContentRef.current) {
-          tabContentRef.current.scrollBy({
-            top: scrollAmount,
-            behavior: "smooth",
-          });
-        }
-      } else if (e.key === "k" && activeTab !== "items") {
-        e.preventDefault();
-        // Scroll skills section if on quests tab, otherwise scroll main content
-        if (activeTab === "quests" && skillsSectionRef.current) {
-          skillsSectionRef.current.scrollBy({
-            top: -scrollAmount,
-            behavior: "smooth",
-          });
-        } else if (tabContentRef.current) {
-          tabContentRef.current.scrollBy({
-            top: -scrollAmount,
-            behavior: "smooth",
-          });
-        }
-      }
-
-      // h/l for tab navigation (works on all tabs)
-      if (e.key === "h") {
-        e.preventDefault();
-        const prevIndex =
-          currentIndex === 0 ? tabs.length - 1 : currentIndex - 1;
-        setActiveTab(tabs[prevIndex]);
-      } else if (e.key === "l") {
+      // j/k for menu navigation (works on all tabs)
+      if (e.key === "j") {
         e.preventDefault();
         const nextIndex =
           currentIndex === tabs.length - 1 ? 0 : currentIndex + 1;
         setActiveTab(tabs[nextIndex]);
+      } else if (e.key === "k") {
+        e.preventDefault();
+        const prevIndex =
+          currentIndex === 0 ? tabs.length - 1 : currentIndex - 1;
+        setActiveTab(tabs[prevIndex]);
+      }
+
+      // h/l for scrolling content
+      if (e.key === "l" && activeTab !== "items") {
+        e.preventDefault();
+        if (activeTab === "quests" && skillsSectionRef.current) {
+          skillsSectionRef.current.scrollBy({
+            top: scrollAmount,
+            behavior: "smooth",
+          });
+        } else if (tabContentRef.current) {
+          tabContentRef.current.scrollBy({
+            top: scrollAmount,
+            behavior: "smooth",
+          });
+        }
+      } else if (e.key === "h" && activeTab !== "items") {
+        e.preventDefault();
+        if (activeTab === "quests" && skillsSectionRef.current) {
+          skillsSectionRef.current.scrollBy({
+            top: -scrollAmount,
+            behavior: "smooth",
+          });
+        } else if (tabContentRef.current) {
+          tabContentRef.current.scrollBy({
+            top: -scrollAmount,
+            behavior: "smooth",
+          });
+        }
+      }
+
+      // Settings tab - use j/k for color selection (handled above for nav)
+      if (activeTab === "misc" && e.key === "Enter") {
+        e.preventDefault();
+        setColor(colorOptions[selectedColorIndex] as ThemeColor);
+      }
+
+      // Projects tab - Enter to navigate
+      if (activeTab === "projects" && e.key === "Enter") {
+        e.preventDefault();
+        router.push("/projects");
+      }
+
+      // Direct shortcuts (r/s/q/p/c)
+      if (e.key === "r") {
+        e.preventDefault();
+        setActiveTab("items");
+      } else if (e.key === "s") {
+        e.preventDefault();
+        setActiveTab("stats");
+      } else if (e.key === "q") {
+        e.preventDefault();
+        setActiveTab("quests");
+      } else if (e.key === "p") {
+        e.preventDefault();
+        setActiveTab("projects");
+      } else if (e.key === "c") {
+        e.preventDefault();
+        setActiveTab("misc");
       }
     };
 
@@ -171,27 +175,6 @@ const Pipboy: React.FC<PipboyProps> = ({
     [colorOptions, setColor],
   );
 
-  const handleTabChange = useCallback(
-    (tab: string) => (e: React.MouseEvent) => {
-      e.preventDefault();
-      setActiveTab(tab);
-    },
-    [],
-  );
-
-  const handleSocialsClick = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
-      setActiveTab("socials");
-      onScrollToSocials?.();
-      // Reset to Status tab after scrolling to socials
-      setTimeout(() => {
-        setActiveTab("items");
-      }, 800);
-    },
-    [onScrollToSocials],
-  );
-
   const handleColorLabelClick = useCallback(
     (index: number, colorOption: ThemeColor) => () => {
       setSelectedColorIndex(index);
@@ -202,31 +185,6 @@ const Pipboy: React.FC<PipboyProps> = ({
     [isTouchDevice, setColor],
   );
 
-  const handleProjectsClick = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
-      router.push("/projects");
-    },
-    [router],
-  );
-
-  // Get keystroke info based on active tab
-  const keystrokeInfo = useMemo(() => {
-    switch (activeTab) {
-      case "items":
-        return "h/l: Tabs";
-      case "stats":
-        return "h/l: Tabs | j/k: Scroll";
-      case "quests":
-        return "h/l: Tabs | j/k: Scroll";
-      case "misc":
-        return "h/l: Tabs | j/k: Nav | ⏎: Select";
-      case "projects":
-        return "h/l: Tabs | ⏎: Open";
-      default:
-        return "h/l: Tabs";
-    }
-  }, [activeTab]);
 
   return (
     <div
@@ -235,321 +193,329 @@ const Pipboy: React.FC<PipboyProps> = ({
       <div ref={frameRef} className={`${styles.frame} ${styles.noclick}`}>
         <div className={`${styles.piece} ${styles.output} ${styles.filter}`}>
           <div className={styles.pipboy}>
-            {/* Footer Navigation */}
-            <ul className={styles["pip-foot"]}>
-              <li className={activeTab === "items" ? styles.active : ""}>
-                <a onClick={handleTabChange("items")}>Status</a>
-              </li>
-              <li className={activeTab === "stats" ? styles.active : ""}>
-                <a onClick={handleTabChange("stats")}>Stats</a>
-              </li>
-              <li className={activeTab === "projects" ? styles.active : ""}>
-                <a onClick={handleProjectsClick}>Projects</a>
-              </li>
-              <li className={activeTab === "quests" ? styles.active : ""}>
-                <a onClick={handleTabChange("quests")}>Skills</a>
-              </li>
-              <li className={activeTab === "misc" ? styles.active : ""}>
-                <a onClick={handleTabChange("misc")}>Settings</a>
-              </li>
-              {isTouchDevice && (
-                <li className={activeTab === "socials" ? styles.active : ""}>
-                  <a onClick={handleSocialsClick}>Socials</a>
-                </li>
-              )}
-            </ul>
+            {/* Keybind Bar - Top horizontal bar with nav info */}
+            {!isTouchDevice && (
+              <div className={styles["keybind-bar"]}>
+                <span className={styles["keybind-item"]}>[j/k] nav</span>
+                <span className={styles["keybind-item"]}>[h/l] scroll</span>
+              </div>
+            )}
 
-            <div
-              ref={tabContentRef}
-              className={styles["tab-content"]}
-              style={{
-                overflowY: activeTab === "items" ? "hidden" : "auto",
-              }}
-            >
-              {/* Main View Tab */}
-              {activeTab === "items" && (
-                <div id="items">
-                  <div className={styles["pip-body"]}>
-                    <div className={styles["dragon-container"]}>
-                      <div className="vboy">
-                        {dragonArt.split("\n").map((line) => (
-                          <pre key={line} className={styles.asciiLine}>
-                            {line}
-                          </pre>
-                        ))}
-                      </div>
-                      <div className={styles["dragon-text"]}>
-                        <p>builder</p>
-                        <p>tinkering...</p>
-                      </div>
-                    </div>
-
-                    <div className={styles["status-info"]}>
-                      <div className={styles["level-display"]}>
-                        <span className={styles["level-label"]}>Level</span>
-                        <span className={styles["level-value"]}>I</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Stats Tab */}
-              {activeTab === "stats" && (
-                <div id="stats">
-                  <h3 className={styles["pip-title"]}>S.P.E.C.I.A.L</h3>
-                  <div className={styles["pip-body"]}>
-                    <div className={styles["status-info"]}>
-                      <div className={styles["attributes-grid"]}>
-                        <div className={styles["attribute"]}>
-                          <span className={styles["attr-label"]}>Strength</span>
-                          <div className={styles["attr-bar"]}>
-                            <div
-                              className={styles["attr-fill"]}
-                              style={{ width: "50%" }}
-                            ></div>
-                            <span className={styles["attr-value"]}>5</span>
-                          </div>
-                        </div>
-                        <div className={styles["attribute"]}>
-                          <span className={styles["attr-label"]}>
-                            Perception
-                          </span>
-                          <div className={styles["attr-bar"]}>
-                            <div
-                              className={styles["attr-fill"]}
-                              style={{ width: "60%" }}
-                            ></div>
-                            <span className={styles["attr-value"]}>9</span>
-                          </div>
-                        </div>
-                        <div className={styles["attribute"]}>
-                          <span className={styles["attr-label"]}>
-                            Endurance
-                          </span>
-                          <div className={styles["attr-bar"]}>
-                            <div
-                              className={styles["attr-fill"]}
-                              style={{ width: "50%" }}
-                            ></div>
-                            <span className={styles["attr-value"]}>5</span>
-                          </div>
-                        </div>
-                        <div className={styles["attribute"]}>
-                          <span className={styles["attr-label"]}>Charisma</span>
-                          <div className={styles["attr-bar"]}>
-                            <div
-                              className={styles["attr-fill"]}
-                              style={{ width: "70%" }}
-                            ></div>
-                            <span className={styles["attr-value"]}>10</span>
-                          </div>
-                        </div>
-                        <div className={styles["attribute"]}>
-                          <span className={styles["attr-label"]}>
-                            Intelligence
-                          </span>
-                          <div className={styles["attr-bar"]}>
-                            <div
-                              className={styles["attr-fill"]}
-                              style={{ width: "80%" }}
-                            ></div>
-                            <span className={styles["attr-value"]}>8</span>
-                          </div>
-                        </div>
-                        <div className={styles["attribute"]}>
-                          <span className={styles["attr-label"]}>Agility</span>
-                          <div className={styles["attr-bar"]}>
-                            <div
-                              className={styles["attr-fill"]}
-                              style={{ width: "60%" }}
-                            ></div>
-                            <span className={styles["attr-value"]}>6</span>
-                          </div>
-                        </div>
-                        <div className={styles["attribute"]}>
-                          <span className={styles["attr-label"]}>Luck</span>
-                          <div className={styles["attr-bar"]}>
-                            <div
-                              className={styles["attr-fill"]}
-                              style={{ width: "70%" }}
-                            ></div>
-                            <span className={styles["attr-value"]}>20</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Skills Tab */}
-              {activeTab === "quests" && (
-                <div id="skills">
-                  <h3 className={styles["pip-title"]}>Technical Skills</h3>
-                  <div className={styles["pip-body"]}>
-                    <div
-                      ref={skillsSectionRef}
-                      className={styles["skills-section"]}
-                    >
-                      <h4 className={styles["skill-category"]}>
-                        Programming Languages
-                      </h4>
-                      <ul className={styles["skill-list"]}>
-                        {skillDetails.skill1.map((skill) => {
-                          return (
-                            <li key={skill.name}>
-                              <div className={styles["skill-card"]}>
-                                <div className={styles["skill-name"]}>
-                                  {skill.name}
-                                </div>
-                              </div>
-                            </li>
-                          );
-                        })}
-                      </ul>
-
-                      <h4 className={styles["skill-category"]}>
-                        Frontend Stack
-                      </h4>
-                      <ul className={styles["skill-list"]}>
-                        {skillDetails.skill2.map((skill) => {
-                          return (
-                            <li key={skill.name}>
-                              <div className={styles["skill-card"]}>
-                                <div className={styles["skill-name"]}>
-                                  {skill.name}
-                                </div>
-                              </div>
-                            </li>
-                          );
-                        })}
-                      </ul>
-
-                      <h4 className={styles["skill-category"]}>
-                        Backend & APIs
-                      </h4>
-                      <ul className={styles["skill-list"]}>
-                        {skillDetails.skill3.map((skill) => {
-                          return (
-                            <li key={skill.name}>
-                              <div className={styles["skill-card"]}>
-                                <div className={styles["skill-name"]}>
-                                  {skill.name}
-                                </div>
-                              </div>
-                            </li>
-                          );
-                        })}
-                      </ul>
-
-                      <h4 className={styles["skill-category"]}>
-                        Databases & ORMs
-                      </h4>
-                      <ul className={styles["skill-list"]}>
-                        {skillDetails.skill4.map((skill) => {
-                          return (
-                            <li key={skill.name}>
-                              <div className={styles["skill-card"]}>
-                                <div className={styles["skill-name"]}>
-                                  {skill.name}
-                                </div>
-                              </div>
-                            </li>
-                          );
-                        })}
-                      </ul>
-
-                      <h4 className={styles["skill-category"]}>
-                        Cloud & Infrastructure
-                      </h4>
-                      <ul className={styles["skill-list"]}>
-                        {skillDetails.skill5.map((skill) => {
-                          return (
-                            <li key={skill.name}>
-                              <div className={styles["skill-card"]}>
-                                <div className={styles["skill-name"]}>
-                                  {skill.name}
-                                </div>
-                              </div>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Settings Tab */}
-              {activeTab === "misc" && (
-                <div id="misc">
-                  <h3 className={styles["pip-title"]}>Settings</h3>
-                  <div className={styles["pip-body"]}>
-                    <div className={styles.colors} onChange={handleColorChange}>
-                      {colorOptions.map((colorOption, index) => (
-                        <React.Fragment key={colorOption}>
-                          <input
-                            id={`b-${colorOption}`}
-                            type="radio"
-                            name="colors"
-                            value={colorOption}
-                            checked={color === colorOption}
-                            readOnly
-                          />
-                          <label
-                            htmlFor={`b-${colorOption}`}
-                            className={
-                              selectedColorIndex === index ? styles.focused : ""
-                            }
-                            onClick={handleColorLabelClick(index, colorOption)}
-                          >
-                            {colorOption.charAt(0).toUpperCase() +
-                              colorOption.slice(1)}
-                          </label>
-                        </React.Fragment>
+            <div className={styles["tab-content"]}>
+              <div className={styles["dashboard-layout"]}>
+                {/* Left Panel - Dragon Art + Menu (always visible) */}
+                <div className={styles["dashboard-left"]}>
+                  <div className={styles["dashboard-dragon"]}>
+                    <div className="vboy">
+                      {dragonArt.split("\n").map((line) => (
+                        <pre key={line} className={styles.asciiLine}>
+                          {line}
+                        </pre>
                       ))}
                     </div>
                   </div>
-                </div>
-              )}
 
-              {/* Projects Tab */}
-              {activeTab === "projects" && (
-                <div id="projects">
-                  <h3 className={styles["pip-title"]}>Projects</h3>
-                  <div className={styles["pip-body"]}>
-                    <div style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      height: '200px',
-                      gap: '24px'
-                    }}>
-                      <p style={{ opacity: 0.7, fontSize: '14px' }}>
-                        View all projects
-                      </p>
-                      <span
-                        className="retro-flash-text"
-                        style={{
-                          fontSize: '12px',
-                          letterSpacing: '2px',
-                          textTransform: 'uppercase'
-                        }}
-                      >
-                        press enter
-                      </span>
+                  {/* Dashboard Menu */}
+                  <div className={styles["dashboard-menu"]}>
+                    <div
+                      className={`${styles["dashboard-menu-item"]} ${activeTab === "items" ? styles.active : ""}`}
+                      onClick={() => setActiveTab("items")}
+                      role="button"
+                      tabIndex={0}
+                    >
+                      <span className={styles["menu-icon"]}>~</span>
+                      <span className={styles["menu-key"]}>[r]</span>
+                      <span className={styles["menu-label"]}>Status</span>
+                    </div>
+                    <div
+                      className={`${styles["dashboard-menu-item"]} ${activeTab === "stats" ? styles.active : ""}`}
+                      onClick={() => setActiveTab("stats")}
+                      role="button"
+                      tabIndex={0}
+                    >
+                      <span className={styles["menu-icon"]}>★</span>
+                      <span className={styles["menu-key"]}>[s]</span>
+                      <span className={styles["menu-label"]}>S.P.E.C.I.A.L</span>
+                    </div>
+                    <div
+                      className={`${styles["dashboard-menu-item"]} ${activeTab === "quests" ? styles.active : ""}`}
+                      onClick={() => setActiveTab("quests")}
+                      role="button"
+                      tabIndex={0}
+                    >
+                      <span className={styles["menu-icon"]}>◆</span>
+                      <span className={styles["menu-key"]}>[q]</span>
+                      <span className={styles["menu-label"]}>Skills</span>
+                    </div>
+                    <div
+                      className={`${styles["dashboard-menu-item"]} ${activeTab === "projects" ? styles.active : ""}`}
+                      onClick={() => setActiveTab("projects")}
+                      role="button"
+                      tabIndex={0}
+                    >
+                      <span className={styles["menu-icon"]}>▢</span>
+                      <span className={styles["menu-key"]}>[p]</span>
+                      <span className={styles["menu-label"]}>Projects</span>
+                    </div>
+                    <div
+                      className={`${styles["dashboard-menu-item"]} ${activeTab === "misc" ? styles.active : ""}`}
+                      onClick={() => setActiveTab("misc")}
+                      role="button"
+                      tabIndex={0}
+                    >
+                      <span className={styles["menu-icon"]}>⚙</span>
+                      <span className={styles["menu-key"]}>[c]</span>
+                      <span className={styles["menu-label"]}>Config</span>
                     </div>
                   </div>
                 </div>
-              )}
-            </div>
 
-            {/* Keystroke Info - Fixed Top Right */}
-            {!isTouchDevice && (
-              <div className={styles["keystroke-info"]}>{keystrokeInfo}</div>
-            )}
+                {/* Right Panel - Tab Content */}
+                <div
+                  ref={tabContentRef}
+                  className={styles["dashboard-right"]}
+                  style={{ overflowY: "auto" }}
+                >
+                  {/* Status Tab */}
+                  {activeTab === "items" && (
+                    <div id="items" className={styles["tab-panel"]}>
+                      <div className={styles["about-content"]}>
+                        <p>
+                          I build software that feels good to use, from agentic event
+                          planning systems to high-performance tools.
+                        </p>
+                        <p>
+                          I make tools I actually use: CLIs for day logging and
+                          deep work tracking, desktop apps for AI workflows, and
+                          utilities like pastebins.
+                        </p>
+                        <p>
+                          Right now I&apos;m interested in agentic systems, real-time
+                          data processing, and the next generation frontend interface
+                          for the age of intelligence.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Stats Tab */}
+                  {activeTab === "stats" && (
+                    <div id="stats" className={styles["tab-panel"]}>
+                      <h3 className={styles["pip-title"]}>S.P.E.C.I.A.L</h3>
+                      <div className={styles["pip-body"]}>
+                        <div className={styles["status-info"]}>
+                          <div className={styles["attributes-grid"]}>
+                            <div className={styles["attribute"]}>
+                              <span className={styles["attr-label"]}>Strength</span>
+                              <div className={styles["attr-bar"]}>
+                                <div
+                                  className={styles["attr-fill"]}
+                                  style={{ width: "50%" }}
+                                ></div>
+                                <span className={styles["attr-value"]}>5</span>
+                              </div>
+                            </div>
+                            <div className={styles["attribute"]}>
+                              <span className={styles["attr-label"]}>Perception</span>
+                              <div className={styles["attr-bar"]}>
+                                <div
+                                  className={styles["attr-fill"]}
+                                  style={{ width: "60%" }}
+                                ></div>
+                                <span className={styles["attr-value"]}>9</span>
+                              </div>
+                            </div>
+                            <div className={styles["attribute"]}>
+                              <span className={styles["attr-label"]}>Endurance</span>
+                              <div className={styles["attr-bar"]}>
+                                <div
+                                  className={styles["attr-fill"]}
+                                  style={{ width: "50%" }}
+                                ></div>
+                                <span className={styles["attr-value"]}>5</span>
+                              </div>
+                            </div>
+                            <div className={styles["attribute"]}>
+                              <span className={styles["attr-label"]}>Charisma</span>
+                              <div className={styles["attr-bar"]}>
+                                <div
+                                  className={styles["attr-fill"]}
+                                  style={{ width: "70%" }}
+                                ></div>
+                                <span className={styles["attr-value"]}>10</span>
+                              </div>
+                            </div>
+                            <div className={styles["attribute"]}>
+                              <span className={styles["attr-label"]}>Intelligence</span>
+                              <div className={styles["attr-bar"]}>
+                                <div
+                                  className={styles["attr-fill"]}
+                                  style={{ width: "80%" }}
+                                ></div>
+                                <span className={styles["attr-value"]}>8</span>
+                              </div>
+                            </div>
+                            <div className={styles["attribute"]}>
+                              <span className={styles["attr-label"]}>Agility</span>
+                              <div className={styles["attr-bar"]}>
+                                <div
+                                  className={styles["attr-fill"]}
+                                  style={{ width: "60%" }}
+                                ></div>
+                                <span className={styles["attr-value"]}>6</span>
+                              </div>
+                            </div>
+                            <div className={styles["attribute"]}>
+                              <span className={styles["attr-label"]}>Luck</span>
+                              <div className={styles["attr-bar"]}>
+                                <div
+                                  className={styles["attr-fill"]}
+                                  style={{ width: "70%" }}
+                                ></div>
+                                <span className={styles["attr-value"]}>20</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Skills Tab */}
+                  {activeTab === "quests" && (
+                    <div id="skills" className={styles["tab-panel"]}>
+                      <h3 className={styles["pip-title"]}>Technical Skills</h3>
+                      <div className={styles["pip-body"]}>
+                        <div
+                          ref={skillsSectionRef}
+                          className={styles["skills-section"]}
+                        >
+                          <h4 className={styles["skill-category"]}>Programming Languages</h4>
+                          <ul className={styles["skill-list"]}>
+                            {skillDetails.skill1.map((skill) => (
+                              <li key={skill.name}>
+                                <div className={styles["skill-card"]}>
+                                  <div className={styles["skill-name"]}>{skill.name}</div>
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+
+                          <h4 className={styles["skill-category"]}>Frontend Stack</h4>
+                          <ul className={styles["skill-list"]}>
+                            {skillDetails.skill2.map((skill) => (
+                              <li key={skill.name}>
+                                <div className={styles["skill-card"]}>
+                                  <div className={styles["skill-name"]}>{skill.name}</div>
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+
+                          <h4 className={styles["skill-category"]}>Backend & APIs</h4>
+                          <ul className={styles["skill-list"]}>
+                            {skillDetails.skill3.map((skill) => (
+                              <li key={skill.name}>
+                                <div className={styles["skill-card"]}>
+                                  <div className={styles["skill-name"]}>{skill.name}</div>
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+
+                          <h4 className={styles["skill-category"]}>Databases & ORMs</h4>
+                          <ul className={styles["skill-list"]}>
+                            {skillDetails.skill4.map((skill) => (
+                              <li key={skill.name}>
+                                <div className={styles["skill-card"]}>
+                                  <div className={styles["skill-name"]}>{skill.name}</div>
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+
+                          <h4 className={styles["skill-category"]}>Cloud & Infrastructure</h4>
+                          <ul className={styles["skill-list"]}>
+                            {skillDetails.skill5.map((skill) => (
+                              <li key={skill.name}>
+                                <div className={styles["skill-card"]}>
+                                  <div className={styles["skill-name"]}>{skill.name}</div>
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Settings Tab */}
+                  {activeTab === "misc" && (
+                    <div id="misc" className={styles["tab-panel"]}>
+                      <h3 className={styles["pip-title"]}>Settings</h3>
+                      <div className={styles["pip-body"]}>
+                        <div className={styles.colors} onChange={handleColorChange}>
+                          {colorOptions.map((colorOption, index) => (
+                            <React.Fragment key={colorOption}>
+                              <input
+                                id={`b-${colorOption}`}
+                                type="radio"
+                                name="colors"
+                                value={colorOption}
+                                checked={color === colorOption}
+                                readOnly
+                              />
+                              <label
+                                htmlFor={`b-${colorOption}`}
+                                className={selectedColorIndex === index ? styles.focused : ""}
+                                onClick={handleColorLabelClick(index, colorOption)}
+                              >
+                                {colorOption.charAt(0).toUpperCase() + colorOption.slice(1)}
+                              </label>
+                            </React.Fragment>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Projects Tab */}
+                  {activeTab === "projects" && (
+                    <div id="projects" className={styles["tab-panel"]}>
+                      <h3 className={styles["pip-title"]}>Projects</h3>
+                      <div className={styles["pip-body"]}>
+                        <div style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          height: '200px',
+                          gap: '24px'
+                        }}>
+                          <p style={{ opacity: 0.7, fontSize: '14px' }}>
+                            View all projects
+                          </p>
+                          <span
+                            className="retro-flash-text"
+                            style={{
+                              fontSize: '12px',
+                              letterSpacing: '2px',
+                              textTransform: 'uppercase'
+                            }}
+                          >
+                            press enter
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {/* End dashboard-right */}
+              </div>
+              {/* End dashboard-layout */}
+            </div>
+            {/* End tab-content */}
+
           </div>
 
           {/* Effects */}

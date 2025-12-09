@@ -232,11 +232,6 @@ const IntroPage: React.FC<IntroPageProps> = ({ image }) => {
     }
   }, []);
 
-  // Expose scrollToBottom for Pipboy to use
-  const handleScrollToBottomFromPipboy = useCallback(() => {
-    scrollToBottom();
-  }, [scrollToBottom]);
-
   useEffect(() => {
     const container = containerRef.current;
     if (container) {
@@ -397,7 +392,6 @@ const IntroPage: React.FC<IntroPageProps> = ({ image }) => {
               <div className="w-full max-w-[800px]">
                 <Pipboy
                   isActive={scrollState.percentage < 70}
-                  onScrollToSocials={handleScrollToBottomFromPipboy}
                 />
                 {/* Down arrow - desktop only (touch devices use Socials tab in Pipboy) */}
                 {!isTouchDevice && (

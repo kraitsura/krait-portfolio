@@ -78,11 +78,11 @@ function SummarizeContent() {
       const maxIndex =
         activeTab === "projects" ? projects.length - 1 : socialLinks.length - 1;
 
-      if (e.key === "j") {
+      if (e.key === "j" || e.key === "ArrowDown") {
         e.preventDefault();
         setIsKeyboardNav(true);
         setSelectedIndex((prev) => Math.min(prev + 1, maxIndex));
-      } else if (e.key === "k") {
+      } else if (e.key === "k" || e.key === "ArrowUp") {
         e.preventDefault();
         setIsKeyboardNav(true);
         setSelectedIndex((prev) => Math.max(prev - 1, 0));
@@ -157,11 +157,11 @@ function SummarizeContent() {
               >
                 <p className="mb-6">
                   I build software that feels good to use, from agentic event
-                  planning systems to high-performance tools that respond in
-                  under 20ms. Most of my time goes into production apps like
-                  Colosseum (an agentic CRM I&apos;m building with TanStack Start)
-                  and Delphi (group chat event coordination with stateful agents
-                  over Cloudflare Durable Objects).
+                  planning systems to high-performance tools. Most of my time
+                  goes into production apps like Colosseum (an agentic CRM
+                  I&apos;m building with TanStack Start) and Delphi (group chat
+                  event coordination with stateful agents over Cloudflare
+                  Durable Objects).
                 </p>
 
                 <p className="mb-6">
@@ -186,26 +186,32 @@ function SummarizeContent() {
                   if you want to chat about projects, ideas, or work
                   opportunites.
                 </p>
-
-                <p className="text-sm opacity-60 mt-12">
-                  ⇧j/k to navigate tabs, j/k/↑↓ for projects, h/l/←→ for sections, ↵ to open, backspace to go back.
-                </p>
               </div>
             </>
           )}
 
           {activeTab === "projects" && (
-            <div
-              className="text-base sm:text-lg text-[#1a1a1a] leading-[1.7]"
-              style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
-            >
-              <ProjectsIndex
-                selectedIndex={selectedIndex}
-                setSelectedIndex={setSelectedIndex}
-                isKeyboardNav={isKeyboardNav}
-                setIsKeyboardNav={setIsKeyboardNav}
-              />
-            </div>
+            <>
+              <div
+                className="text-base sm:text-lg text-[#1a1a1a] leading-[1.7]"
+                style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
+              >
+                <ProjectsIndex
+                  selectedIndex={selectedIndex}
+                  setSelectedIndex={setSelectedIndex}
+                  isKeyboardNav={isKeyboardNav}
+                  setIsKeyboardNav={setIsKeyboardNav}
+                />
+              </div>
+              <div
+                className="text-sm opacity-60 mt-8 text-center"
+                style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
+              >
+                <p>
+                  ⇧j/k to navigate tabs, j/k/↑↓ for projects, h/l/←→ for sections, ↵ to open, backspace to go back.
+                </p>
+              </div>
+            </>
           )}
 
           {activeTab === "socials" && (

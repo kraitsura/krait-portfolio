@@ -249,3 +249,125 @@
         }
     }
 }
+
+// ============================================================================
+// DASHBOARD MENU (Neovim-style quick actions)
+// ============================================================================
+
+.dashboard-dragon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 0;
+
+    .vboy {
+        padding: 8px;
+        transform: scale(0.7);
+        transform-origin: center top;
+    }
+
+    .asciiLine {
+        transform: scale(0.75);
+    }
+}
+
+.dashboard-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 12px;
+    padding: 0 4px;
+}
+
+.dashboard-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: background-color 0.15s ease, opacity 0.15s ease;
+    font-family: monospace;
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    opacity: 0.6;
+
+    &:hover {
+        background: rgba(var(--main), 0.08);
+        opacity: 1;
+    }
+
+    &:focus {
+        outline: none;
+        background: rgba(var(--main), 0.12);
+        opacity: 1;
+    }
+
+    &.active {
+        opacity: 1;
+        background: rgba(var(--main), 0.15);
+
+        .menu-icon {
+            opacity: 1;
+        }
+
+        .menu-key {
+            opacity: 1;
+        }
+
+        .menu-label {
+            opacity: 1;
+            font-weight: 500;
+        }
+    }
+}
+
+.menu-icon {
+    font-size: 14px;
+    opacity: 0.6;
+    width: 16px;
+    text-align: center;
+}
+
+.menu-key {
+    font-family: monospace;
+    font-size: 12px;
+    opacity: 0.7;
+}
+
+.menu-label {
+    flex: 1;
+    opacity: 0.85;
+}
+
+// ============================================================================
+// TAB PANEL (Content inside dashboard-right)
+// ============================================================================
+
+.tab-panel {
+    width: 100%;
+    height: 100%;
+}
+
+.welcome-text {
+    font-family: monospace;
+    font-size: 14px;
+    opacity: 0.6;
+    letter-spacing: 0.05em;
+}
+
+.about-content {
+    font-size: 13px;
+    line-height: 1.6;
+    opacity: 0.85;
+    letter-spacing: 0.02em;
+    padding: 8px 0;
+
+    p {
+        margin-bottom: 12px;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+}
