@@ -250,9 +250,9 @@
     }
 }
 
-// Text shadow for CRT glow
+// Text shadow for CRT glow - softer to reduce saturation
 @mixin text-glow {
-    text-shadow: 0rem 0.2rem 1rem currentColor;
+    text-shadow: 0 0 0.4rem rgba(var(--main), 0.5);
 }
 
 // Border with fade corners

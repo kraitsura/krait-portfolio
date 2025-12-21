@@ -94,10 +94,26 @@
     position: relative;
     width: 100%;
     height: 100%;
-    min-height: 550px;
+    min-height: min(660px, 100vh - 30px);
     background: var(--black);
+    color: rgb(var(--main));
     z-index: 1;
     @include hide-cursor;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+// ============================================================================
+// LIGHT MODE - Vintage Paper Terminal
+// ============================================================================
+// Note: CSS variables are defined in globals.css
+// The paper background is applied to .output only, not the outer wrapper
+
+.pipboy-global {
+    :global(html.light) & {
+        background: transparent;
+    }
 }
 
 // ============================================================================

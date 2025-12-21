@@ -67,12 +67,12 @@
 }
 
 .attr-label {
-    font-size: 12px;
+    font-size: 14px;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: rgb(var(--main));
     opacity: 0.9;
-    min-width: 95px;
+    min-width: 110px;
     flex-shrink: 0;
 }
 
@@ -177,4 +177,81 @@
         rgba(0, 0, 0, 0) 60%,
         var(--black) 100%
     );
+}
+
+// ============================================================================
+// TERMINAL STATS (GitHub activity)
+// ============================================================================
+
+.terminal-stats {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 2px solid rgba(var(--main), 0.25);
+}
+
+.terminal-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px 20px;
+}
+
+.terminal-stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(var(--main), 0.15);
+}
+
+.stat-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgb(var(--main));
+    opacity: 0.8;
+}
+
+.stat-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: rgb(var(--main));
+    font-variant-numeric: tabular-nums;
+}
+
+.terminal-loading {
+    text-align: center;
+    padding: 20px;
+    opacity: 0.5;
+    font-size: 12px;
+}
+
+// ============================================================================
+// DARK MODE - Visibility fixes (same UI structure as light mode)
+// ============================================================================
+// DEBUG: Using bright red to test if selector works
+
+.attr-bar {
+    :global(html.dark) & {
+        background: rgba(255, 0, 0, 0.3) !important;
+        border: 2px solid red !important;
+    }
+}
+
+.attr-fill {
+    :global(html.dark) & {
+        background: red !important;
+        opacity: 0.8;
+    }
+}
+
+.terminal-stat {
+    :global(html.dark) & {
+        border-bottom: 2px solid red !important;
+    }
+}
+
+.terminal-stats {
+    :global(html.dark) & {
+        border-top: 3px solid red !important;
+    }
 }
