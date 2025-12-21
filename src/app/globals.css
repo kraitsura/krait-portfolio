@@ -12,6 +12,10 @@ body[data-loading="true"] {
   background: black !important;
 }
 
+html.light body[data-loading="true"] {
+  background: #FFFBF0 !important;
+}
+
 /* Ensure video loading state is respected */
 .intro-container[data-video-loading="true"] .ui-content {
   opacity: 0 !important;
@@ -453,4 +457,147 @@ body {
 .retro-flash-text {
     animation: retro-flash 1.2s steps(2, jump-none) infinite;
     font-family: 'Roboto Mono', monospace;
+}
+
+/* Loading Screen Animations */
+@keyframes blink {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
+}
+
+.animate-blink {
+    animation: blink 1s steps(1) infinite;
+}
+
+@keyframes load-bar {
+    0% {
+        width: 0%;
+    }
+    100% {
+        width: 100%;
+    }
+}
+
+.animate-load-bar {
+    animation: load-bar 2s ease-out infinite;
+}
+
+@keyframes glitch {
+    0% {
+        transform: translate(0);
+        filter: none;
+    }
+    20% {
+        transform: translate(-2px, 2px);
+        filter: hue-rotate(90deg);
+    }
+    40% {
+        transform: translate(-2px, -2px);
+        filter: hue-rotate(180deg);
+    }
+    60% {
+        transform: translate(2px, 2px);
+        filter: hue-rotate(270deg);
+    }
+    80% {
+        transform: translate(2px, -2px);
+        filter: none;
+    }
+    100% {
+        transform: translate(0);
+        filter: none;
+    }
+}
+
+.animate-glitch {
+    animation: glitch 0.1s ease-in-out;
+}
+
+/* Shimmer effect for loading skeletons */
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.shimmer-effect {
+    position: relative;
+    overflow: hidden;
+}
+
+.shimmer-effect::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(var(--theme-primary-rgb), 0.08),
+        transparent
+    );
+    animation: shimmer 2s infinite;
+}
+
+/* Light mode specific loading styles */
+html.light .shimmer-effect::after {
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(var(--theme-primary-rgb), 0.12),
+        transparent
+    );
+}
+
+/* ============================================================================
+   PIPBOY LIGHT MODE - Vintage Paper Terminal
+   ============================================================================ */
+
+/* Light mode CSS variables for Pipboy */
+html.light {
+    --paper: #f4ede4;
+    --paper-dark: #e8dfd3;
+    --paper-edge: #d4c9b8;
+    --ink: 45, 35, 25;
+    --ink-light: 90, 75, 60;
+}
+
+/* Light mode color overrides - Rich ink tones */
+html.light.amber {
+    --main: 130, 60, 10;
+    --alt: 95, 45, 5;
+}
+
+html.light.white {
+    --main: 32, 28, 24;
+    --alt: 55, 50, 45;
+}
+
+html.light.green {
+    --main: 15, 85, 35;
+    --alt: 10, 60, 25;
+}
+
+html.light.blue {
+    --main: 20, 50, 110;
+    --alt: 15, 38, 85;
+}
+
+html.light.red {
+    --main: 130, 20, 15;
+    --alt: 95, 15, 10;
+}
+
+html.light.black {
+    --main: 25, 22, 20;
+    --alt: 50, 45, 40;
 }
