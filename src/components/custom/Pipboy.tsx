@@ -12,28 +12,74 @@ import { useRouter } from "next/navigation";
 import styles from "@/styles/pip-new.module.scss";
 import { useTouchDevice } from "@/contexts/TouchContext";
 import { useThemeColor, type ThemeColor } from "@/contexts/ThemeColorContext";
-import { skillDetails, dragonArt } from "@/data/pipboy-data";
+import { useAppTheme } from "@/contexts/AppThemeContext";
+import { dragonArt } from "@/data/pipboy-data";
+
+interface ActivityEntry {
+  id: string;
+  type: 'commit' | 'tweet';
+  message: string;
+  date: string;
+  timestamp: string;
+  source: string;
+  url: string | null;
+  isPrivate?: boolean;
+  shortHash?: string;
+}
+
+interface GithubStats {
+  commitsThisWeek: number;
+  activeRepos: number;
+  currentStreak: number;
+}
 
 interface PipboyProps {
   isActive?: boolean;
 }
+
+type ConfigSection = 'main' | 'colors' | 'theme';
 
 const Pipboy: React.FC<PipboyProps> = ({
   isActive = true,
 }) => {
   const { isTouchDevice } = useTouchDevice();
   const { color, setColor } = useThemeColor();
+  const { theme, setTheme } = useAppTheme();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState("items");
+  const [activeTab, setActiveTab] = useState("logs");
   const [browser, setBrowser] = useState("chrome");
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
   const [selectedColorIndex, setSelectedColorIndex] = useState(0);
+  const [configMode, setConfigMode] = useState(false);
+  const [configSection, setConfigSection] = useState<ConfigSection>('main');
+  const [selectedConfigIndex, setSelectedConfigIndex] = useState(0);
+  const [selectedThemeIndex, setSelectedThemeIndex] = useState(theme === 'dark' ? 0 : 1);
+  const [activityLogs, setActivityLogs] = useState<ActivityEntry[]>([]);
+  const [logsLoading, setLogsLoading] = useState(true);
+  const [logsMode, setLogsMode] = useState(false); // Whether we're navigating within logs
+  const [showVideoBg, setShowVideoBg] = useState(false); // Video background toggle
+  const [selectedLogIndex, setSelectedLogIndex] = useState(0);
+  const [githubStats, setGithubStats] = useState<GithubStats | null>(null);
+  const [statsLoading, setStatsLoading] = useState(true);
   const tabContentRef = useRef<HTMLDivElement>(null);
-  const skillsSectionRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<HTMLDivElement>(null);
+  const logsListRef = useRef<HTMLDivElement>(null);
 
   const colorOptions = useMemo(
     () => ["amber", "white", "green", "blue", "red"] as const,
+    [],
+  );
+
+  const themeOptions = useMemo(
+    () => ["dark", "light"] as const,
+    [],
+  );
+
+  const configMenuItems = useMemo(
+    () => [
+      { label: "Colors", section: "colors" as ConfigSection },
+      { label: "Theme", section: "theme" as ConfigSection },
+    ],
     [],
   );
 
@@ -41,6 +87,28 @@ const Pipboy: React.FC<PipboyProps> = ({
     // Detect Safari browser
     const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
     setBrowser(isSafari ? "safari" : "chrome");
+  }, []);
+
+  // Fetch activity logs (git commits + tweets) on mount
+  useEffect(() => {
+    fetch('/api/git-logs')
+      .then(res => res.json())
+      .then(data => {
+        setActivityLogs(data.activity || []);
+        setLogsLoading(false);
+      })
+      .catch(() => setLogsLoading(false));
+  }, []);
+
+  // Fetch GitHub stats on mount
+  useEffect(() => {
+    fetch('/api/github-stats')
+      .then(res => res.json())
+      .then(data => {
+        setGithubStats(data);
+        setStatsLoading(false);
+      })
+      .catch(() => setStatsLoading(false));
   }, []);
 
   // Track cursor position (only on non-touch devices when active)
@@ -73,95 +141,168 @@ const Pipboy: React.FC<PipboyProps> = ({
     };
   }, [isActive, isTouchDevice]);
 
-  // Keyboard navigation with j/k for scrolling and h/l for tabs
+  // Scroll selected log into view
   useEffect(() => {
-    // Only attach keyboard listener when Pipboy is active (not when Dashboard is showing)
+    if (logsMode && logsListRef.current) {
+      const selectedElement = logsListRef.current.children[selectedLogIndex] as HTMLElement;
+      if (selectedElement) {
+        selectedElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+    }
+  }, [logsMode, selectedLogIndex]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    // Only attach keyboard listener when Pipboy is active
     if (!isActive) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       // Ignore if shift key is pressed (to allow Shift+J/K for page scrolling)
       if (e.shiftKey) return;
 
-      const scrollAmount = 50;
-      const tabs = ["items", "stats", "quests", "projects", "misc"];
+      const tabs = ["logs", "stats", "about", "projects", "blogs", "misc"];
       const currentIndex = tabs.indexOf(activeTab);
 
-      // j/k for menu navigation (works on all tabs)
+      // Logs mode handling (navigating within activity logs)
+      if (logsMode) {
+        if (e.key === "j") {
+          e.preventDefault();
+          setSelectedLogIndex(prev =>
+            prev === activityLogs.length - 1 ? 0 : prev + 1
+          );
+        } else if (e.key === "k") {
+          e.preventDefault();
+          setSelectedLogIndex(prev =>
+            prev === 0 ? activityLogs.length - 1 : prev - 1
+          );
+        } else if (e.key === "Enter") {
+          e.preventDefault();
+          const selectedEntry = activityLogs[selectedLogIndex];
+          if (selectedEntry?.url) {
+            window.open(selectedEntry.url, '_blank', 'noopener,noreferrer');
+          }
+        } else if (e.key === "Escape") {
+          e.preventDefault();
+          setLogsMode(false);
+        }
+        return; // Don't process other keys in logs mode
+      }
+
+      // Config mode handling
+      if (configMode) {
+        if (configSection === 'main') {
+          // Main config menu navigation
+          if (e.key === "j") {
+            e.preventDefault();
+            setSelectedConfigIndex(prev =>
+              prev === configMenuItems.length - 1 ? 0 : prev + 1
+            );
+          } else if (e.key === "k") {
+            e.preventDefault();
+            setSelectedConfigIndex(prev =>
+              prev === 0 ? configMenuItems.length - 1 : prev - 1
+            );
+          } else if (e.key === "Enter") {
+            e.preventDefault();
+            setConfigSection(configMenuItems[selectedConfigIndex].section);
+          } else if (e.key === "Escape") {
+            e.preventDefault();
+            setConfigMode(false);
+            setConfigSection('main');
+          }
+        } else if (configSection === 'colors') {
+          // Color selection
+          if (e.key === "j") {
+            e.preventDefault();
+            setSelectedColorIndex(prev =>
+              prev === colorOptions.length - 1 ? 0 : prev + 1
+            );
+          } else if (e.key === "k") {
+            e.preventDefault();
+            setSelectedColorIndex(prev =>
+              prev === 0 ? colorOptions.length - 1 : prev - 1
+            );
+          } else if (e.key === "Enter") {
+            e.preventDefault();
+            setColor(colorOptions[selectedColorIndex] as ThemeColor);
+          } else if (e.key === "Escape") {
+            e.preventDefault();
+            setConfigSection('main');
+          }
+        } else if (configSection === 'theme') {
+          // Theme selection
+          if (e.key === "j" || e.key === "k") {
+            e.preventDefault();
+            setSelectedThemeIndex(prev => prev === 0 ? 1 : 0);
+          } else if (e.key === "Enter") {
+            e.preventDefault();
+            setTheme(themeOptions[selectedThemeIndex]);
+          } else if (e.key === "Escape") {
+            e.preventDefault();
+            setConfigSection('main');
+          }
+        }
+        return; // Don't process other keys in config mode
+      }
+
+      // Normal mode: j/k for menu navigation
       if (e.key === "j") {
         e.preventDefault();
-        const nextIndex =
-          currentIndex === tabs.length - 1 ? 0 : currentIndex + 1;
+        const nextIndex = currentIndex === tabs.length - 1 ? 0 : currentIndex + 1;
         setActiveTab(tabs[nextIndex]);
       } else if (e.key === "k") {
         e.preventDefault();
-        const prevIndex =
-          currentIndex === 0 ? tabs.length - 1 : currentIndex - 1;
+        const prevIndex = currentIndex === 0 ? tabs.length - 1 : currentIndex - 1;
         setActiveTab(tabs[prevIndex]);
       }
 
-      // h/l for scrolling content
-      if (e.key === "l" && activeTab !== "items") {
+      // Enter handling for different tabs
+      if (e.key === "Enter") {
         e.preventDefault();
-        if (activeTab === "quests" && skillsSectionRef.current) {
-          skillsSectionRef.current.scrollBy({
-            top: scrollAmount,
-            behavior: "smooth",
-          });
-        } else if (tabContentRef.current) {
-          tabContentRef.current.scrollBy({
-            top: scrollAmount,
-            behavior: "smooth",
-          });
-        }
-      } else if (e.key === "h" && activeTab !== "items") {
-        e.preventDefault();
-        if (activeTab === "quests" && skillsSectionRef.current) {
-          skillsSectionRef.current.scrollBy({
-            top: -scrollAmount,
-            behavior: "smooth",
-          });
-        } else if (tabContentRef.current) {
-          tabContentRef.current.scrollBy({
-            top: -scrollAmount,
-            behavior: "smooth",
-          });
+        if (activeTab === "logs" && activityLogs.length > 0) {
+          setLogsMode(true);
+          setSelectedLogIndex(0);
+        } else if (activeTab === "misc") {
+          setConfigMode(true);
+        } else if (activeTab === "projects") {
+          router.push("/projects");
+        } else if (activeTab === "about") {
+          router.push("/about");
+        } else if (activeTab === "blogs") {
+          router.push("/blog");
         }
       }
 
-      // Settings tab - use j/k for color selection (handled above for nav)
-      if (activeTab === "misc" && e.key === "Enter") {
+      // Direct shortcuts (l/s/a/p/b/c/t)
+      if (e.key === "l") {
         e.preventDefault();
-        setColor(colorOptions[selectedColorIndex] as ThemeColor);
-      }
-
-      // Projects tab - Enter to navigate
-      if (activeTab === "projects" && e.key === "Enter") {
-        e.preventDefault();
-        router.push("/projects");
-      }
-
-      // Direct shortcuts (r/s/q/p/c)
-      if (e.key === "r") {
-        e.preventDefault();
-        setActiveTab("items");
+        setActiveTab("logs");
+        setLogsMode(false); // Exit logs mode when switching tabs
       } else if (e.key === "s") {
         e.preventDefault();
         setActiveTab("stats");
-      } else if (e.key === "q") {
+      } else if (e.key === "a") {
         e.preventDefault();
-        setActiveTab("quests");
+        setActiveTab("about");
       } else if (e.key === "p") {
         e.preventDefault();
         setActiveTab("projects");
-      } else if (e.key === "c") {
+      } else if (e.key === "b") {
+        e.preventDefault();
+        setActiveTab("blogs");
+      } else if (e.key === "m") {
         e.preventDefault();
         setActiveTab("misc");
+      } else if (e.key === "v" && theme === "dark") {
+        e.preventDefault();
+        setShowVideoBg(prev => !prev);
       }
+      // Note: 't' (theme toggle) and 'c' (cycle colors) are now global keybinds
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isActive, activeTab, selectedColorIndex, colorOptions, setColor, router]);
+  }, [isActive, activeTab, configMode, configSection, logsMode, selectedLogIndex, activityLogs, selectedColorIndex, selectedConfigIndex, selectedThemeIndex, colorOptions, themeOptions, configMenuItems, setColor, setTheme, router, theme]);
 
   const handleColorChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -193,11 +334,29 @@ const Pipboy: React.FC<PipboyProps> = ({
       <div ref={frameRef} className={`${styles.frame} ${styles.noclick}`}>
         <div className={`${styles.piece} ${styles.output} ${styles.filter}`}>
           <div className={styles.pipboy}>
-            {/* Keybind Bar - Top horizontal bar with nav info */}
+            {/* Keybind Bar - Dynamic based on mode */}
             {!isTouchDevice && (
               <div className={styles["keybind-bar"]}>
-                <span className={styles["keybind-item"]}>[j/k] nav</span>
-                <span className={styles["keybind-item"]}>[h/l] scroll</span>
+                {logsMode ? (
+                  <>
+                    <span className={styles["keybind-item"]}>[j/k] select</span>
+                    <span className={styles["keybind-item"]}>[enter] open</span>
+                    <span className={styles["keybind-item"]}>[esc] back</span>
+                  </>
+                ) : configMode ? (
+                  <>
+                    <span className={styles["keybind-item"]}>[j/k] select</span>
+                    <span className={styles["keybind-item"]}>[enter] apply</span>
+                    <span className={styles["keybind-item"]}>[esc] back</span>
+                  </>
+                ) : (
+                  <>
+                    <span className={styles["keybind-item"]}>[j/k] nav</span>
+                    <span className={styles["keybind-item"]}>[enter] select</span>
+                    <span className={styles["keybind-item"]}>[t] theme [c] color</span>
+                    {theme === "dark" && <span className={styles["keybind-item"]}>[v] video</span>}
+                  </>
+                )}
               </div>
             )}
 
@@ -218,14 +377,14 @@ const Pipboy: React.FC<PipboyProps> = ({
                   {/* Dashboard Menu */}
                   <div className={styles["dashboard-menu"]}>
                     <div
-                      className={`${styles["dashboard-menu-item"]} ${activeTab === "items" ? styles.active : ""}`}
-                      onClick={() => setActiveTab("items")}
+                      className={`${styles["dashboard-menu-item"]} ${activeTab === "logs" ? styles.active : ""}`}
+                      onClick={() => setActiveTab("logs")}
                       role="button"
                       tabIndex={0}
                     >
                       <span className={styles["menu-icon"]}>~</span>
-                      <span className={styles["menu-key"]}>[r]</span>
-                      <span className={styles["menu-label"]}>Status</span>
+                      <span className={styles["menu-key"]}>[l]</span>
+                      <span className={styles["menu-label"]}>Logs</span>
                     </div>
                     <div
                       className={`${styles["dashboard-menu-item"]} ${activeTab === "stats" ? styles.active : ""}`}
@@ -238,14 +397,14 @@ const Pipboy: React.FC<PipboyProps> = ({
                       <span className={styles["menu-label"]}>S.P.E.C.I.A.L</span>
                     </div>
                     <div
-                      className={`${styles["dashboard-menu-item"]} ${activeTab === "quests" ? styles.active : ""}`}
-                      onClick={() => setActiveTab("quests")}
+                      className={`${styles["dashboard-menu-item"]} ${activeTab === "about" ? styles.active : ""}`}
+                      onClick={() => setActiveTab("about")}
                       role="button"
                       tabIndex={0}
                     >
-                      <span className={styles["menu-icon"]}>◆</span>
-                      <span className={styles["menu-key"]}>[q]</span>
-                      <span className={styles["menu-label"]}>Skills</span>
+                      <span className={styles["menu-icon"]}>◈</span>
+                      <span className={styles["menu-key"]}>[a]</span>
+                      <span className={styles["menu-label"]}>About</span>
                     </div>
                     <div
                       className={`${styles["dashboard-menu-item"]} ${activeTab === "projects" ? styles.active : ""}`}
@@ -258,13 +417,23 @@ const Pipboy: React.FC<PipboyProps> = ({
                       <span className={styles["menu-label"]}>Projects</span>
                     </div>
                     <div
+                      className={`${styles["dashboard-menu-item"]} ${activeTab === "blogs" ? styles.active : ""}`}
+                      onClick={() => setActiveTab("blogs")}
+                      role="button"
+                      tabIndex={0}
+                    >
+                      <span className={styles["menu-icon"]}>✎</span>
+                      <span className={styles["menu-key"]}>[b]</span>
+                      <span className={styles["menu-label"]}>Blogs</span>
+                    </div>
+                    <div
                       className={`${styles["dashboard-menu-item"]} ${activeTab === "misc" ? styles.active : ""}`}
                       onClick={() => setActiveTab("misc")}
                       role="button"
                       tabIndex={0}
                     >
                       <span className={styles["menu-icon"]}>⚙</span>
-                      <span className={styles["menu-key"]}>[c]</span>
+                      <span className={styles["menu-key"]}>[m]</span>
                       <span className={styles["menu-label"]}>Config</span>
                     </div>
                   </div>
@@ -274,26 +443,43 @@ const Pipboy: React.FC<PipboyProps> = ({
                 <div
                   ref={tabContentRef}
                   className={styles["dashboard-right"]}
-                  style={{ overflowY: "auto" }}
                 >
-                  {/* Status Tab */}
-                  {activeTab === "items" && (
-                    <div id="items" className={styles["tab-panel"]}>
-                      <div className={styles["about-content"]}>
-                        <p>
-                          I build software that feels good to use, from agentic event
-                          planning systems to high-performance tools.
-                        </p>
-                        <p>
-                          I make tools I actually use: CLIs for day logging and
-                          deep work tracking, desktop apps for AI workflows, and
-                          utilities like pastebins.
-                        </p>
-                        <p>
-                          Right now I&apos;m interested in agentic systems, real-time
-                          data processing, and the next generation frontend interface
-                          for the age of intelligence.
-                        </p>
+                  {/* Logs Tab */}
+                  {activeTab === "logs" && (
+                    <div id="logs" className={styles["tab-panel"]}>
+                      <h3 className={styles["pip-title"]}>
+                        Activity
+                        {!logsMode && !logsLoading && activityLogs.length > 0 && (
+                          <span className={styles["pip-title-hint"]}> - press enter</span>
+                        )}
+                      </h3>
+                      <div className={styles["pip-body"]}>
+                        {logsLoading ? (
+                          <div className={styles["logs-loading"]}>Loading activity...</div>
+                        ) : (
+                          <div ref={logsListRef} className={styles["logs-list"]}>
+                            {activityLogs.map((entry, index) => (
+                              <div
+                                key={entry.id}
+                                className={`${styles["log-entry"]} ${logsMode && selectedLogIndex === index ? styles.focused : ""} ${entry.isPrivate ? styles.private : ""} ${entry.url ? styles.clickable : ""} ${entry.type === 'tweet' ? styles.tweet : ''}`}
+                                onClick={() => {
+                                  if (entry.url) {
+                                    window.open(entry.url, '_blank', 'noopener,noreferrer');
+                                  }
+                                }}
+                                role={entry.url ? "link" : undefined}
+                                tabIndex={entry.url ? 0 : undefined}
+                              >
+                                <span className={styles["log-hash"]}>
+                                  {entry.type === 'commit' ? entry.shortHash : '𝕏'}
+                                </span>
+                                <span className={styles["log-repo"]}>{entry.source}</span>
+                                <span className={styles["log-message"]}>{entry.message}</span>
+                                <span className={styles["log-date"]}>{entry.date}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
@@ -377,73 +563,58 @@ const Pipboy: React.FC<PipboyProps> = ({
                             </div>
                           </div>
                         </div>
+
+                        {/* Terminal Stats */}
+                        <div className={styles["terminal-stats"]}>
+                          {statsLoading ? (
+                            <div className={styles["terminal-loading"]}>...</div>
+                          ) : githubStats ? (
+                            <div className={styles["terminal-grid"]}>
+                              <div className={styles["terminal-stat"]}>
+                                <span className={styles["stat-label"]}>Commits/Week</span>
+                                <span className={styles["stat-value"]}>{githubStats.commitsThisWeek}</span>
+                              </div>
+                              <div className={styles["terminal-stat"]}>
+                                <span className={styles["stat-label"]}>Streak</span>
+                                <span className={styles["stat-value"]}>{githubStats.currentStreak}d</span>
+                              </div>
+                              <div className={styles["terminal-stat"]}>
+                                <span className={styles["stat-label"]}>Active Repos</span>
+                                <span className={styles["stat-value"]}>{githubStats.activeRepos}</span>
+                              </div>
+                            </div>
+                          ) : null}
+                        </div>
                       </div>
                     </div>
                   )}
 
-                  {/* Skills Tab */}
-                  {activeTab === "quests" && (
-                    <div id="skills" className={styles["tab-panel"]}>
-                      <h3 className={styles["pip-title"]}>Technical Skills</h3>
+                  {/* About Tab */}
+                  {activeTab === "about" && (
+                    <div id="about" className={styles["tab-panel"]}>
+                      <h3 className={styles["pip-title"]}>About</h3>
                       <div className={styles["pip-body"]}>
-                        <div
-                          ref={skillsSectionRef}
-                          className={styles["skills-section"]}
-                        >
-                          <h4 className={styles["skill-category"]}>Programming Languages</h4>
-                          <ul className={styles["skill-list"]}>
-                            {skillDetails.skill1.map((skill) => (
-                              <li key={skill.name}>
-                                <div className={styles["skill-card"]}>
-                                  <div className={styles["skill-name"]}>{skill.name}</div>
-                                </div>
-                              </li>
-                            ))}
-                          </ul>
-
-                          <h4 className={styles["skill-category"]}>Frontend Stack</h4>
-                          <ul className={styles["skill-list"]}>
-                            {skillDetails.skill2.map((skill) => (
-                              <li key={skill.name}>
-                                <div className={styles["skill-card"]}>
-                                  <div className={styles["skill-name"]}>{skill.name}</div>
-                                </div>
-                              </li>
-                            ))}
-                          </ul>
-
-                          <h4 className={styles["skill-category"]}>Backend & APIs</h4>
-                          <ul className={styles["skill-list"]}>
-                            {skillDetails.skill3.map((skill) => (
-                              <li key={skill.name}>
-                                <div className={styles["skill-card"]}>
-                                  <div className={styles["skill-name"]}>{skill.name}</div>
-                                </div>
-                              </li>
-                            ))}
-                          </ul>
-
-                          <h4 className={styles["skill-category"]}>Databases & ORMs</h4>
-                          <ul className={styles["skill-list"]}>
-                            {skillDetails.skill4.map((skill) => (
-                              <li key={skill.name}>
-                                <div className={styles["skill-card"]}>
-                                  <div className={styles["skill-name"]}>{skill.name}</div>
-                                </div>
-                              </li>
-                            ))}
-                          </ul>
-
-                          <h4 className={styles["skill-category"]}>Cloud & Infrastructure</h4>
-                          <ul className={styles["skill-list"]}>
-                            {skillDetails.skill5.map((skill) => (
-                              <li key={skill.name}>
-                                <div className={styles["skill-card"]}>
-                                  <div className={styles["skill-name"]}>{skill.name}</div>
-                                </div>
-                              </li>
-                            ))}
-                          </ul>
+                        <div style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          height: '200px',
+                          gap: '24px'
+                        }}>
+                          <p style={{ opacity: 0.7, fontSize: '14px' }}>
+                            View about page
+                          </p>
+                          <span
+                            className="retro-flash-text"
+                            style={{
+                              fontSize: '12px',
+                              letterSpacing: '2px',
+                              textTransform: 'uppercase'
+                            }}
+                          >
+                            press enter
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -452,29 +623,92 @@ const Pipboy: React.FC<PipboyProps> = ({
                   {/* Settings Tab */}
                   {activeTab === "misc" && (
                     <div id="misc" className={styles["tab-panel"]}>
-                      <h3 className={styles["pip-title"]}>Settings</h3>
+                      <h3 className={styles["pip-title"]}>Config</h3>
                       <div className={styles["pip-body"]}>
-                        <div className={styles.colors} onChange={handleColorChange}>
-                          {colorOptions.map((colorOption, index) => (
-                            <React.Fragment key={colorOption}>
-                              <input
-                                id={`b-${colorOption}`}
-                                type="radio"
-                                name="colors"
-                                value={colorOption}
-                                checked={color === colorOption}
-                                readOnly
-                              />
-                              <label
-                                htmlFor={`b-${colorOption}`}
-                                className={selectedColorIndex === index ? styles.focused : ""}
-                                onClick={handleColorLabelClick(index, colorOption)}
+                        {!configMode ? (
+                          <div style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            height: '200px',
+                            gap: '24px'
+                          }}>
+                            <p style={{ opacity: 0.7, fontSize: '14px' }}>
+                              Configure appearance
+                            </p>
+                            <span
+                              className="retro-flash-text"
+                              style={{
+                                fontSize: '12px',
+                                letterSpacing: '2px',
+                                textTransform: 'uppercase'
+                              }}
+                            >
+                              press enter
+                            </span>
+                          </div>
+                        ) : configSection === 'main' ? (
+                          <div className={styles["config-menu"]}>
+                            {configMenuItems.map((item, index) => (
+                              <div
+                                key={item.section}
+                                className={`${styles["config-menu-item"]} ${selectedConfigIndex === index ? styles.focused : ""}`}
+                                onClick={() => {
+                                  setSelectedConfigIndex(index);
+                                  setConfigSection(item.section);
+                                }}
+                                role="button"
+                                tabIndex={0}
                               >
-                                {colorOption.charAt(0).toUpperCase() + colorOption.slice(1)}
-                              </label>
-                            </React.Fragment>
-                          ))}
-                        </div>
+                                <span className={styles["config-icon"]}>{item.section === 'colors' ? '◆' : '◐'}</span>
+                                <span className={styles["config-label"]}>{item.label}</span>
+                              </div>
+                            ))}
+                          </div>
+                        ) : configSection === 'colors' ? (
+                          <div className={styles.colors} onChange={handleColorChange}>
+                            {colorOptions.map((colorOption, index) => (
+                              <React.Fragment key={colorOption}>
+                                <input
+                                  id={`b-${colorOption}`}
+                                  type="radio"
+                                  name="colors"
+                                  value={colorOption}
+                                  checked={color === colorOption}
+                                  readOnly
+                                />
+                                <label
+                                  htmlFor={`b-${colorOption}`}
+                                  className={selectedColorIndex === index ? styles.focused : ""}
+                                  onClick={handleColorLabelClick(index, colorOption)}
+                                >
+                                  {colorOption.charAt(0).toUpperCase() + colorOption.slice(1)}
+                                </label>
+                              </React.Fragment>
+                            ))}
+                          </div>
+                        ) : configSection === 'theme' ? (
+                          <div className={styles["theme-options"]}>
+                            {themeOptions.map((themeOption, index) => (
+                              <div
+                                key={themeOption}
+                                className={`${styles["theme-option"]} ${selectedThemeIndex === index ? styles.focused : ""} ${theme === themeOption ? styles.active : ""}`}
+                                onClick={() => {
+                                  setSelectedThemeIndex(index);
+                                  if (isTouchDevice) {
+                                    setTheme(themeOption);
+                                  }
+                                }}
+                                role="button"
+                                tabIndex={0}
+                              >
+                                <span className={styles["theme-icon"]}>{themeOption === 'dark' ? '☾' : '☀'}</span>
+                                <span className={styles["theme-label"]}>{themeOption.charAt(0).toUpperCase() + themeOption.slice(1)}</span>
+                              </div>
+                            ))}
+                          </div>
+                        ) : null}
                       </div>
                     </div>
                   )}
@@ -509,6 +743,37 @@ const Pipboy: React.FC<PipboyProps> = ({
                       </div>
                     </div>
                   )}
+
+                  {/* Blogs Tab */}
+                  {activeTab === "blogs" && (
+                    <div id="blogs" className={styles["tab-panel"]}>
+                      <h3 className={styles["pip-title"]}>Blog</h3>
+                      <div className={styles["pip-body"]}>
+                        <div style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          height: '200px',
+                          gap: '24px'
+                        }}>
+                          <p style={{ opacity: 0.7, fontSize: '14px' }}>
+                            View blog posts
+                          </p>
+                          <span
+                            className="retro-flash-text"
+                            style={{
+                              fontSize: '12px',
+                              letterSpacing: '2px',
+                              textTransform: 'uppercase'
+                            }}
+                          >
+                            press enter
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
                 {/* End dashboard-right */}
               </div>
@@ -517,6 +782,30 @@ const Pipboy: React.FC<PipboyProps> = ({
             {/* End tab-content */}
 
           </div>
+
+          {/* Video Background */}
+          {theme === "dark" && showVideoBg && (
+            <div className={`${styles.piece} ${styles.noclick}`} style={{ zIndex: -2 }}>
+              <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  opacity: 0.4,
+                }}
+              >
+                <source src="/gifs/skyscrape.webm" type="video/webm" />
+                <source src="/gifs/skyscrape.mp4" type="video/mp4" />
+              </video>
+            </div>
+          )}
 
           {/* Effects */}
           <div
