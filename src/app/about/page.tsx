@@ -7,6 +7,7 @@ import SocialsIndex from "@/components/custom/SocialsIndex";
 import { projects } from "@/utils/projectList";
 
 type TabType = "about" | "projects" | "socials";
+type FocusArea = "menu" | "content";
 
 const socialLinks = [
   { name: "github", url: "https://github.com/kraitsura" },
@@ -22,6 +23,7 @@ function SummarizeContent() {
   const searchParams = useSearchParams();
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isKeyboardNav, setIsKeyboardNav] = useState(false);
+  const [focusArea, setFocusArea] = useState<FocusArea>("menu");
 
   // Initialize active tab from URL param or default to "about"
   const tabParam = searchParams.get("tab");
@@ -29,9 +31,11 @@ function SummarizeContent() {
     tabParam === "projects" || tabParam === "socials" ? tabParam : "about";
   const [activeTab, setActiveTab] = useState<TabType>(initialTab);
 
-  // Reset selected index when tab changes
+  // Reset selected index and focus when tab changes
   useEffect(() => {
     setSelectedIndex(0);
+    // Reset focus to menu when switching tabs
+    setFocusArea("menu");
   }, [activeTab]);
 
   useEffect(() => {
@@ -48,6 +52,11 @@ function SummarizeContent() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Backspace") {
         e.preventDefault();
+        // If focus is on content, go back to menu
+        if (focusArea === "content") {
+          setFocusArea("menu");
+          return;
+        }
         // If on projects or socials, go back to about
         if (activeTab === "projects" || activeTab === "socials") {
           setActiveTab("about");
@@ -58,41 +67,76 @@ function SummarizeContent() {
         return;
       }
 
-      // Shift+j/k for tab navigation
-      if (e.shiftKey && (e.key === "J" || e.key === "K")) {
+      // h/l for horizontal navigation
+      if (e.key === "h" || e.key === "ArrowLeft") {
         e.preventDefault();
-        const currentIndex = tabs.indexOf(activeTab);
-        if (e.key === "J") {
-          const nextIndex = Math.min(currentIndex + 1, tabs.length - 1);
-          setActiveTab(tabs[nextIndex]);
-        } else if (e.key === "K") {
-          const prevIndex = Math.max(currentIndex - 1, 0);
-          setActiveTab(tabs[prevIndex]);
+        if (activeTab === "projects") {
+          // Switch focus to menu (content -> menu)
+          if (focusArea === "content") {
+            setFocusArea("menu");
+          }
+        } else if (activeTab === "socials" && focusArea === "content") {
+          // Navigate socials horizontally
+          setIsKeyboardNav(true);
+          setSelectedIndex((prev) => Math.max(prev - 1, 0));
         }
         return;
       }
 
-      // j/k navigation only works in projects and socials tabs
-      if (activeTab === "about") return;
-
-      const maxIndex =
-        activeTab === "projects" ? projects.length - 1 : socialLinks.length - 1;
-
-      if (e.key === "j" || e.key === "ArrowDown") {
-        e.preventDefault();
-        setIsKeyboardNav(true);
-        setSelectedIndex((prev) => Math.min(prev + 1, maxIndex));
-      } else if (e.key === "k" || e.key === "ArrowUp") {
-        e.preventDefault();
-        setIsKeyboardNav(true);
-        setSelectedIndex((prev) => Math.max(prev - 1, 0));
-      } else if (e.key === "Enter" && !e.shiftKey) {
-        // Only regular Enter (not Shift+Enter) opens projects/socials
+      if (e.key === "l" || e.key === "ArrowRight") {
         e.preventDefault();
         if (activeTab === "projects") {
-          router.push(`/projects/${projects[selectedIndex].id}?from=summarize`);
-        } else if (activeTab === "socials") {
-          window.open(socialLinks[selectedIndex].url, "_blank");
+          // Switch focus to content (menu -> content)
+          if (focusArea === "menu") {
+            setFocusArea("content");
+          }
+        } else if (activeTab === "socials" && focusArea === "content") {
+          // Navigate socials horizontally
+          setIsKeyboardNav(true);
+          setSelectedIndex((prev) => Math.min(prev + 1, socialLinks.length - 1));
+        }
+        return;
+      }
+
+      // j/k for vertical navigation (menu items or content depending on focus)
+      if (e.key === "j" || e.key === "ArrowDown") {
+        e.preventDefault();
+        if (focusArea === "menu") {
+          // Navigate menu items
+          const currentIndex = tabs.indexOf(activeTab);
+          const nextIndex = Math.min(currentIndex + 1, tabs.length - 1);
+          setActiveTab(tabs[nextIndex]);
+        }
+        // Note: j/k in content area for projects is handled by ProjectsIndex
+        return;
+      }
+
+      if (e.key === "k" || e.key === "ArrowUp") {
+        e.preventDefault();
+        if (focusArea === "menu") {
+          // Navigate menu items
+          const currentIndex = tabs.indexOf(activeTab);
+          const prevIndex = Math.max(currentIndex - 1, 0);
+          setActiveTab(tabs[prevIndex]);
+        }
+        // Note: j/k in content area for projects is handled by ProjectsIndex
+        return;
+      }
+
+      // Enter handling
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        if (focusArea === "menu") {
+          // If on a tab that has content, focus into it
+          if (activeTab === "projects" || activeTab === "socials") {
+            setFocusArea("content");
+          }
+        } else if (focusArea === "content") {
+          if (activeTab === "projects") {
+            router.push(`/projects/${projects[selectedIndex].id}?from=summarize`);
+          } else if (activeTab === "socials") {
+            window.open(socialLinks[selectedIndex].url, "_blank");
+          }
         }
       }
     };
@@ -102,7 +146,7 @@ function SummarizeContent() {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [router, activeTab, selectedIndex]);
+  }, [router, activeTab, selectedIndex, focusArea]);
 
   return (
     <div className="h-screen overflow-y-auto bg-[#FFFBF0] px-4 sm:px-6 py-16 sm:py-20">
@@ -111,16 +155,19 @@ function SummarizeContent() {
         suppressHydrationWarning
         className={`sticky top-0 z-10 bg-[#FFFBF0] pb-4 flex flex-col gap-2 mb-8 lg:mb-0 lg:pb-0 lg:bg-transparent lg:static lg:fixed lg:top-1/2 lg:-translate-y-1/2 lg:left-[calc(50%-325px-100px)] transition-all duration-700 ease-out ${
           isVisible ? "opacity-100" : "opacity-0"
-        }`}
+        } ${focusArea === "menu" ? "lg:border-l-2 lg:border-[#1a1a1a] lg:pl-2" : ""}`}
         style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
       >
         {tabs.map((tab) => (
           <button
             key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`text-left text-sm text-[#1a1a1a] hover:opacity-60 transition-opacity ${
+            onClick={() => {
+              setActiveTab(tab);
+              setFocusArea("menu");
+            }}
+            className={`text-left text-sm text-[#1a1a1a] hover:opacity-60 transition-all duration-200 ${
               activeTab === tab ? "underline underline-offset-[3px]" : ""
-            }`}
+            } ${activeTab === tab && focusArea === "menu" ? "translate-x-1" : ""}`}
           >
             {tab}
           </button>
@@ -201,6 +248,7 @@ function SummarizeContent() {
                   setSelectedIndex={setSelectedIndex}
                   isKeyboardNav={isKeyboardNav}
                   setIsKeyboardNav={setIsKeyboardNav}
+                  isFocused={focusArea === "content"}
                 />
               </div>
               <div
@@ -208,24 +256,35 @@ function SummarizeContent() {
                 style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
               >
                 <p>
-                  ⇧j/k to navigate tabs, j/k/↑↓ for projects, h/l/←→ for sections, ↵ to open, backspace to go back.
+                  j/k nav menu, h/l switch focus, ↵ select, backspace back
                 </p>
               </div>
             </>
           )}
 
           {activeTab === "socials" && (
-            <div
-              className="text-base sm:text-lg text-[#1a1a1a] leading-[1.7]"
-              style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
-            >
-              <SocialsIndex
-                selectedIndex={selectedIndex}
-                setSelectedIndex={setSelectedIndex}
-                isKeyboardNav={isKeyboardNav}
-                setIsKeyboardNav={setIsKeyboardNav}
-              />
-            </div>
+            <>
+              <div
+                className="text-base sm:text-lg text-[#1a1a1a] leading-[1.7]"
+                style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
+              >
+                <SocialsIndex
+                  selectedIndex={selectedIndex}
+                  setSelectedIndex={setSelectedIndex}
+                  isKeyboardNav={isKeyboardNav}
+                  setIsKeyboardNav={setIsKeyboardNav}
+                  isFocused={focusArea === "content"}
+                />
+              </div>
+              <div
+                className="text-sm opacity-60 mt-8 text-center"
+                style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
+              >
+                <p>
+                  j/k nav menu, h/l nav socials, ↵ open, backspace back
+                </p>
+              </div>
+            </>
           )}
         </div>
       </div>
