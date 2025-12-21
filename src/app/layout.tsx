@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import localFont from "next/font/local";
 import { Inter, Roboto_Mono, Playfair_Display, Press_Start_2P } from "next/font/google";
 import Header from "@/components/custom/Header";
 import VideoPreloader from "@/components/VideoPreloader";
+import { GlobalKeybinds } from "@/components/GlobalKeybinds";
 import { TouchProvider } from "@/contexts/TouchContext";
 import { ThemeColorProvider } from "@/contexts/ThemeColorContext";
+import { AppThemeProvider } from "@/contexts/AppThemeContext";
+import { RocketSceneProvider } from "@/contexts/RocketSceneContext";
 import "./globals.css";
 
 const geistSans = localFont({
@@ -59,16 +63,36 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`scroll-smooth ${geistSans.variable} ${geistMono.variable} ${inter.variable} ${robotoMono.variable} ${playfair.variable} ${pressStart2P.variable}`}
     >
+      <head>
+        {process.env.NODE_ENV === "development" && (
+          <>
+            <Script
+              src="//unpkg.com/react-grab/dist/index.global.js"
+              strategy="beforeInteractive"
+            />
+            <Script
+              src="//unpkg.com/@react-grab/claude-code/dist/client.global.js"
+              strategy="lazyOnload"
+            />
+          </>
+        )}
+      </head>
       <body className={`${inter.className} flex flex-col min-h-screen`}>
-        <ThemeColorProvider>
-          <TouchProvider>
-            <VideoPreloader />
-            <Header />
-            <main className="flex-grow">{children}</main>
-          </TouchProvider>
-        </ThemeColorProvider>
+        <AppThemeProvider>
+          <ThemeColorProvider>
+            <TouchProvider>
+              <RocketSceneProvider>
+                <GlobalKeybinds />
+                <VideoPreloader />
+                <Header />
+                <main className="flex-grow">{children}</main>
+              </RocketSceneProvider>
+            </TouchProvider>
+          </ThemeColorProvider>
+        </AppThemeProvider>
       </body>
     </html>
   );
