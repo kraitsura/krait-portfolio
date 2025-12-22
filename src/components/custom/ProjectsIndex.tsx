@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { projectsByCategory, categoryOrder } from "@/utils/projectList";
 
 interface ProjectsIndexProps {
@@ -9,11 +9,13 @@ interface ProjectsIndexProps {
   setSelectedIndex: (index: number) => void;
   isKeyboardNav: boolean;
   setIsKeyboardNav: (value: boolean) => void;
+  isFocused?: boolean;
 }
 
 export default function ProjectsIndex({
   selectedIndex,
   setSelectedIndex,
+  isFocused = true,
 }: ProjectsIndexProps) {
   const listItemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const listContainerRef = useRef<HTMLDivElement>(null);
@@ -82,40 +84,14 @@ export default function ProjectsIndex({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Helper to get section start indices
-  const getSectionStartIndices = () => {
-    const indices: number[] = [];
-    let currentIndex = 0;
 
-    categoryOrder.forEach((category) => {
-      const categoryProjects = projectsByCategory[category];
-      if (categoryProjects.length > 0) {
-        indices.push(currentIndex);
-        currentIndex += categoryProjects.length;
-      }
-    });
-
-    return indices;
-  };
-
-  // Helper to find which section an index belongs to
-  const getSectionForIndex = useCallback((index: number): number => {
-    const sectionStarts = getSectionStartIndices();
-    for (let i = sectionStarts.length - 1; i >= 0; i--) {
-      if (index >= sectionStarts[i]) {
-        return i;
-      }
-    }
-    return 0;
-  }, []);
-
-  // Handle j/k/h/l and arrow key navigation
+  // Handle j/k navigation (only when this component is focused)
   useEffect(() => {
+    if (!isFocused) return;
+
     const handleKeyDown = (e: KeyboardEvent) => {
       // Guard against null centerIndex during initialization
       if (centerIndex === null) return;
-
-      const sectionStarts = getSectionStartIndices();
 
       // j or ArrowDown - next project
       if (e.key === 'j' || e.key === 'ArrowDown') {
@@ -133,31 +109,11 @@ export default function ProjectsIndex({
         setSelectedIndex(newIndex);
         smoothScrollToItem(newIndex);
       }
-      // l or ArrowRight - next section
-      else if (e.key === 'l' || e.key === 'ArrowRight') {
-        e.preventDefault();
-        const currentSection = getSectionForIndex(centerIndex);
-        const nextSection = (currentSection + 1) % sectionStarts.length;
-        const newIndex = sectionStarts[nextSection];
-        setCenterIndex(newIndex);
-        setSelectedIndex(newIndex);
-        smoothScrollToItem(newIndex);
-      }
-      // h or ArrowLeft - previous section
-      else if (e.key === 'h' || e.key === 'ArrowLeft') {
-        e.preventDefault();
-        const currentSection = getSectionForIndex(centerIndex);
-        const prevSection = currentSection === 0 ? sectionStarts.length - 1 : currentSection - 1;
-        const newIndex = sectionStarts[prevSection];
-        setCenterIndex(newIndex);
-        setSelectedIndex(newIndex);
-        smoothScrollToItem(newIndex);
-      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [centerIndex, setSelectedIndex, orderedProjects.length, getSectionForIndex]);
+  }, [isFocused, centerIndex, setSelectedIndex, orderedProjects.length]);
 
   // Handle page-wide scrolling
   useEffect(() => {
@@ -223,7 +179,7 @@ export default function ProjectsIndex({
     e.preventDefault();
     setSelectedIndex(index);
     setCenterIndex(index);
-    window.location.href = `/projects/${orderedProjects[index].id}?from=summarize`;
+    window.location.href = `/projects/${orderedProjects[index].id}?from=about`;
   };
 
   return (
@@ -265,7 +221,7 @@ export default function ProjectsIndex({
                       <Link
                         key={project.id}
                         ref={(el) => { listItemRefs.current[index] = el; }}
-                        href={`/projects/${project.id}?from=summarize`}
+                        href={`/projects/${project.id}?from=about`}
                         onMouseEnter={() => handleMouseEnter(index)}
                         onMouseLeave={handleMouseLeave}
                         onClick={(e) => handleClick(e, index)}

@@ -4,6 +4,8 @@ import React, { useEffect, useRef, useState, useCallback, useMemo } from "react"
 import type { RocketScene } from "../three/RocketScene";
 import { Github, Linkedin, Twitter } from "lucide-react";
 import { useTouchDevice } from "@/contexts/TouchContext";
+import { useThemeColor } from "@/contexts/ThemeColorContext";
+import { useAppTheme } from "@/contexts/AppThemeContext";
 
 interface SocialLink {
   name: string;
@@ -17,10 +19,20 @@ interface DashboardProps {
 
 const Dashboard: React.FC<DashboardProps> = React.memo(({ isVisible = true }) => {
   const { isTouchDevice } = useTouchDevice();
+  const { color } = useThemeColor();
+  const { theme } = useAppTheme();
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<RocketScene | null>(null);
   const [selectedIndex, setSelectedIndex] = useState(1); // Start with LinkedIn (middle)
   const [isLaunching, setIsLaunching] = useState(false);
+
+  // On RocketScene (dark space background), white should stay white even in light mode
+  const rocketSceneColor = useMemo(() => {
+    if (color === 'white' && theme === 'light') {
+      return '#F5F5F5'; // Keep white on dark space background
+    }
+    return 'var(--theme-primary)';
+  }, [color, theme]);
 
   // Social links configuration
   const socialLinks: SocialLink[] = useMemo(() => [
@@ -143,12 +155,12 @@ const Dashboard: React.FC<DashboardProps> = React.memo(({ isVisible = true }) =>
 
   const buttonStyle = useMemo(() => ({
     pointerEvents: (isVisible ? 'auto' : 'none') as React.CSSProperties['pointerEvents'],
-    color: 'var(--theme-primary)'
-  }), [isVisible]);
+    color: rocketSceneColor
+  }), [isVisible, rocketSceneColor]);
 
   const textStyle = useMemo(() => ({
-    color: 'var(--theme-primary)'
-  }), []);
+    color: rocketSceneColor
+  }), [rocketSceneColor]);
 
   return (
     <main className="min-h-screen overflow-hidden font-mono">

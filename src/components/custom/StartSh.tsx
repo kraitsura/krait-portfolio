@@ -24,6 +24,7 @@ const StartSh: React.FC = () => {
   const [started, setStarted] = useState(false);
   const [showKeystroke, setShowKeystroke] = useState(false);
   const [shadowColor, setShadowColor] = useState('#ff0000');
+  const [blogsShadowColor, setBlogsShadowColor] = useState('#ff0000');
 
   // Loading states for smooth transitions
   const [sceneLoaded, setSceneLoaded] = useState(false);
@@ -73,16 +74,26 @@ const StartSh: React.FC = () => {
     videoPreloader.aggressivePreload('/gifs/skyscrape.webm');
   }, [router]);
 
-  // Handler for summarize.sh button
-  const handleSummarizeClick = useCallback(() => {
+  // Handler for about.sh button
+  const handleAboutClick = useCallback(() => {
     setStarted(true);
-    router.push('/summarize');
+    router.push('/about');
   }, [router]);
 
-  const handleSummarizeHover = () => {
+  const handleAboutHover = () => {
     setShadowColor(getRandomVibrantColor());
-    // Prefetch the route on hover for instant loading
-    router.prefetch('/summarize');
+    router.prefetch('/about');
+  };
+
+  // Handler for blogs.sh button
+  const handleBlogsClick = useCallback(() => {
+    setStarted(true);
+    router.push('/blog');
+  }, [router]);
+
+  const handleBlogsHover = () => {
+    setBlogsShadowColor(getRandomVibrantColor());
+    router.prefetch('/blog');
   };
 
 
@@ -123,17 +134,19 @@ const StartSh: React.FC = () => {
 
       if (e.key === "Enter") {
         e.preventDefault();
-        if (e.shiftKey) {
-          handleSummarizeClick();
-        } else {
-          handleStartClick();
-        }
+        handleStartClick();
+      } else if (e.key === "a" || e.key === "A") {
+        e.preventDefault();
+        handleAboutClick();
+      } else if (e.key === "b" || e.key === "B") {
+        e.preventDefault();
+        handleBlogsClick();
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [started, handleStartClick, handleSummarizeClick]);
+  }, [started, handleStartClick, handleAboutClick, handleBlogsClick]);
 
   return (
     <div
@@ -160,19 +173,19 @@ const StartSh: React.FC = () => {
         <h1 className="text-xl md:text-2xl font-bold mb-6 text-green-400">
           Welcome Home, spacecowboy
         </h1>
-        <div className="flex justify-between items-end">
-          <div className="flex flex-col gap-2 w-auto items-start">
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-row gap-2 w-full">
             <button
               onClick={handleStartClick}
               onMouseEnter={handleStartHover}
-              className="px-2 py-1.5 bg-green-600 text-black font-bold hover:bg-green-500 transition-colors duration-300 text-sm"
+              className="flex-1 px-2 py-1.5 bg-green-600 text-black font-bold hover:bg-green-500 transition-colors duration-300 text-sm text-center"
             >
               ./start.sh
             </button>
             <button
-              onClick={handleSummarizeClick}
-              onMouseEnter={handleSummarizeHover}
-              className="px-2 py-1.5 font-bold text-black transition-all duration-150 hover:translate-x-[3px] hover:translate-y-[3px] active:translate-x-0 active:translate-y-0 active:shadow-none tracking-tight text-sm text-left"
+              onClick={handleAboutClick}
+              onMouseEnter={handleAboutHover}
+              className="flex-1 px-2 py-1.5 font-bold text-black transition-all duration-150 hover:translate-x-[3px] hover:translate-y-[3px] active:translate-x-0 active:translate-y-0 active:shadow-none tracking-tight text-sm text-center"
               style={{
                 backgroundColor: '#FFFBF0',
                 boxShadow: `0 0 0 transparent`,
@@ -184,10 +197,27 @@ const StartSh: React.FC = () => {
                 e.currentTarget.style.boxShadow = `0 0 0 transparent`;
               }}
             >
-              ./summarize.sh
+              ./about.sh
+            </button>
+            <button
+              onClick={handleBlogsClick}
+              onMouseEnter={handleBlogsHover}
+              className="flex-1 px-2 py-1.5 font-bold text-black transition-all duration-150 hover:translate-x-[3px] hover:translate-y-[3px] active:translate-x-0 active:translate-y-0 active:shadow-none tracking-tight text-sm text-center"
+              style={{
+                backgroundColor: '#FFFBF0',
+                boxShadow: `0 0 0 transparent`,
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.boxShadow = `6px 6px 0 ${blogsShadowColor}`;
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.boxShadow = `0 0 0 transparent`;
+              }}
+            >
+              ./blogs.sh
             </button>
           </div>
-          <div className="flex flex-col items-end gap-1">
+          <div className="flex justify-between items-center">
             <p className="text-sm text-green-600">v1.0.0</p>
             {!isTouchDevice && (
               <p
@@ -195,7 +225,7 @@ const StartSh: React.FC = () => {
                   showKeystroke ? "opacity-60" : "opacity-0"
                 }`}
               >
-                ⏎: Start | ⇧⏎: Summarize
+                ⏎: Start | a: About | b: Blogs | t: Theme | c: Color
               </p>
             )}
           </div>

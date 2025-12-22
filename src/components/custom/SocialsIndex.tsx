@@ -20,6 +20,7 @@ interface SocialsIndexProps {
   setSelectedIndex: (index: number) => void;
   isKeyboardNav: boolean;
   setIsKeyboardNav: (value: boolean) => void;
+  isFocused?: boolean;
 }
 
 export default function SocialsIndex({
@@ -27,6 +28,7 @@ export default function SocialsIndex({
   setSelectedIndex,
   isKeyboardNav,
   setIsKeyboardNav,
+  isFocused = true,
 }: SocialsIndexProps) {
   const handleMouseEnter = (index: number) => {
     if (!isKeyboardNav) {
@@ -42,7 +44,7 @@ export default function SocialsIndex({
 
   return (
     <div className="flex justify-center pt-[30vh] lg:pt-[40vh]" onMouseMove={handleMouseMove}>
-      <div className="flex gap-6">
+      <div className={`flex gap-6 transition-all duration-200 ${isFocused ? "border-b-2 border-[#1a1a1a] pb-1" : ""}`}>
         {socialLinks.map((social, index) => (
           <a
             key={social.name}
@@ -50,8 +52,10 @@ export default function SocialsIndex({
             target="_blank"
             rel="noopener noreferrer"
             onMouseEnter={() => handleMouseEnter(index)}
-            className={`transition-all ${
-              index === selectedIndex
+            className={`transition-all duration-200 ${
+              index === selectedIndex && isFocused
+                ? "opacity-100 underline underline-offset-4 translate-y-[-2px]"
+                : index === selectedIndex
                 ? "opacity-100 underline underline-offset-4"
                 : "opacity-50"
             }`}

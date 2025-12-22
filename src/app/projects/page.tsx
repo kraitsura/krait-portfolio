@@ -3,20 +3,20 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Project, projectsByCategory, categoryOrder } from '@/utils/projectList';
 import ProjectCard from '@/components/custom/ProjectCard';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useTouchDevice } from '@/contexts/TouchContext';
+import { useAppTheme } from '@/contexts/AppThemeContext';
 
 const Projects: React.FC = () => {
   const { isTouchDevice } = useTouchDevice();
+  const { theme } = useAppTheme();
+  const isDark = theme === 'dark';
+  const searchParams = useSearchParams();
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [highlightedIndex, setHighlightedIndex] = useState<number>(() => {
-    // Restore highlighted index from sessionStorage on mount
-    if (typeof window !== 'undefined') {
-      const saved = sessionStorage.getItem('projectHighlightedIndex');
-      return saved ? parseInt(saved, 10) : 0;
-    }
-    return 0;
-  });
+
+  // Get initial index from URL param (for back navigation)
+  const initialIndex = parseInt(searchParams.get('idx') || '0', 10);
+  const [highlightedIndex, setHighlightedIndex] = useState<number>(initialIndex);
   const router = useRouter();
   const projectRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
@@ -32,14 +32,11 @@ const Projects: React.FC = () => {
       setHighlightedIndex(projectIndex);
     }
 
-    // Save current highlighted index before navigating
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem('projectHighlightedIndex', projectIndex.toString());
-    }
     setSelectedId(project.id);
     setTimeout(() => {
-      router.push(`/projects/${project.id}`);
-    }, 300); // Reduced delay for smoother transition
+      // Pass index via URL for back navigation
+      router.push(`/projects/${project.id}?idx=${projectIndex}`);
+    }, 300);
   }, [allProjects, router]);
 
   // Helper to get the starting index of each section
@@ -131,13 +128,6 @@ const Projects: React.FC = () => {
     }
   }, [highlightedIndex, allProjects]);
 
-  // Save highlighted index to sessionStorage whenever it changes
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem('projectHighlightedIndex', highlightedIndex.toString());
-    }
-  }, [highlightedIndex]);
-
   // Calculate total index across all categories for staggered animations
   let globalIndex = 0;
 
@@ -147,13 +137,15 @@ const Projects: React.FC = () => {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
-      className="min-h-screen bg-black text-white p-4 md:p-8 overflow-hidden relative"
+      className={`min-h-screen p-4 md:p-8 overflow-hidden relative transition-colors duration-300 theme-text ${
+        isDark ? 'bg-black' : 'bg-[#FFFBF0]'
+      }`}
     >
       <motion.h1
         initial={{ x: -100, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ delay: 0.5, duration: 0.8 }}
-        className="text-5xl md:text-8xl font-thin mb-16 fixed top-24 left-4 z-10 theme-text"
+        className="text-5xl md:text-8xl font-thin mb-16 fixed top-24 left-4 z-10"
         style={{ writingMode: 'vertical-lr', textOrientation: 'mixed' }}
       >
         Projects
@@ -228,7 +220,7 @@ const Projects: React.FC = () => {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2, duration: 0.5 }}
-                className="text-3xl font-thin mb-3 md:mb-6 theme-text"
+                className="text-3xl font-thin mb-3 md:mb-6"
               >
                 {category}
               </motion.h2>

@@ -9,12 +9,14 @@ import React, {
   lazy,
   Suspense,
 } from "react";
-import Image from "next/image";
+// import Image from "next/image"; // Temporarily unused while background is disabled
 import styles from "@/styles/fadeIn.module.css";
 import Pipboy from "@/components/custom/Pipboy";
 import { useTouchDevice } from "@/contexts/TouchContext";
-import { isSafari, getVideoFormat, getVideoMimeType } from "@/utils/browser";
-import { videoPreloader } from "@/utils/videoPreloader";
+import { useAppTheme } from "@/contexts/AppThemeContext";
+import { useRocketScene } from "@/contexts/RocketSceneContext";
+// import { isSafari, getVideoFormat, getVideoMimeType } from "@/utils/browser"; // Temporarily unused
+// import { videoPreloader } from "@/utils/videoPreloader"; // Temporarily unused
 import ErrorBoundary from "@/components/ErrorBoundary";
 
 const Dashboard = lazy(() => import("./Dashboard"));
@@ -69,8 +71,12 @@ const NavigationArrow = memo(
 
 NavigationArrow.displayName = "NavigationArrow";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const IntroPage: React.FC<IntroPageProps> = ({ image }) => {
   const { isTouchDevice } = useTouchDevice();
+  const { theme } = useAppTheme();
+  const { setIsInRocketScene } = useRocketScene();
+  const isDark = theme === 'dark';
   const [scrollState, setScrollState] = useState({
     percentage: 0,
     isAtBottom: false,
@@ -80,11 +86,13 @@ const IntroPage: React.FC<IntroPageProps> = ({ image }) => {
   const [mediaLoaded, setMediaLoaded] = useState(false);
   const [mediaVisible, setMediaVisible] = useState(false);
   const [uiVisible, setUiVisible] = useState(false);
-  const [useTransplantedVideo, setUseTransplantedVideo] = useState(false);
+  // const [useTransplantedVideo, setUseTransplantedVideo] = useState(false); // Temporarily unused
   const containerRef = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const videoContainerRef = useRef<HTMLDivElement>(null);
+  // const videoRef = useRef<HTMLVideoElement>(null); // Temporarily unused
+  // const videoContainerRef = useRef<HTMLDivElement>(null); // Temporarily unused
 
+  // Background is temporarily disabled - commenting out related code
+  /*
   // Detect if the image is a video file
   const isVideo = useMemo(() => {
     const ext = image.split(".").pop()?.toLowerCase();
@@ -109,6 +117,7 @@ const IntroPage: React.FC<IntroPageProps> = ({ image }) => {
     const cachedUrl = videoPreloader.getCachedUrl(image);
     return cachedUrl || actualVideoPath;
   }, [image, actualVideoPath]);
+  */
 
   // Handler for when media is ready to display
   const handleMediaLoaded = useCallback(() => {
@@ -122,7 +131,8 @@ const IntroPage: React.FC<IntroPageProps> = ({ image }) => {
     }
   }, [mediaLoaded]);
 
-  // Handler for video loading errors
+  // Handler for video loading errors (temporarily disabled with background)
+  /*
   const handleVideoError = useCallback(() => {
     // If video fails to load, show content anyway after a delay
     setTimeout(() => {
@@ -130,6 +140,7 @@ const IntroPage: React.FC<IntroPageProps> = ({ image }) => {
       setMediaVisible(true);
     }, 500);
   }, []);
+  */
 
   // Loading sequence: media loads → media fades in → UI fades in
   useEffect(() => {
@@ -146,7 +157,15 @@ const IntroPage: React.FC<IntroPageProps> = ({ image }) => {
     return () => clearTimeout(uiTimer);
   }, [mediaLoaded]);
 
-  // Poll for video ready state + fallback timeout
+  // Background disabled - immediately trigger loaded state
+  useEffect(() => {
+    if (mediaLoaded) return;
+    // Background is disabled, trigger loaded immediately
+    handleMediaLoaded();
+  }, [mediaLoaded, handleMediaLoaded]);
+
+  // Poll for video ready state + fallback timeout (disabled with background)
+  /*
   useEffect(() => {
     if (mediaLoaded) return;
 
@@ -197,6 +216,7 @@ const IntroPage: React.FC<IntroPageProps> = ({ image }) => {
       clearTimeout(fallbackTimer);
     };
   }, [mediaLoaded, image, handleMediaLoaded]);
+  */
 
   const handleScroll = useCallback(() => {
     if (containerRef.current) {
@@ -262,16 +282,34 @@ const IntroPage: React.FC<IntroPageProps> = ({ image }) => {
 
   const isFullyDarkened = scrollState.percentage >= 95;
 
+  // Sync rocket scene state with context for Header to know
+  useEffect(() => {
+    setIsInRocketScene(isFullyDarkened);
+  }, [isFullyDarkened, setIsInRocketScene]);
+
   const gradientStyle = useMemo(
-    () => ({
-      background: `
-      linear-gradient(to bottom,
-        rgba(0,0,0,${0.2 + scrollState.percentage * 0.008}) 0%,
-        rgba(0,0,0,${0.6 + scrollState.percentage * 0.004}) 50%,
-        rgba(0,0,0,1) 100%)
-    `,
-    }),
-    [scrollState.percentage],
+    () => {
+      if (isDark) {
+        return {
+          background: `
+          linear-gradient(to bottom,
+            rgba(0,0,0,${0.2 + scrollState.percentage * 0.008}) 0%,
+            rgba(0,0,0,${0.6 + scrollState.percentage * 0.004}) 50%,
+            rgba(0,0,0,1) 100%)
+        `,
+        };
+      }
+      // Light mode: cream gradient
+      return {
+        background: `
+        linear-gradient(to bottom,
+          rgba(255,251,240,${0.2 + scrollState.percentage * 0.008}) 0%,
+          rgba(255,251,240,${0.6 + scrollState.percentage * 0.004}) 50%,
+          rgba(255,251,240,1) 100%)
+      `,
+      };
+    },
+    [scrollState.percentage, isDark],
   );
 
   // Remove loading state when component mounts
@@ -279,7 +317,8 @@ const IntroPage: React.FC<IntroPageProps> = ({ image }) => {
     document.body.removeAttribute('data-loading');
   }, []);
 
-  // Transplant preloaded video element if available (not for Safari)
+  // Transplant preloaded video element if available (not for Safari) - temporarily disabled
+  /*
   useEffect(() => {
     if (!isVideo || !videoContainerRef.current) return;
 
@@ -325,19 +364,23 @@ const IntroPage: React.FC<IntroPageProps> = ({ image }) => {
       delete (window as Window & { __preloadedVideoElement?: HTMLVideoElement }).__preloadedVideoElement;
     }
   }, [isVideo, handleMediaLoaded]);
+  */
 
   return (
     <div
       ref={containerRef}
-      className="intro-container h-screen w-full overflow-y-scroll relative bg-black text-white"
+      className={`intro-container h-screen w-full overflow-y-scroll relative transition-colors duration-300 ${
+        isDark ? 'bg-black text-white' : 'bg-[#FFFBF0] text-[#1a1a1a]'
+      }`}
     >
         {/* Loading overlay - covers everything until video is ready */}
         <div
-          className={`absolute inset-0 bg-black z-50 transition-opacity duration-1000 ease-out ${
-            mediaVisible ? "opacity-0 pointer-events-none" : "opacity-100"
-          }`}
+          className={`absolute inset-0 z-50 transition-opacity duration-1000 ease-out ${
+            isDark ? 'bg-black' : 'bg-[#FFFBF0]'
+          } ${mediaVisible ? "opacity-0 pointer-events-none" : "opacity-100"}`}
         />
 
+        {/* Background video/image temporarily disabled
         <div className="absolute inset-0 overflow-hidden">
           <div className={`absolute inset-0 transition-opacity duration-1500 ease-out ${
             mediaVisible ? "opacity-100" : "opacity-0"
@@ -378,6 +421,7 @@ const IntroPage: React.FC<IntroPageProps> = ({ image }) => {
             )}
           </div>
         </div>
+        */}
         <div
           className="absolute inset-0 pointer-events-none transition-opacity duration-1000"
           style={gradientStyle}
@@ -385,11 +429,11 @@ const IntroPage: React.FC<IntroPageProps> = ({ image }) => {
         <div className="min-h-[200vh] relative z-10">
           <div className="h-screen flex items-center justify-center">
             <div
-              className={`ui-content h-full w-full flex flex-col items-center justify-center gap-8 transition-all duration-700 ease-out ${
+              className={`ui-content w-full flex flex-col items-center justify-center gap-8 transition-all duration-700 ease-out ${
                 uiVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
               }`}
             >
-              <div className="w-full max-w-[800px]">
+              <div className="w-full max-w-[1000px]">
                 <Pipboy
                   isActive={scrollState.percentage < 70}
                 />
@@ -403,7 +447,7 @@ const IntroPage: React.FC<IntroPageProps> = ({ image }) => {
                           : "opacity-0 -translate-y-2 pointer-events-none"
                       }`}
                     >
-                      <div className="text-[10px] text-white opacity-40 mb-1">
+                      <div className={`text-[10px] opacity-40 mb-1 ${isDark ? 'text-white' : 'text-[#1a1a1a]'}`}>
                         ⇧J
                       </div>
                       <NavigationArrow
@@ -423,9 +467,9 @@ const IntroPage: React.FC<IntroPageProps> = ({ image }) => {
           >
             <div className={styles.pipboyContainer}>
               <ErrorBoundary
-                fallback={<div className="min-h-screen bg-black" />}
+                fallback={<div className={`min-h-screen ${isDark ? 'bg-black' : 'bg-[#FFFBF0]'}`} />}
               >
-                <Suspense fallback={<div className="min-h-screen bg-black" />}>
+                <Suspense fallback={<div className={`min-h-screen ${isDark ? 'bg-black' : 'bg-[#FFFBF0]'}`} />}>
                   <Dashboard isVisible={isFullyDarkened} />
                 </Suspense>
               </ErrorBoundary>
@@ -440,7 +484,7 @@ const IntroPage: React.FC<IntroPageProps> = ({ image }) => {
               >
                 <NavigationArrow direction="up" onClick={scrollToTop} />
                 {!isTouchDevice && (
-                  <div className="text-[10px] text-white opacity-40 mt-1">
+                  <div className={`text-[10px] opacity-40 mt-1 ${isDark ? 'text-white' : 'text-[#1a1a1a]'}`}>
                     ⇧K
                   </div>
                 )}

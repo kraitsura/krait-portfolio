@@ -3,6 +3,8 @@ import Image from 'next/image';
 import { Project } from '@/utils/projectList';
 import { iconMap } from '@/utils/iconMap';
 import { Playfair_Display, Roboto_Mono } from 'next/font/google';
+import { useAppTheme } from '@/contexts/AppThemeContext';
+import { useThemeColor } from '@/contexts/ThemeColorContext';
 
 interface ProjectCardProps {
   project: Project;
@@ -16,6 +18,10 @@ const playfair = Playfair_Display({ subsets: ['latin'] });
 const robotoMono = Roboto_Mono({ subsets: ['latin'] });
 
 const ProjectCard: React.FC<ProjectCardProps> = React.memo(({ project, index, onClick, isSelected, isHighlighted = false }) => {
+  const { theme } = useAppTheme();
+  const isDark = theme === 'dark';
+  const { effectiveColor } = useThemeColor();
+  const isBlackTheme = effectiveColor === 'black';
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [hoveredTag, setHoveredTag] = useState<number | null>(null);
   const [iconSize, setIconSize] = useState(16);
@@ -263,13 +269,15 @@ const ProjectCard: React.FC<ProjectCardProps> = React.memo(({ project, index, on
       </div>
 
       <div
-        className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent theme-text p-2 md:p-3 lg:p-4 overflow-hidden transition-all duration-300 ${
+        className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t to-transparent theme-text p-2 md:p-3 lg:p-4 overflow-hidden transition-all duration-300 ${
+          isDark ? 'from-black' : 'from-[#FFFBF0]'
+        } ${
           isSelected ? 'opacity-0 translate-y-5' : 'opacity-100 translate-y-0'
         }`}
       >
         <div className="relative overflow-hidden">
           <div className="absolute inset-y-0 left-0 right-0 bg-[var(--theme-primary)] h-[2px] my-auto" />
-          <h3 className={`${playfair.className} text-black text-base md:text-lg lg:text-xl font-semibold relative bg-[var(--theme-primary)] inline-block pr-2`}>
+          <h3 className={`${playfair.className} ${isBlackTheme ? 'text-white' : 'text-black'} text-base md:text-lg lg:text-xl font-semibold relative bg-[var(--theme-primary)] inline-block pr-2`}>
             {project.title}
           </h3>
         </div>
