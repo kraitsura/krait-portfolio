@@ -17,6 +17,19 @@ export default function BlogToolbar() {
     router.push(backHref);
   };
 
+  // Use theme colors for buttons
+  const buttonBgStyle = {
+    backgroundColor: isDark
+      ? 'rgba(var(--theme-primary-rgb), 0.1)'
+      : 'rgba(var(--theme-primary-rgb), 0.08)',
+  };
+
+  const iconStyle = {
+    color: isDark
+      ? 'rgba(var(--theme-primary-rgb), 0.7)'
+      : 'rgba(var(--theme-primary-rgb), 0.8)',
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, x: -10 }}
@@ -28,9 +41,7 @@ export default function BlogToolbar() {
       <button
         onClick={handleBack}
         className="p-2 rounded-full transition-all duration-300 hover:scale-110"
-        style={{
-          backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)',
-        }}
+        style={buttonBgStyle}
         aria-label={isArticlePage ? 'Back to blog' : 'Back to home'}
       >
         <svg
@@ -43,7 +54,7 @@ export default function BlogToolbar() {
           strokeWidth="1.5"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className={isDark ? 'text-white/60' : 'text-[#1a1a1a]/50'}
+          style={iconStyle}
         >
           <path d="m12 19-7-7 7-7" />
           <path d="M19 12H5" />
@@ -54,9 +65,7 @@ export default function BlogToolbar() {
       <button
         onClick={toggleTheme}
         className="p-2 rounded-full transition-all duration-300 hover:scale-110"
-        style={{
-          backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)',
-        }}
+        style={buttonBgStyle}
         aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
       >
         {isDark ? (
@@ -70,7 +79,7 @@ export default function BlogToolbar() {
             strokeWidth="1.5"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="text-white/60"
+            style={iconStyle}
           >
             <circle cx="12" cy="12" r="4" />
             <path d="M12 2v2" />
@@ -93,7 +102,7 @@ export default function BlogToolbar() {
             strokeWidth="1.5"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="text-[#1a1a1a]/50"
+            style={iconStyle}
           >
             <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
           </svg>

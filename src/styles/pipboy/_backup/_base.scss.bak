@@ -1,0 +1,167 @@
+// ============================================================================
+// BASE STRUCTURAL STYLES
+// ============================================================================
+// Core container, frame, and output area styles
+
+@use 'variables' as *;
+
+// ============================================================================
+// UTILITY CLASSES
+// ============================================================================
+
+.noclick {
+    @include no-click;
+}
+
+.piece {
+    display: block;
+    @include full-absolute;
+}
+
+// ============================================================================
+// MAIN FRAME
+// ============================================================================
+
+.frame {
+    background-color: transparent;
+    border-radius: 30px;
+    border: 15px solid;
+    border-bottom-color: #0f0e0d;
+    border-left-color: #080807;
+    border-right-color: #080807;
+    border-top-color: #020202;
+    @include deep-shadow;
+    @include no-click;
+    max-width: 1200px;
+    height: min(480px, calc(100vh - 80px));
+    width: 96%;
+    max-height: calc(100vh - 60px);
+    margin: 0 auto;
+    overflow: hidden;
+    position: relative;
+    min-height: 340px;
+    container-type: inline-size;
+    container-name: pipboy-frame;
+}
+
+.frame * {
+    @include hide-cursor;
+    font-weight: normal;
+}
+
+// ============================================================================
+// OUTPUT AREA
+// ============================================================================
+
+.output {
+    // @include crt-flicker(crt-output); // PERF: Removed - 10ms animation causes constant repaints
+    background-color: var(--black);
+    position: absolute;
+    padding: 30px;
+    @include clickable;
+    z-index: -1;
+    @include hide-cursor;
+
+    // Text glow only in dark mode
+    :global(html:not(.light)) & {
+        @include text-glow;
+    }
+}
+
+// ============================================================================
+// DISABLED STATE
+// ============================================================================
+
+.frame .disabled {
+    color: rgb(var(--alt));
+    @include no-click;
+}
+
+// ============================================================================
+// BUTTONS
+// ============================================================================
+
+.frame button {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    color: rgb(var(--main));
+    border: 1px solid rgb(var(--main));
+    padding: 3px 10px;
+    @include smooth-transition;
+}
+
+.frame button:hover,
+.frame button:focus {
+    background: rgba(var(--alt), 0.25);
+    outline: 1px solid;
+}
+
+// ============================================================================
+// LIGHT MODE OVERRIDES - Vintage Paper Terminal
+// ============================================================================
+// Transforms CRT into aged paper document with ink-like typography
+// Note: CSS variables are defined in globals.css
+
+// Frame becomes aged brass/copper bezel with strong contrast
+.frame {
+    :global(html.light) & {
+        border-bottom-color: #6a5a4a;
+        border-left-color: #4a3a2a;
+        border-right-color: #4a3a2a;
+        border-top-color: #3a2a1a;
+        box-shadow:
+            inset 0 0 3rem rgba(0, 0, 0, 0.1),
+            inset 0 0 1rem rgba(0, 0, 0, 0.06),
+            0 6px 30px rgba(40, 30, 20, 0.25),
+            0 2px 8px rgba(40, 30, 20, 0.15);
+
+        button {
+            border-width: 1.5px;
+            transition: all 0.15s ease;
+
+            &:hover,
+            &:focus {
+                background: rgba(var(--main), 0.1);
+                box-shadow: inset 0 -1px 0 currentColor;
+            }
+        }
+
+        .disabled {
+            opacity: 0.45;
+        }
+    }
+}
+
+// Output becomes warm parchment with ink-like text
+.output {
+    :global(html.light) & {
+        background-color: var(--paper, #f4ede4);
+        // Ink bleed effect - subtle softness like real ink on paper
+        text-shadow:
+            0 0 0.3px currentColor,
+            0 0.3px 0.8px rgba(var(--ink, 45, 35, 25), 0.12);
+    }
+}
+
+// Paper ruling lines - like aged notebook/telegraph paper
+.scanlines {
+    :global(html.light) & {
+        background: repeating-linear-gradient(
+            to bottom,
+            transparent 0px,
+            transparent 20px,
+            rgba(140, 120, 90, 0.06) 20px,
+            rgba(140, 120, 90, 0.06) 21px
+        );
+        background-size: 100% 21px;
+        opacity: 0.8;
+    }
+}
+
+// Title background strip matches paper
+.pip-title::after {
+    :global(html.light) & {
+        background: var(--paper, #f4ede4);
+    }
+}

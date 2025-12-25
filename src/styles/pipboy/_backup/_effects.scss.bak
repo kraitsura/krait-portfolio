@@ -1,0 +1,168 @@
+// ============================================================================
+// VISUAL EFFECTS
+// ============================================================================
+// CRT scanlines, glow effects, and custom cursor styles
+
+@use 'variables' as *;
+
+// ============================================================================
+// SCANLINES
+// ============================================================================
+
+.scanlines {
+    // @include scanlines; // PERF: Removed - expensive repeating gradient
+    border-radius: 30px;
+    position: absolute;
+    @include full-absolute;
+    z-index: 0;
+    // PERF: Simplified to subtle horizontal lines with larger spacing
+    background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 3px,
+        rgba(0, 0, 0, 0.03) 3px,
+        rgba(0, 0, 0, 0.03) 4px
+    );
+}
+
+// ============================================================================
+// GLOW EFFECT
+// ============================================================================
+
+.glow {
+    @include crt-glow(0.15);
+    @include no-click;
+    position: fixed;
+    @include full-absolute;
+    z-index: 2;
+
+    // Performant glow animation - only in dark mode, slower duration
+    :global(html:not(.light)) & {
+        animation: crt-glow-slow 8s ease-in-out infinite;
+    }
+}
+
+// PERF: Slower, GPU-friendly glow animation using opacity only
+@keyframes crt-glow-slow {
+    0%, 100% { opacity: 0.12; }
+    50% { opacity: 0.18; }
+}
+
+// ============================================================================
+// CUSTOM CURSOR
+// ============================================================================
+
+.cursor {
+    position: absolute;
+    z-index: 9999;
+    @include no-click;
+    will-change: transform;
+}
+
+.cursor::before {
+    content: "";
+    display: block;
+    width: 20px;
+    height: 25px;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+// Cursor states
+.cursor.cursor-hidden::before {
+    background-image: unset;
+}
+
+.cursor.cursor-default::before {
+    background-image: url("/cursor/nv-cursor.png");
+    -webkit-filter: brightness(0.8);
+    filter: brightness(0.8);
+}
+
+.cursor.cursor-input::before {
+    background-image: url("/cursor/nv-cur-text.png");
+    -webkit-filter: brightness(0.8);
+    filter: brightness(0.8);
+}
+
+.cursor.cursor-active::before {
+    background-image: url("/cursor/nv-cursor.png");
+    -webkit-filter: brightness(1.15) saturate(1.15);
+    filter: brightness(1.15) saturate(1.15);
+}
+
+// ============================================================================
+// FADE SWAP ANIMATION
+// ============================================================================
+
+.fade-a {
+    animation: fade-swap 8s infinite;
+    animation-delay: -4s;
+    opacity: 1;
+}
+
+.fade-b {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    padding: 0 6px;
+    opacity: 0;
+    animation: fade-swap 8s infinite;
+}
+
+.pip-head .fade-b {
+    padding: 0 10px;
+}
+
+// ============================================================================
+// LIGHT MODE OVERRIDES - Vintage Paper Terminal Effects
+// ============================================================================
+
+// Aged paper vignette - darkened edges like old documents
+.glow {
+    :global(html.light) & {
+        background: radial-gradient(
+            ellipse 120% 100% at center,
+            transparent 0%,
+            transparent 45%,
+            rgba(120, 100, 70, 0.08) 65%,
+            rgba(90, 70, 40, 0.18) 85%,
+            rgba(60, 45, 25, 0.28) 100%
+        );
+        opacity: 1;
+        animation: none;
+        pointer-events: none;
+    }
+}
+
+// Paper grain texture overlay
+// PERF: Removed SVG noise texture - mix-blend-mode is expensive
+// .output {
+//     :global(html.light) &::after {
+//         content: '';
+//         position: absolute;
+//         inset: 0;
+//         background-image: url("data:image/svg+xml,...");
+//         opacity: 0.025;
+//         pointer-events: none;
+//         mix-blend-mode: multiply;
+//         border-radius: inherit;
+//     }
+// }
+
+// Softer cursor for paper aesthetic
+.cursor-default::before,
+.cursor-input::before,
+.cursor-active::before {
+    :global(html.light) & {
+        filter: brightness(0.7) contrast(1.1);
+    }
+}
+
+// Fade animations adapt for paper
+.fade-a,
+.fade-b {
+    :global(html.light) & {
+        animation-timing-function: ease-in-out;
+    }
+}

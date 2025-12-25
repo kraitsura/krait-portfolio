@@ -1,0 +1,949 @@
+// ============================================================================
+// CONTENT SECTIONS
+// ============================================================================
+// Info tables, ASCII art, icons, posts, and dragon container
+
+@use 'variables' as *;
+
+// ============================================================================
+// INFO SECTION
+// ============================================================================
+
+.info {
+    width: 60%;
+    float: right;
+    padding-top: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+// ============================================================================
+// INFO TABLE
+// ============================================================================
+
+.info-table {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 3px;
+    width: 100%;
+
+    li {
+        float: none;
+        margin: 0;
+        width: auto;
+        border-top: 2px solid;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        &:nth-child(2n) {
+            clear: none;
+        }
+
+        b {
+            float: none;
+            margin-right: 0;
+        }
+    }
+}
+
+.info-table li::after,
+.extra::after {
+    @include pseudo-border(2px, 100%, var(--main));
+    right: 0;
+    top: 0;
+}
+
+.info-table .vboy-wrap {
+    border: none;
+}
+
+.info-table .vboy-wrap::after {
+    display: none;
+}
+
+// ============================================================================
+// EXTRA INFO
+// ============================================================================
+
+.extra {
+    border-top: 2px solid;
+    float: left;
+    clear: both;
+    width: 98.7%;
+    position: relative;
+    padding: 5px 6px;
+    margin: 0 0 0 1.3%;
+    padding-left: 34.6%;
+}
+
+.extra b {
+    position: absolute;
+    left: 6px;
+}
+
+// ============================================================================
+// ICONS
+// ============================================================================
+
+.item-icon {
+    position: absolute;
+    bottom: 4px;
+    left: 0;
+}
+
+.icon {
+    float: left;
+    width: 40px;
+    height: 40px;
+    margin-top: -20px;
+    margin-right: 7px;
+    border: 2px solid;
+    object-fit: contain;
+}
+
+.icon img {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+// ============================================================================
+// POST CONTENT
+// ============================================================================
+
+.post {
+    line-height: 1.5em;
+    padding-right: 20px;
+    font-size: 14px;
+}
+
+// ============================================================================
+// LEVEL BADGES
+// ============================================================================
+
+.level {
+    display: inline-block;
+    padding: 2px 6px;
+    margin-left: 8px;
+    font-size: 0.9em;
+    border: 1px solid;
+}
+
+.level-apprentice {
+    color: #6b9955;
+    border-color: #6b9955;
+    background: rgba(107, 153, 85, 0.1);
+}
+
+.level-journeyman {
+    color: #5599b5;
+    border-color: #5599b5;
+    background: rgba(85, 153, 181, 0.1);
+}
+
+.level-adept {
+    color: #9955b5;
+    border-color: #9955b5;
+    background: rgba(153, 85, 181, 0.1);
+}
+
+.level-expert {
+    color: #b55999;
+    border-color: #b55999;
+    background: rgba(181, 89, 153, 0.1);
+}
+
+.level-master {
+    color: #b59955;
+    border-color: #b59955;
+    background: rgba(181, 153, 85, 0.1);
+}
+
+// ============================================================================
+// ASCII ART (VBOY)
+// ============================================================================
+
+.vboy {
+    height: auto;
+    @include no-click;
+    font-family: monospace;
+    white-space: pre;
+    line-height: 1.5;
+    font-size: 12px;
+    display: inline-block;
+    padding: 15px;
+    text-align: center;
+    letter-spacing: 0;
+    margin: 0 auto;
+    min-width: unset;
+}
+
+.vboy-wrap {
+    width: 100%;
+    overflow-x: auto;
+    border: none;
+    margin-bottom: 20px;
+    text-align: center;
+    max-width: 100%;
+}
+
+.asciiLine {
+    margin: 0;
+    padding: 0;
+    font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace;
+    white-space: pre;
+    display: block;
+    line-height: 1.15;
+    height: 1.1em;
+    width: max-content;
+    user-select: none;
+    -webkit-user-select: none;
+    // Use optimizeLegibility for crisp Unicode characters
+    text-rendering: optimizeLegibility;
+    // Auto smoothing works better across different DPI monitors
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    // Explicit color inheritance for visibility
+    color: rgb(var(--main));
+    // Use font-size for scaling instead of transform to avoid blur
+    font-size: 10px;
+}
+
+// ============================================================================
+// DRAGON CONTAINER
+// ============================================================================
+
+.dragon-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 20px;
+    position: relative;
+    margin-top: 20px;
+}
+
+.dragon-text {
+    text-align: center;
+    margin-top: 20px;
+    font-weight: 300;
+    font-size: 14px;
+    letter-spacing: 0.05em;
+    line-height: 1.8;
+    opacity: 0.9;
+    position: relative;
+
+    p {
+        margin: 4px 0;
+        font-weight: 300;
+        color: rgb(var(--main));
+
+        &:first-child {
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+        }
+
+        &:last-child {
+            font-size: 13px;
+            opacity: 0.8;
+            font-style: italic;
+        }
+    }
+}
+
+// ============================================================================
+// DASHBOARD MENU (Neovim-style quick actions)
+// ============================================================================
+
+.dashboard-dragon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 0 8px 0;
+    flex-shrink: 0;
+    overflow: hidden;
+
+    .vboy {
+        padding: 8px 4px;
+        margin-bottom: 6px;
+        // Explicit color for light mode visibility
+        color: rgb(var(--main));
+        // Scale up the dragon without increasing container width
+        transform: scale(1.35);
+        transform-origin: center center;
+    }
+
+    .asciiLine {
+        // Larger base font-size for better visibility
+        font-size: 9px;
+        line-height: 1.1;
+        height: 1.05em;
+        // Ensure color is explicitly set
+        color: inherit;
+    }
+}
+
+.dashboard-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    margin-top: 4px;
+    padding: 0 2px;
+    flex: 1;
+    overflow: hidden;
+}
+
+.dashboard-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 8px;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: background-color 0.15s ease, opacity 0.15s ease;
+    font-family: monospace;
+    font-size: 11px;
+    letter-spacing: 0.02em;
+    opacity: 0.6;
+    flex-shrink: 0;
+
+    &:hover {
+        background: rgba(var(--main), 0.08);
+        opacity: 1;
+    }
+
+    &:focus {
+        outline: none;
+        background: rgba(var(--main), 0.12);
+        opacity: 1;
+    }
+
+    &.active {
+        opacity: 1;
+        background: rgba(var(--main), 0.15);
+
+        .menu-icon {
+            opacity: 1;
+        }
+
+        .menu-key {
+            opacity: 1;
+        }
+
+        .menu-label {
+            opacity: 1;
+            font-weight: 500;
+        }
+    }
+}
+
+.menu-icon {
+    font-size: 12px;
+    opacity: 0.6;
+    width: 14px;
+    text-align: center;
+}
+
+.menu-key {
+    font-family: monospace;
+    font-size: 10px;
+    opacity: 0.7;
+}
+
+.menu-label {
+    flex: 1;
+    opacity: 0.85;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+// ============================================================================
+// TAB PANEL (Content inside dashboard-right)
+// ============================================================================
+
+.tab-panel {
+    width: 100%;
+    height: 100%;
+}
+
+.welcome-text {
+    font-family: monospace;
+    font-size: 14px;
+    opacity: 0.6;
+    letter-spacing: 0.05em;
+}
+
+.about-content {
+    font-size: 13px;
+    line-height: 1.6;
+    opacity: 0.85;
+    letter-spacing: 0.02em;
+    padding: 8px 0;
+
+    p {
+        margin-bottom: 12px;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+}
+
+// ============================================================================
+// GIT LOGS (Terminal-style commit history)
+// ============================================================================
+
+.logs-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    max-height: 320px;
+    overflow-y: auto;
+    font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+    padding: 4px 0;
+
+    // Custom scrollbar for terminal feel
+    &::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: rgba(var(--main), 0.05);
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: rgba(var(--main), 0.3);
+        border-radius: 2px;
+
+        &:hover {
+            background: rgba(var(--main), 0.5);
+        }
+    }
+}
+
+.log-entry {
+    display: grid;
+    grid-template-columns: 56px 80px 1fr auto;
+    gap: 8px;
+    align-items: baseline;
+    padding: 6px 8px;
+    font-size: 11px;
+    border-left: 2px solid transparent;
+    transition: all 0.12s ease;
+    position: relative;
+
+    // Subtle row separator
+    &::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 56px;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(
+            90deg,
+            rgba(var(--main), 0.15) 0%,
+            rgba(var(--main), 0.05) 100%
+        );
+    }
+
+    &:last-child::after {
+        display: none;
+    }
+
+    &:hover {
+        background: rgba(var(--main), 0.06);
+        border-left-color: rgba(var(--main), 0.4);
+
+        .log-hash {
+            opacity: 1;
+        }
+
+        .log-message {
+            opacity: 1;
+        }
+
+        .log-date {
+            opacity: 0.7;
+        }
+    }
+
+    // Alternate row subtle tint
+    &:nth-child(odd) {
+        background: rgba(var(--main), 0.02);
+    }
+
+    // Focused state (keyboard navigation)
+    &.focused {
+        background: rgba(var(--main), 0.15);
+        border-left-color: rgb(var(--main));
+
+        .log-hash,
+        .log-message,
+        .log-repo {
+            opacity: 1;
+        }
+
+        .log-date {
+            opacity: 0.8;
+        }
+    }
+
+    // Clickable commits (public repos)
+    &.clickable {
+        cursor: pointer;
+
+        &:hover {
+            background: rgba(var(--main), 0.1);
+        }
+    }
+
+    // Private repo commits (redacted)
+    &.private {
+        .log-message {
+            font-style: italic;
+            opacity: 0.5;
+        }
+
+        .log-repo {
+            opacity: 0.4;
+
+            &::after {
+                content: ' 🔒';
+                font-size: 8px;
+            }
+        }
+    }
+
+    // Tweet entries - slightly different styling
+    &.tweet {
+        .log-hash {
+            font-size: 12px;
+            letter-spacing: 0;
+
+            &::before {
+                content: none;
+            }
+        }
+
+        .log-repo {
+            opacity: 0.5;
+            font-style: italic;
+        }
+    }
+}
+
+.log-hash {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    opacity: 0.7;
+    color: rgb(var(--main));
+
+    // Terminal hash prefix styling
+    &::before {
+        content: '●';
+        margin-right: 6px;
+        font-size: 6px;
+        vertical-align: middle;
+        opacity: 0.5;
+    }
+}
+
+.log-repo {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    opacity: 0.6;
+    color: rgb(var(--main));
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.log-message {
+    font-size: 11px;
+    letter-spacing: 0.01em;
+    opacity: 0.85;
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    // Truncate long messages with fade
+    mask-image: linear-gradient(
+        90deg,
+        black 90%,
+        transparent 100%
+    );
+    -webkit-mask-image: linear-gradient(
+        90deg,
+        black 90%,
+        transparent 100%
+    );
+}
+
+.log-date {
+    font-size: 9px;
+    font-family: 'SF Mono', monospace;
+    opacity: 0.45;
+    letter-spacing: 0.03em;
+    text-transform: lowercase;
+    white-space: nowrap;
+    padding-left: 8px;
+}
+
+.logs-loading {
+    font-family: monospace;
+    font-size: 12px;
+    opacity: 0.5;
+    letter-spacing: 0.05em;
+    padding: 20px 0;
+    text-align: center;
+
+    // Blinking cursor effect
+    &::after {
+        content: '_';
+        animation: blink-cursor 1s steps(2) infinite;
+    }
+}
+
+@keyframes blink-cursor {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+// ============================================================================
+// CONFIG MENU (Settings submenu)
+// ============================================================================
+
+.config-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px 8px;
+}
+
+.config-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.15s ease;
+    font-family: monospace;
+    font-size: 14px;
+    letter-spacing: 0.02em;
+    opacity: 0.7;
+    border: 1px solid transparent;
+
+    &:hover {
+        background: rgba(var(--main), 0.08);
+        opacity: 1;
+    }
+
+    &.focused {
+        background: rgba(var(--main), 0.12);
+        border-color: rgba(var(--main), 0.4);
+        opacity: 1;
+
+        .config-icon {
+            opacity: 1;
+        }
+
+        .config-label {
+            font-weight: 500;
+        }
+    }
+}
+
+.config-icon {
+    font-size: 16px;
+    opacity: 0.6;
+    width: 20px;
+    text-align: center;
+}
+
+.config-label {
+    flex: 1;
+    opacity: 0.85;
+}
+
+// ============================================================================
+// THEME OPTIONS (Light/Dark toggle)
+// ============================================================================
+
+.theme-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px 8px;
+}
+
+.theme-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.15s ease;
+    font-family: monospace;
+    font-size: 14px;
+    letter-spacing: 0.02em;
+    opacity: 0.6;
+    border: 1px solid transparent;
+
+    &:hover {
+        background: rgba(var(--main), 0.08);
+        opacity: 0.9;
+    }
+
+    &.focused {
+        background: rgba(var(--main), 0.12);
+        border-color: rgba(var(--main), 0.4);
+        opacity: 1;
+
+        .theme-icon {
+            opacity: 1;
+        }
+
+        .theme-label {
+            font-weight: 500;
+        }
+    }
+
+    &.active {
+        opacity: 1;
+
+        &::after {
+            content: '✓';
+            margin-left: auto;
+            font-size: 12px;
+            opacity: 0.8;
+        }
+    }
+
+    &.focused.active {
+        border-color: rgba(var(--main), 0.6);
+    }
+}
+
+.theme-icon {
+    font-size: 18px;
+    opacity: 0.6;
+    width: 24px;
+    text-align: center;
+}
+
+.theme-label {
+    flex: 1;
+    opacity: 0.85;
+}
+
+// ============================================================================
+// DARK MODE - Content Overrides matching Light Mode UI
+// ============================================================================
+
+// Dashboard menu items - glow effect on hover
+.dashboard-menu-item {
+    :global(html:not(.light)) & {
+        &:hover {
+            background: rgba(var(--main), 0.06);
+            box-shadow: inset 2px 0 0 rgba(var(--main), 0.5);
+        }
+
+        &.active {
+            background: rgba(var(--main), 0.1);
+            box-shadow: inset 3px 0 0 currentColor;
+        }
+    }
+}
+
+// Log entries - subtle row effect
+.log-entry {
+    :global(html:not(.light)) & {
+        &:nth-child(odd) {
+            background: rgba(var(--main), 0.015);
+        }
+
+        &:hover {
+            background: rgba(var(--main), 0.05);
+        }
+
+        &::after {
+            background: linear-gradient(
+                90deg,
+                rgba(var(--main), 0.1) 0%,
+                rgba(var(--main), 0.03) 100%
+            );
+        }
+    }
+}
+
+// Config and theme options - card style
+.config-menu-item,
+.theme-option {
+    :global(html:not(.light)) & {
+        &:hover {
+            background: rgba(var(--main), 0.06);
+        }
+
+        &.focused {
+            background: rgba(var(--main), 0.08);
+            border-color: rgba(var(--main), 0.3);
+        }
+    }
+}
+
+// Level badges
+.level {
+    :global(html:not(.light)) & {
+        background: rgba(var(--main), 0.05);
+    }
+}
+
+// Info table borders
+.info-table li {
+    :global(html:not(.light)) & {
+        border-top-color: rgba(var(--main), 0.25);
+    }
+}
+
+// Extra section border
+.extra {
+    :global(html:not(.light)) & {
+        border-top-color: rgba(var(--main), 0.25);
+    }
+}
+
+// Dragon text
+.dragon-text p {
+    :global(html:not(.light)) & {
+        text-shadow: 0 0 0.2px currentColor;
+    }
+}
+
+// Dragon ASCII art
+.dashboard-dragon {
+    :global(html:not(.light)) & {
+        .vboy {
+            color: rgb(var(--main));
+            text-shadow: 0 0 0.3px currentColor;
+        }
+
+        .asciiLine {
+            color: inherit;
+            -webkit-text-stroke: 0.1px currentColor;
+        }
+    }
+}
+
+// ============================================================================
+// LIGHT MODE - Content Overrides for Paper Terminal
+// ============================================================================
+
+// Dashboard menu items - ink underline on hover
+.dashboard-menu-item {
+    :global(html.light) & {
+        &:hover {
+            background: rgba(var(--main), 0.06);
+            box-shadow: inset 2px 0 0 rgba(var(--main), 0.5);
+        }
+
+        &.active {
+            background: rgba(var(--main), 0.1);
+            box-shadow: inset 3px 0 0 currentColor;
+        }
+    }
+}
+
+// Log entries - subtle paper row effect
+.log-entry {
+    :global(html.light) & {
+        &:nth-child(odd) {
+            background: rgba(var(--main), 0.015);
+        }
+
+        &:hover {
+            background: rgba(var(--main), 0.05);
+        }
+
+        &::after {
+            background: linear-gradient(
+                90deg,
+                rgba(var(--main), 0.1) 0%,
+                rgba(var(--main), 0.03) 100%
+            );
+        }
+    }
+}
+
+// Config and theme options - paper card style
+.config-menu-item,
+.theme-option {
+    :global(html.light) & {
+        &:hover {
+            background: rgba(var(--main), 0.06);
+        }
+
+        &.focused {
+            background: rgba(var(--main), 0.08);
+            border-color: rgba(var(--main), 0.3);
+        }
+    }
+}
+
+// Level badges - ink wash effect
+.level {
+    :global(html.light) & {
+        background: rgba(var(--main), 0.05);
+    }
+}
+
+// Info table borders more visible
+.info-table li {
+    :global(html.light) & {
+        border-top-color: rgba(var(--main), 0.25);
+    }
+}
+
+// Extra section border
+.extra {
+    :global(html.light) & {
+        border-top-color: rgba(var(--main), 0.25);
+    }
+}
+
+// Dragon text - subtle ink style
+.dragon-text p {
+    :global(html.light) & {
+        text-shadow: 0 0 0.2px currentColor;
+    }
+}
+
+// Dragon ASCII art - ensure visibility in light mode
+.dashboard-dragon {
+    :global(html.light) & {
+        .vboy {
+            // Strong ink color for paper aesthetic
+            color: rgb(var(--main));
+            // Subtle ink bleed effect
+            text-shadow: 0 0 0.3px currentColor;
+        }
+
+        .asciiLine {
+            color: inherit;
+            // Slightly heavier weight appearance for legibility
+            -webkit-text-stroke: 0.1px currentColor;
+        }
+    }
+}

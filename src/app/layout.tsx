@@ -5,6 +5,7 @@ import { Inter, Roboto_Mono, Playfair_Display, Press_Start_2P } from "next/font/
 import Header from "@/components/custom/Header";
 import VideoPreloader from "@/components/VideoPreloader";
 import { GlobalKeybinds } from "@/components/GlobalKeybinds";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import { TouchProvider } from "@/contexts/TouchContext";
 import { ThemeColorProvider } from "@/contexts/ThemeColorContext";
 import { AppThemeProvider } from "@/contexts/AppThemeContext";
@@ -81,18 +82,20 @@ export default function RootLayout({
         )}
       </head>
       <body className={`${inter.className} flex flex-col min-h-screen`}>
-        <AppThemeProvider>
-          <ThemeColorProvider>
-            <TouchProvider>
-              <RocketSceneProvider>
-                <GlobalKeybinds />
-                <VideoPreloader />
-                <Header />
-                <main className="flex-grow">{children}</main>
-              </RocketSceneProvider>
-            </TouchProvider>
-          </ThemeColorProvider>
-        </AppThemeProvider>
+        <ThemeProvider>
+          <AppThemeProvider>
+            <ThemeColorProvider>
+              <TouchProvider>
+                <RocketSceneProvider>
+                  <GlobalKeybinds />
+                  <VideoPreloader />
+                  <Header />
+                  <main className="flex-grow">{children}</main>
+                </RocketSceneProvider>
+              </TouchProvider>
+            </ThemeColorProvider>
+          </AppThemeProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { useTheme } from 'next-themes';
 
 export type AppTheme = 'dark' | 'light';
 
@@ -13,43 +14,32 @@ interface AppThemeContextType {
 const AppThemeContext = createContext<AppThemeContextType | undefined>(undefined);
 
 export function AppThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<AppTheme>('dark');
+  const { setTheme: setNextTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-  // Load theme from localStorage on mount
   useEffect(() => {
     setMounted(true);
-    const savedTheme = localStorage.getItem('app-theme') as AppTheme | null;
-    if (savedTheme && (savedTheme === 'dark' || savedTheme === 'light')) {
-      setThemeState(savedTheme);
-    }
   }, []);
 
-  // Apply theme to document
+  // Use resolvedTheme to get the actual theme (handles system theme)
+  // Default to 'dark' before mounting to match SSR
+  const theme: AppTheme = mounted
+    ? (resolvedTheme === 'light' ? 'light' : 'dark')
+    : 'dark';
+
+  // Apply data-theme attribute for any CSS that uses it
   useEffect(() => {
-    if (!mounted) return;
-
-    const htmlElement = document.documentElement;
-
-    // Remove existing theme classes
-    htmlElement.classList.remove('dark', 'light');
-
-    // Add current theme class
-    htmlElement.classList.add(theme);
-
-    // Also set data attribute for next-themes compatibility
-    htmlElement.setAttribute('data-theme', theme);
-
-    // Save to localStorage
-    localStorage.setItem('app-theme', theme);
+    if (mounted) {
+      document.documentElement.setAttribute('data-theme', theme);
+    }
   }, [theme, mounted]);
 
   const setTheme = (newTheme: AppTheme) => {
-    setThemeState(newTheme);
+    setNextTheme(newTheme);
   };
 
   const toggleTheme = () => {
-    setThemeState(prev => prev === 'dark' ? 'light' : 'dark');
+    setNextTheme(theme === 'dark' ? 'light' : 'dark');
   };
 
   return (

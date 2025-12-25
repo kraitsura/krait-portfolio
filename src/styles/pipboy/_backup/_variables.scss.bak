@@ -1,0 +1,284 @@
+// ============================================================================
+// PIPBOY VARIABLES & MIXINS
+// ============================================================================
+// Shared variables, mixins, and utilities for the modular Pipboy styles
+
+// ============================================================================
+// CSS CUSTOM PROPERTIES (defined in :root by _global.scss)
+// ============================================================================
+// --main: Primary theme color (RGB values)
+// --alt: Secondary theme color (RGB values)
+// --black: Background color
+
+// ============================================================================
+// MIXINS
+// ============================================================================
+
+// Border gradient (vertical fade)
+@mixin border-gradient-vertical($color: var(--main)) {
+    background: linear-gradient(
+        to bottom,
+        rgb(#{$color}) 0%,
+        rgba(0, 0, 0, 0) 35%,
+        rgba(0, 0, 0, 0) 65%,
+        rgb(#{$color}) 100%
+    );
+}
+
+// Border gradient (horizontal fade)
+@mixin border-gradient-horizontal($color: var(--main)) {
+    background: linear-gradient(
+        to right,
+        rgba(0, 0, 0, 0) 0%,
+        rgb(#{$color}) 35%,
+        rgb(#{$color}) 65%,
+        rgba(0, 0, 0, 0) 100%
+    );
+}
+
+// Focus/hover state
+@mixin interactive-focus {
+    outline: 2px solid currentColor;
+    background: rgba(var(--alt), 0.25);
+}
+
+// CRT glow effect - soft vignette
+@mixin crt-glow($opacity: 0.15) {
+    background: radial-gradient(
+        ellipse 80% 70% at center,
+        rgba(var(--main), 0.08) 0%,
+        rgba(var(--alt), 0.04) 30%,
+        rgba(var(--alt), 0.02) 50%,
+        transparent 70%
+    );
+    opacity: $opacity;
+}
+
+// Scanlines effect
+@mixin scanlines {
+    background: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0),
+        rgba(255, 255, 255, 0) 50%,
+        rgba(0, 0, 0, 0.2) 70%,
+        rgba(0, 0, 0, 0.6)
+    );
+    background-size: 100% 0.5rem;
+}
+
+// Box shadow for depth
+@mixin deep-shadow {
+    // PERF: Reduced blur radii from 24rem/16rem to 4rem/3rem (80% cheaper)
+    box-shadow:
+        inset 0 0 4rem black,
+        inset 0 0 2rem black,
+        0 0 3rem black;
+}
+
+// Transition utility
+@mixin smooth-transition($duration: 0.1s) {
+    transition: all $duration ease;
+}
+
+// CRT flicker animation
+@mixin crt-flicker($name) {
+    animation: #{$name} 10ms infinite;
+}
+
+// Common outline styles
+@mixin outline-transparent {
+    outline: 0.5px solid transparent;
+}
+
+// Pseudo-element border line
+@mixin pseudo-border($width: 2px, $height: 100%, $color: var(--main)) {
+    content: "";
+    position: absolute;
+    width: $width;
+    height: $height;
+    background: linear-gradient(
+        to bottom,
+        rgb(#{$color}) 0%,
+        rgba(0, 0, 0, 0) 100%
+    );
+}
+
+// CRT scanline overlay for elements
+@mixin scanline-overlay {
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 1px,
+            rgba(0, 0, 0, 0.2) 1px,
+            rgba(0, 0, 0, 0.2) 2px
+        );
+        pointer-events: none;
+    }
+}
+
+// ============================================================================
+// ANIMATION KEYFRAMES
+// ============================================================================
+
+@keyframes crt-output {
+    0% {
+        opacity: 0.9;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+@keyframes crt-glow {
+    0% {
+        opacity: 0.1;
+    }
+    50% {
+        opacity: 0.2;
+    }
+}
+
+@keyframes fade-swap {
+    0% {
+        opacity: 0;
+        color: rgb(var(--alt));
+    }
+    20% {
+        opacity: 0;
+        color: rgb(var(--alt));
+    }
+    30% {
+        opacity: 1;
+        color: rgb(var(--main));
+    }
+    65% {
+        opacity: 1;
+        color: rgb(var(--main));
+    }
+    75% {
+        opacity: 0;
+        color: rgb(var(--alt));
+    }
+    100% {
+        opacity: 0;
+        color: rgb(var(--alt));
+    }
+}
+
+@keyframes pulse-bracket {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+@keyframes pulse-border {
+    0%,
+    100% {
+        box-shadow:
+            0 0 20px rgba(var(--main), 1),
+            0 0 40px rgba(var(--main), 0.6),
+            inset 0 0 20px rgba(var(--main), 0.4),
+            inset 0 0 0 2px rgba(255, 255, 255, 0.3);
+        background: rgba(var(--main), 0.15);
+    }
+    50% {
+        box-shadow:
+            0 0 30px rgba(var(--main), 1),
+            0 0 60px rgba(var(--main), 0.8),
+            inset 0 0 30px rgba(var(--main), 0.6),
+            inset 0 0 0 3px rgba(255, 255, 255, 0.5);
+        background: rgba(var(--main), 0.25);
+    }
+}
+
+// ============================================================================
+// COMMON UTILITIES
+// ============================================================================
+
+// Disable pointer events
+@mixin no-click {
+    pointer-events: none;
+}
+
+// Enable pointer events
+@mixin clickable {
+    pointer-events: auto;
+}
+
+// Hide cursor (for custom cursor)
+@mixin hide-cursor {
+    cursor: none !important;
+}
+
+// Full size absolute positioning
+@mixin full-absolute {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+}
+
+// Scrollbar styling
+@mixin custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--alt)) transparent;
+
+    &::-webkit-scrollbar {
+        width: 12px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        border-radius: 0;
+        background-color: rgb(var(--alt));
+        border: 2px solid transparent;
+    }
+}
+
+// Text shadow for CRT glow - soft dispersed halo
+@mixin text-glow {
+    text-shadow:
+        0 0 0.25rem rgba(var(--main), 0.9),
+        0 0 0.75rem rgba(var(--main), 0.6),
+        0 0 1.5rem rgba(var(--main), 0.35),
+        0 0 3rem rgba(var(--main), 0.15);
+}
+
+// Border with fade corners
+@mixin border-with-fade($thickness: 2px) {
+    border: $thickness solid;
+    border-width: $thickness 0;
+
+    &::before,
+    &::after {
+        content: "";
+        position: absolute;
+        width: 2px;
+        height: 100%;
+        top: 0;
+        @include border-gradient-vertical(var(--main));
+    }
+
+    &::before {
+        left: 0;
+    }
+
+    &::after {
+        right: 0;
+    }
+}
