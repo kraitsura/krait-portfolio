@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import { ChevronUp, ChevronDown } from 'lucide-react';
+import { useAppTheme } from '@/contexts/AppThemeContext';
 
 interface VerticalCarouselProps {
   images: string[];
@@ -13,6 +14,8 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = React.memo(({ images, 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
+  const { theme } = useAppTheme();
+  const isDark = theme === 'dark';
 
   const goToNext = useCallback(() => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
@@ -87,7 +90,9 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = React.memo(({ images, 
   return (
     <div
       ref={carouselRef}
-      className="relative w-full h-full flex items-center justify-center bg-gray-50"
+      className={`relative w-full h-full flex items-center justify-center transition-colors duration-300 ${
+        isDark ? 'bg-[#111]' : 'bg-gray-50'
+      }`}
       onTouchStart={isTouchDevice ? handleTouchStart : undefined}
       onTouchEnd={isTouchDevice ? handleTouchEnd : undefined}
     >
@@ -137,7 +142,7 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = React.memo(({ images, 
             className="absolute top-6 left-1/2 -translate-x-1/2 opacity-30 hover:opacity-100 transition-opacity z-10"
             aria-label="Previous image (k)"
           >
-            <ChevronUp size={28} strokeWidth={0.5} className="text-gray-700" />
+            <ChevronUp size={28} strokeWidth={0.5} className={isDark ? 'text-gray-300' : 'text-gray-700'} />
           </button>
 
           <button
@@ -145,7 +150,7 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = React.memo(({ images, 
             className="absolute bottom-6 left-1/2 -translate-x-1/2 opacity-30 hover:opacity-100 transition-opacity z-10"
             aria-label="Next image (j)"
           >
-            <ChevronDown size={28} strokeWidth={0.5} className="text-gray-700" />
+            <ChevronDown size={28} strokeWidth={0.5} className={isDark ? 'text-gray-300' : 'text-gray-700'} />
           </button>
         </>
       )}
@@ -159,8 +164,8 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = React.memo(({ images, 
               onClick={() => setCurrentIndex(index)}
               className={`w-1 transition-all ${
                 index === currentIndex
-                  ? 'h-8 bg-gray-700'
-                  : 'h-4 bg-gray-300 hover:bg-gray-400'
+                  ? `h-8 ${isDark ? 'bg-gray-300' : 'bg-gray-700'}`
+                  : `h-4 ${isDark ? 'bg-gray-600 hover:bg-gray-500' : 'bg-gray-300 hover:bg-gray-400'}`
               }`}
               aria-label={`Go to image ${index + 1}`}
             />
@@ -170,7 +175,9 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = React.memo(({ images, 
 
       {/* Image Counter */}
       {images.length > 1 && (
-        <div className="absolute bottom-4 right-4 px-2 py-1 bg-white/80 border border-gray-200 rounded text-[10px] font-thin text-gray-600 font-mono">
+        <div className={`absolute bottom-4 right-4 px-2 py-1 rounded text-[10px] font-thin font-mono ${
+          isDark ? 'bg-black/60 border border-gray-700 text-gray-400' : 'bg-white/80 border border-gray-200 text-gray-600'
+        }`}>
           {currentIndex + 1} / {images.length}
         </div>
       )}

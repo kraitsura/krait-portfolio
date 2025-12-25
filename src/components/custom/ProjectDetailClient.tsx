@@ -10,8 +10,8 @@ import { useAppTheme } from '@/contexts/AppThemeContext';
 // Lazy load VerticalCarousel for better initial page load
 const VerticalCarousel = dynamic(() => import('@/components/custom/VerticalCarousel'), {
   loading: () => (
-    <div className="w-full h-full bg-gray-50 animate-pulse flex items-center justify-center">
-      <div className="text-gray-400 text-sm">Loading...</div>
+    <div className="w-full h-full animate-pulse flex items-center justify-center bg-gray-50 dark:bg-[#111]">
+      <div className="text-gray-400 dark:text-gray-600 text-sm">Loading...</div>
     </div>
   ),
   ssr: false,
