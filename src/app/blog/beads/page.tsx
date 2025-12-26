@@ -6,7 +6,6 @@ import ArticleLayout, {
   ArticleSubheading,
   ArticleParagraph,
   ArticleCode,
-  ArticleBlockquote,
   ArticleImagePlaceholder,
   ArticleList,
   ArticleLink,
