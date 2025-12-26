@@ -49,17 +49,19 @@ export default function BeadsArticle() {
           with detailed insights using <ArticleCode>bv</ArticleCode>. You can
           even use Beads to track planning sessions, codebase deep-dives, and
           more. Its format allows for tremendous utility for humans in the
-          loop—you can develop your own workflows around these tools while they
+          loop. You can develop your own workflows around these tools while they
           provide the base observability needed into work done and ways to
           execute prompts.
         </ArticleParagraph>
 
-        <ArticleBlockquote>
-          Consider adding a brief explanation of what{" "}
-          <ArticleCode>bd</ArticleCode> and <ArticleCode>bv</ArticleCode> stand
-          for and their core functions before diving into setup. First-time
-          readers may be confused by the acronyms.
-        </ArticleBlockquote>
+        <ArticleParagraph>
+          <ArticleCode>bd</ArticleCode> (beads) is a drop-in replacement for
+          native task runners like <ArticleCode>TodoWrite</ArticleCode>. Same
+          interface, but with a persistent memory layer underneath.{" "}
+          <ArticleCode>bv</ArticleCode> (beads viewer) visualizes the task
+          graph, shows progress across phases, and lets you navigate
+          dependencies interactively. Lightweight, significant memory savings.
+        </ArticleParagraph>
       </ArticleSection>
 
       {/* Setup */}
@@ -67,7 +69,7 @@ export default function BeadsArticle() {
         <ArticleHeading>Setup</ArticleHeading>
 
         <ArticleParagraph>
-          Setup is straightforward—literally just copy and enter the curl links
+          Setup is straightforward. Literally just copy and enter the curl links
           that install the tools. Then add the Beads marketplace plugin, run{" "}
           <ArticleCode>bd init</ArticleCode>, and update{" "}
           <ArticleCode>claude.md</ArticleCode>/
@@ -76,9 +78,16 @@ export default function BeadsArticle() {
           for condensed insights.
         </ArticleParagraph>
 
-        <ArticleBlockquote>
-          Insert the actual curl commands here, or link to installation docs
-        </ArticleBlockquote>
+        <ArticleCode inline={false}>
+          {`# Install bd (beads CLI)
+curl -fsSL https://raw.githubusercontent.com/kraitsura/beads/main/install.sh | bash
+
+# Install bv (beads viewer)
+curl -fsSL https://raw.githubusercontent.com/kraitsura/beads-viewer/main/install.sh | bash
+
+# Add the marketplace plugin for Claude Code
+/plugin marketplace add beads`}
+        </ArticleCode>
 
         <ArticleParagraph>
           I personally built from source in a forked repo and symlinked my build
@@ -94,11 +103,12 @@ export default function BeadsArticle() {
           session boundaries.
         </ArticleParagraph>
 
-        <ArticleBlockquote>
-          This is a great selling point—consider expanding: &quot;This creates
-          an automatic audit trail that survives context compactions and session
-          boundaries, which is the core value proposition.&quot;
-        </ArticleBlockquote>
+        <ArticleParagraph>
+          This is the core value prop: an audit trail that survives compaction.
+          When Claude&apos;s context fills up and gets compressed, the beads
+          remain. You can pick up any session and immediately see what was
+          done, what failed, and what&apos;s left.
+        </ArticleParagraph>
       </ArticleSection>
 
       {/* Small Example */}
@@ -115,11 +125,12 @@ export default function BeadsArticle() {
           sessions.
         </ArticleParagraph>
 
-        <ArticleBlockquote>
-          This pain point—picking up where you left off—is extremely relatable
-          for anyone doing multi-session AI-assisted development. Consider
-          emphasizing this more strongly as a key problem Beads solves.
-        </ArticleBlockquote>
+        <ArticleParagraph>
+          If you&apos;ve ever started a new Claude session and spent 10 minutes
+          re-explaining context, you know the pain. Beads fixes this. The task
+          state <em>is</em> the context. Point Claude at a bead and it knows
+          exactly what&apos;s been done and what&apos;s next.
+        </ArticleParagraph>
 
         <ArticleParagraph>
           We started with this plan: 1 epic and approximately 20 tasks.
@@ -145,11 +156,11 @@ highlight it chooses incorrectly, track issue under labels viewer epic with
 phase1 label as you fix it.`}
         </ArticleCode>
 
-        <ArticleBlockquote>
-          Great example of natural language task creation mid-flow. Consider
-          noting that this conversational style is intentional—you don&apos;t
-          need formal syntax to create and track issues.
-        </ArticleBlockquote>
+        <ArticleParagraph>
+          Notice the conversational phrasing, no special syntax required. You
+          just describe what&apos;s wrong and where to track it. Claude handles
+          the <ArticleCode>bd create</ArticleCode> and dependency wiring.
+        </ArticleParagraph>
 
         <ArticleParagraph>
           While this was working on itself, I had ideas about quality-of-life
@@ -171,12 +182,13 @@ prompt should be concise and include the issue id along with instructions
 to get started working on it. Create the necessary beads for this feature.`}
         </ArticleCode>
 
-        <ArticleBlockquote>
-          This demonstrates a powerful pattern: using Beads as an &quot;idea
-          parking lot&quot; that maintains proper dependency awareness. The
-          ideas aren&apos;t just notes—they&apos;re structured, unblocked tasks
-          waiting for execution.
-        </ArticleBlockquote>
+        <ArticleParagraph>
+          This is beads as an idea parking lot. Unlike plain notes, these ideas
+          have structure. They&apos;re proper tasks with dependencies. When
+          phase 4 finishes, phase 5 tasks automatically become unblocked and
+          show up in <ArticleCode>bd ready</ArticleCode>. The ideas wait for
+          their moment.
+        </ArticleParagraph>
 
         <ArticleParagraph>
           Once my phase 1 fixes were done, this was the end result:
@@ -211,12 +223,12 @@ to get started working on it. Create the necessary beads for this feature.`}
           seamless as both tools improve.
         </ArticleParagraph>
 
-        <ArticleBlockquote>
-          Honest acknowledgment of friction is valuable. Consider adding:
-          &quot;The key insight is that the coaxing itself gets recorded—your
-          refinements, redirections, and clarifications become part of the
-          persistent context that survives compaction.&quot;
-        </ArticleBlockquote>
+        <ArticleParagraph>
+          The key insight: the coaxing itself gets recorded. When you redirect
+          Claude, when you clarify scope, when you reject an approach, all of
+          that becomes part of the bead&apos;s history. Future sessions inherit
+          those refinements.
+        </ArticleParagraph>
 
         <ArticleParagraph>
           As I progressed through the implementation, a few nice workflows
@@ -235,11 +247,12 @@ to get started working on it. Create the necessary beads for this feature.`}
           implementation. This felt fairly liberating.
         </ArticleParagraph>
 
-        <ArticleBlockquote>
-          This is the key insight: Beads as &quot;conversation anchors&quot;
-          that allow you to resume context across session boundaries. Consider
-          making this its own highlighted section.
-        </ArticleBlockquote>
+        <ArticleParagraph>
+          Beads become conversation anchors. Instead of &quot;continue where we
+          left off&quot; and hoping Claude remembers, you say &quot;pick up
+          bd-47&quot; and the full context is there. The bead <em>is</em> the
+          shared memory between sessions.
+        </ArticleParagraph>
 
         <ArticleParagraph>
           On the flip side, I was continuing with my QoL updates in parallel
@@ -252,8 +265,8 @@ to get started working on it. Create the necessary beads for this feature.`}
         <ArticleParagraph>
           I felt I had more control over leading conversations, and the entire
           parallel stream was done in a single conversation (with 3 compacts, so
-          technically 4 conversations). Some ideas didn&apos;t take—we used
-          beads to revert safely. Some ideas led to more—we used beads to track
+          technically 4 conversations). Some ideas didn&apos;t take, we used
+          beads to revert safely. Some ideas led to more, we used beads to track
           these thoughts and execute after compacts. I even had ideas in the
           other phases that I asked Claude to create in the same conversation
           (Claude at this point was still in the root folder while working in{" "}
@@ -261,155 +274,47 @@ to get started working on it. Create the necessary beads for this feature.`}
           effortless.
         </ArticleParagraph>
 
-        <ArticleBlockquote>
-          The parallel worktree pattern combined with Beads is powerful.
-          Consider a diagram showing: Main branch (phases 1-4) running alongside
-          worktree branch (phase 5 QoL), with Beads tracking both streams in a
-          unified view.
-        </ArticleBlockquote>
+        <ArticleParagraph>
+          The parallel worktree pattern works well here: main branch handles
+          phases 1-4, worktree handles phase 5 QoL. Beads tracks both streams
+          from a single database in the root. You can see all work in one{" "}
+          <ArticleCode>bv</ArticleCode> view regardless of which git context
+          you&apos;re in.
+        </ArticleParagraph>
 
         <ArticleParagraph>
           Once phase 2 was completed, I merged the QoL feature branch onto my
           main local branch, committed, and carried on with phases 3–4. I
           won&apos;t bore you with the details, but we ended with a complete
           (unoptimized) implementation after around 50 beads over 5 phases. It
-          took me around 2 days. Phase 2 took the longest—I had to redesign the
+          took me around 2 days. Phase 2 took the longest. I had to redesign the
           heuristic partitioning multiple times, and I&apos;m still not fully
           happy with it, but it&apos;s good enough for now.
         </ArticleParagraph>
-      </ArticleSection>
-
-      {/* Label Partitioning Algorithm */}
-      <ArticleSection>
-        <ArticleHeading>The Label Partitioning Algorithm</ArticleHeading>
-
-        <ArticleBlockquote>
-          This technical section is valuable but feels abrupt. Consider a
-          transition like: &quot;One of the more interesting challenges was
-          making the dashboard automatically organize tasks without requiring
-          users to follow a specific labeling convention.&quot;
-        </ArticleBlockquote>
-
-        <ArticleParagraph>
-          My goal is to make the partitioning system as user-agnostic as
-          possible, allowing any personal style of labeling. Currently, we look
-          for group families by sequential heuristics.
-        </ArticleParagraph>
-
-        <ArticleParagraph>
-          The algorithm automatically partitions issues into meaningful
-          workstreams by analyzing label patterns and dependency structure. It
-          works as follows:
-        </ArticleParagraph>
-
-        <ArticleHeading level={3}>Step 1: Detect Label Families</ArticleHeading>
-        <ArticleParagraph>
-          The system identifies different types of label patterns:
-        </ArticleParagraph>
-        <ArticleList>
-          <li>
-            Sequential labels (e.g., <ArticleCode>phase1</ArticleCode>,{" "}
-            <ArticleCode>phase2</ArticleCode>, <ArticleCode>phase3</ArticleCode>
-            )
-          </li>
-          <li>
-            Prefixed labels (e.g., <ArticleCode>feat:auth</ArticleCode>,{" "}
-            <ArticleCode>feat:payments</ArticleCode>)
-          </li>
-          <li>
-            Suffix-based labels (e.g., <ArticleCode>auth-backend</ArticleCode>,{" "}
-            <ArticleCode>auth-frontend</ArticleCode>)
-          </li>
-        </ArticleList>
-
-        <ArticleHeading level={3}>Step 2: Score Each Family</ArticleHeading>
-        <ArticleParagraph>
-          Each detected family is scored based on:
-        </ArticleParagraph>
-        <ArticleList>
-          <li>
-            <strong>Coverage</strong>: What percentage of issues have these
-            labels?
-          </li>
-          <li>
-            <strong>Exclusivity</strong>: Do issues have exactly one label from
-            the family?
-          </li>
-          <li>
-            <strong>Balance</strong>: Are the resulting groups similarly sized?
-          </li>
-        </ArticleList>
-        <ArticleParagraph>
-          Sequential families receive a scoring boost since they imply workflow
-          stages.
-        </ArticleParagraph>
-
-        <ArticleHeading level={3}>Step 3: Select Primary Grouping</ArticleHeading>
-        <ArticleParagraph>
-          The highest-scoring family becomes the primary grouping dimension. The
-          current view&apos;s filter label is automatically excluded to ensure
-          grouping happens along an orthogonal axis (e.g., filtering by{" "}
-          <ArticleCode>phase1</ArticleCode> groups by feature, not by phase).
-        </ArticleParagraph>
-
-        <ArticleHeading level={3}>Step 4: Handle Sparse Labels</ArticleHeading>
-        <ArticleParagraph>
-          For sparsely-labeled issue sets, the algorithm falls back to
-          dependency graph analysis—finding connected components via{" "}
-          <ArticleCode>blocks</ArticleCode> and parent-child edges and naming
-          them by their root issue or most common label.
-        </ArticleParagraph>
-
-        <ArticleHeading level={3}>Recursive Subdivision</ArticleHeading>
-        <ArticleParagraph>
-          The system supports recursive subdivision: each workstream can be
-          further partitioned using the next-best label family, with
-          previously-used families excluded and scoring thresholds relaxed at
-          deeper levels.
-        </ArticleParagraph>
-
-        <ArticleHeading level={3}>Label Propagation</ArticleHeading>
-        <ArticleParagraph>
-          Labels propagate downstream through blocking relationships, so
-          &quot;label the entrypoint only&quot; workflows still produce correct
-          groupings.
-        </ArticleParagraph>
-
-        <ArticleBlockquote>
-          This algorithm is genuinely novel and useful. Consider adding a
-          concrete before/after example: &quot;Given these raw issues and
-          labels... the algorithm produces this view...&quot;
-        </ArticleBlockquote>
-
-        <ArticleParagraph>
-          The result is a hierarchical view that adapts to however users have
-          chosen to organize their work, requiring zero configuration.
-        </ArticleParagraph>
-
-        <ArticleImagePlaceholder caption="INSERT SCREENSHOT: Final dashboard view showing hierarchical organization" />
       </ArticleSection>
 
       {/* My Personal Workflow */}
       <ArticleSection>
         <ArticleHeading>My Personal Workflow</ArticleHeading>
 
-        <ArticleBlockquote>
-          Consider opening with: &quot;Here&apos;s how I&apos;ve integrated
-          Beads into my daily development practice.&quot;
-        </ArticleBlockquote>
+        <ArticleParagraph>
+          Here&apos;s how I actually use this stuff day-to-day.
+        </ArticleParagraph>
 
         <ArticleParagraph>
           I&apos;ve created a skill to turn large plans into beads for when I
           bring in plans from outside Claude Code during large planning sessions
           in markdown. This does a clean job of digesting enormous markdown
           files into beads with proper structure. But the point of Beads is to
-          embrace it as the default task manager—not just as an import tool.
+          embrace it as the default task manager, not just as an import tool.
         </ArticleParagraph>
 
-        <ArticleBlockquote>
-          Link to or include the skill, or at least describe its key
-          transformation logic.
-        </ArticleBlockquote>
+        <ArticleParagraph>
+          The skill encodes my personal conventions: labeling rules, phase and
+          scope specifications, guards against circular dependencies, that sort
+          of thing. Using it gives me task graphs shaped exactly the way I
+          think about work.
+        </ArticleParagraph>
 
         <ArticleParagraph>
           I forked the Beads repo and replaced my local install. To it, I added
@@ -600,7 +505,7 @@ to get started working on it. Create the necessary beads for this feature.`}
         <ArticleImagePlaceholder caption="INSERT SCREENSHOT: Comprehensive plan with Beads" />
 
         <ArticleParagraph>
-          This is my latest workflow—the Ralph Wiggum iterations act as
+          This is my latest workflow. The Ralph Wiggum iterations act as
           coordination layers that use agents to delegate tasks. With this
           method alone I saw a massive efficiency boost in token usage. Here is
           the prompt I use:
@@ -641,15 +546,33 @@ to get started working on it. Create the necessary beads for this feature.`}
       <ArticleSection>
         <ArticleHeading>Conclusion</ArticleHeading>
 
-        <ArticleBlockquote>
-          Add a conclusion that summarizes key takeaways: Beads provides
-          persistent memory across context compactions. The label-based
-          partitioning enables flexible, user-defined organization. Parallel
-          worktrees + Beads enables true multi-stream development. The
-          observability layer makes human-in-the-loop AI development more
-          controllable. Include a call to action: link to repo, marketplace, and
-          your fork with verbose flags.
-        </ArticleBlockquote>
+        <ArticleParagraph>
+          Beads solves the context problem. Your task state persists across
+          compactions, sessions, and even machines (via git sync). The
+          label-based partitioning adapts to however you work, no conventions
+          forced. Parallel worktrees let you run multiple development streams
+          with unified visibility.
+        </ArticleParagraph>
+
+        <ArticleParagraph>
+          The real win is control. You can enter the loop at any bead, redirect
+          work, park ideas for later, and always know exactly where things
+          stand. The observability layer makes AI-assisted development
+          something you direct rather than something that happens to you.
+        </ArticleParagraph>
+
+        <ArticleParagraph>
+          Links:{" "}
+          <ArticleLink href="https://github.com/kraitsura/beads">
+            github.com/kraitsura/beads
+          </ArticleLink>{" "}
+          (my fork with verbose flags),{" "}
+          <ArticleLink href="https://github.com/kraitsura/beads-viewer">
+            github.com/kraitsura/beads-viewer
+          </ArticleLink>{" "}
+          (the TUI). For the marketplace plugin with token optimizations:{" "}
+          <ArticleCode>/plugin marketplace add kraitsura/beads</ArticleCode>.
+        </ArticleParagraph>
       </ArticleSection>
     </ArticleLayout>
   );
