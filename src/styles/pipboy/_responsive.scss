@@ -61,6 +61,15 @@
 
 @media only screen and (max-width: 800px) {
 
+  // Switch to ribbon view for logs on mobile
+  .logs-list {
+    display: none;
+  }
+
+  .logs-ribbons {
+    display: flex;
+  }
+
   // Frame adjustments
   .frame {
     height: min(380px, calc(100vh - 80px));
@@ -265,8 +274,11 @@
 
   // Title adjustment
   .pip-title {
-    top: 6px;
-    font-size: 18px;
+    position: relative;
+    top: 0;
+    left: 0;
+    font-size: 16px;
+    margin-bottom: 8px;
   }
 
   // Dragon container
@@ -467,9 +479,11 @@
   }
 
   .pip-title {
-    font-size: 14px;
-    top: 4px;
-    left: 20px;
+    position: relative;
+    top: 0;
+    left: 0;
+    font-size: 13px;
+    margin-bottom: 6px;
   }
 }
 

@@ -606,6 +606,108 @@
 }
 
 // ============================================================================
+// MOBILE RIBBONS (Stacked log entries with scrolling text)
+// ============================================================================
+
+.logs-ribbons {
+    display: none; // Hidden on desktop
+    flex-direction: column;
+    gap: 2px;
+    max-height: 280px;
+    overflow-y: auto;
+    padding: 4px 0;
+}
+
+.ribbon-entry {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 4px;
+    border-left: 2px solid transparent;
+    transition: background 0.15s ease;
+
+    &:nth-child(odd) {
+        background: rgba(var(--main), 0.02);
+    }
+
+    &.clickable {
+        cursor: pointer;
+
+        &:active {
+            background: rgba(var(--main), 0.1);
+            border-left-color: rgba(var(--main), 0.5);
+        }
+    }
+}
+
+.ribbon-hash {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 9px;
+    font-weight: 600;
+    color: rgb(var(--main));
+    opacity: 0.7;
+    flex-shrink: 0;
+    min-width: 32px;
+}
+
+.ribbon-content {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+
+    // Fade out edges
+    mask-image: linear-gradient(90deg, black 85%, transparent 100%);
+    -webkit-mask-image: linear-gradient(90deg, black 85%, transparent 100%);
+}
+
+.ribbon-text {
+    display: inline-flex;
+    gap: 8px;
+    white-space: nowrap;
+    animation: ribbon-scroll 12s linear infinite;
+    padding-right: 40px;
+}
+
+// Stagger animation start times for visual interest
+@for $i from 1 through 15 {
+    .ribbon-entry:nth-child(#{$i}) .ribbon-text {
+        animation-delay: #{$i * 0.8}s;
+    }
+}
+
+.ribbon-repo {
+    font-family: 'SF Mono', monospace;
+    font-size: 9px;
+    font-weight: 500;
+    opacity: 0.6;
+    color: rgb(var(--main));
+    flex-shrink: 0;
+}
+
+.ribbon-message {
+    font-size: 11px;
+    opacity: 0.85;
+}
+
+.ribbon-date {
+    font-family: 'SF Mono', monospace;
+    font-size: 8px;
+    opacity: 0.4;
+    flex-shrink: 0;
+    text-align: right;
+    min-width: 28px;
+}
+
+@keyframes ribbon-scroll {
+    0%, 15% {
+        transform: translateX(0);
+    }
+    85%, 100% {
+        transform: translateX(calc(-100% + 50vw));
+    }
+}
+
+// ============================================================================
 // CONFIG MENU (Settings submenu)
 // ============================================================================
 

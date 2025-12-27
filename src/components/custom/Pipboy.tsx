@@ -398,7 +398,13 @@ const Pipboy: React.FC<PipboyProps> = ({
                     </div>
                     <div
                       className={`${styles["dashboard-menu-item"]} ${activeTab === "about" ? styles.active : ""}`}
-                      onClick={() => setActiveTab("about")}
+                      onClick={() => {
+                        if (isTouchDevice) {
+                          router.push("/about");
+                        } else {
+                          setActiveTab("about");
+                        }
+                      }}
                       role="button"
                       tabIndex={0}
                     >
@@ -408,7 +414,13 @@ const Pipboy: React.FC<PipboyProps> = ({
                     </div>
                     <div
                       className={`${styles["dashboard-menu-item"]} ${activeTab === "projects" ? styles.active : ""}`}
-                      onClick={() => setActiveTab("projects")}
+                      onClick={() => {
+                        if (isTouchDevice) {
+                          router.push("/projects");
+                        } else {
+                          setActiveTab("projects");
+                        }
+                      }}
                       role="button"
                       tabIndex={0}
                     >
@@ -418,7 +430,13 @@ const Pipboy: React.FC<PipboyProps> = ({
                     </div>
                     <div
                       className={`${styles["dashboard-menu-item"]} ${activeTab === "blogs" ? styles.active : ""}`}
-                      onClick={() => setActiveTab("blogs")}
+                      onClick={() => {
+                        if (isTouchDevice) {
+                          router.push("/blog");
+                        } else {
+                          setActiveTab("blogs");
+                        }
+                      }}
                       role="button"
                       tabIndex={0}
                     >
@@ -428,7 +446,12 @@ const Pipboy: React.FC<PipboyProps> = ({
                     </div>
                     <div
                       className={`${styles["dashboard-menu-item"]} ${activeTab === "misc" ? styles.active : ""}`}
-                      onClick={() => setActiveTab("misc")}
+                      onClick={() => {
+                        setActiveTab("misc");
+                        if (isTouchDevice) {
+                          setConfigMode(true);
+                        }
+                      }}
                       role="button"
                       tabIndex={0}
                     >
@@ -449,7 +472,7 @@ const Pipboy: React.FC<PipboyProps> = ({
                     <div id="logs" className={styles["tab-panel"]}>
                       <h3 className={styles["pip-title"]}>
                         Activity
-                        {!logsMode && !logsLoading && activityLogs.length > 0 && (
+                        {!logsMode && !logsLoading && activityLogs.length > 0 && !isTouchDevice && (
                           <span className={styles["pip-title-hint"]}> - press enter</span>
                         )}
                       </h3>
@@ -457,28 +480,57 @@ const Pipboy: React.FC<PipboyProps> = ({
                         {logsLoading ? (
                           <div className={styles["logs-loading"]}>Loading activity...</div>
                         ) : (
-                          <div ref={logsListRef} className={styles["logs-list"]}>
-                            {activityLogs.map((entry, index) => (
-                              <div
-                                key={entry.id}
-                                className={`${styles["log-entry"]} ${logsMode && selectedLogIndex === index ? styles.focused : ""} ${entry.isPrivate ? styles.private : ""} ${entry.url ? styles.clickable : ""} ${entry.type === 'tweet' ? styles.tweet : ''}`}
-                                onClick={() => {
-                                  if (entry.url) {
-                                    window.open(entry.url, '_blank', 'noopener,noreferrer');
-                                  }
-                                }}
-                                role={entry.url ? "link" : undefined}
-                                tabIndex={entry.url ? 0 : undefined}
-                              >
-                                <span className={styles["log-hash"]}>
-                                  {entry.type === 'commit' ? entry.shortHash : '𝕏'}
-                                </span>
-                                <span className={styles["log-repo"]}>{entry.source}</span>
-                                <span className={styles["log-message"]}>{entry.message}</span>
-                                <span className={styles["log-date"]}>{entry.date}</span>
-                              </div>
-                            ))}
-                          </div>
+                          <>
+                            {/* Desktop: Standard list view */}
+                            <div ref={logsListRef} className={styles["logs-list"]}>
+                              {activityLogs.map((entry, index) => (
+                                <div
+                                  key={entry.id}
+                                  className={`${styles["log-entry"]} ${logsMode && selectedLogIndex === index ? styles.focused : ""} ${entry.isPrivate ? styles.private : ""} ${entry.url ? styles.clickable : ""} ${entry.type === 'tweet' ? styles.tweet : ''}`}
+                                  onClick={() => {
+                                    if (entry.url) {
+                                      window.open(entry.url, '_blank', 'noopener,noreferrer');
+                                    }
+                                  }}
+                                  role={entry.url ? "link" : undefined}
+                                  tabIndex={entry.url ? 0 : undefined}
+                                >
+                                  <span className={styles["log-hash"]}>
+                                    {entry.type === 'commit' ? entry.shortHash : '𝕏'}
+                                  </span>
+                                  <span className={styles["log-repo"]}>{entry.source}</span>
+                                  <span className={styles["log-message"]}>{entry.message}</span>
+                                  <span className={styles["log-date"]}>{entry.date}</span>
+                                </div>
+                              ))}
+                            </div>
+
+                            {/* Mobile: Stacked ribbons with marquee text */}
+                            <div className={styles["logs-ribbons"]}>
+                              {activityLogs.map((entry) => (
+                                <div
+                                  key={entry.id}
+                                  className={`${styles["ribbon-entry"]} ${entry.url ? styles.clickable : ""}`}
+                                  onClick={() => {
+                                    if (entry.url) {
+                                      window.open(entry.url, '_blank', 'noopener,noreferrer');
+                                    }
+                                  }}
+                                >
+                                  <span className={styles["ribbon-hash"]}>
+                                    {entry.type === 'commit' ? entry.shortHash : '𝕏'}
+                                  </span>
+                                  <span className={styles["ribbon-content"]}>
+                                    <span className={styles["ribbon-text"]}>
+                                      <span className={styles["ribbon-repo"]}>{entry.source}</span>
+                                      <span className={styles["ribbon-message"]}>{entry.message}</span>
+                                    </span>
+                                  </span>
+                                  <span className={styles["ribbon-date"]}>{entry.date}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </>
                         )}
                       </div>
                     </div>
