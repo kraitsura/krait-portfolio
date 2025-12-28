@@ -398,13 +398,7 @@ const Pipboy: React.FC<PipboyProps> = ({
                     </div>
                     <div
                       className={`${styles["dashboard-menu-item"]} ${activeTab === "about" ? styles.active : ""}`}
-                      onClick={() => {
-                        if (isTouchDevice) {
-                          router.push("/about");
-                        } else {
-                          setActiveTab("about");
-                        }
-                      }}
+                      onClick={() => setActiveTab("about")}
                       role="button"
                       tabIndex={0}
                     >
@@ -414,13 +408,7 @@ const Pipboy: React.FC<PipboyProps> = ({
                     </div>
                     <div
                       className={`${styles["dashboard-menu-item"]} ${activeTab === "projects" ? styles.active : ""}`}
-                      onClick={() => {
-                        if (isTouchDevice) {
-                          router.push("/projects");
-                        } else {
-                          setActiveTab("projects");
-                        }
-                      }}
+                      onClick={() => setActiveTab("projects")}
                       role="button"
                       tabIndex={0}
                     >
@@ -430,13 +418,7 @@ const Pipboy: React.FC<PipboyProps> = ({
                     </div>
                     <div
                       className={`${styles["dashboard-menu-item"]} ${activeTab === "blogs" ? styles.active : ""}`}
-                      onClick={() => {
-                        if (isTouchDevice) {
-                          router.push("/blog");
-                        } else {
-                          setActiveTab("blogs");
-                        }
-                      }}
+                      onClick={() => setActiveTab("blogs")}
                       role="button"
                       tabIndex={0}
                     >
@@ -659,10 +641,14 @@ const Pipboy: React.FC<PipboyProps> = ({
                           </p>
                           <span
                             className="retro-flash-text"
+                            onClick={() => router.push("/about")}
+                            role="button"
+                            tabIndex={0}
                             style={{
                               fontSize: '12px',
                               letterSpacing: '2px',
-                              textTransform: 'uppercase'
+                              textTransform: 'uppercase',
+                              cursor: 'pointer'
                             }}
                           >
                             press enter
@@ -783,10 +769,14 @@ const Pipboy: React.FC<PipboyProps> = ({
                           </p>
                           <span
                             className="retro-flash-text"
+                            onClick={() => router.push("/projects")}
+                            role="button"
+                            tabIndex={0}
                             style={{
                               fontSize: '12px',
                               letterSpacing: '2px',
-                              textTransform: 'uppercase'
+                              textTransform: 'uppercase',
+                              cursor: 'pointer'
                             }}
                           >
                             press enter
@@ -814,10 +804,14 @@ const Pipboy: React.FC<PipboyProps> = ({
                           </p>
                           <span
                             className="retro-flash-text"
+                            onClick={() => router.push("/blog")}
+                            role="button"
+                            tabIndex={0}
                             style={{
                               fontSize: '12px',
                               letterSpacing: '2px',
-                              textTransform: 'uppercase'
+                              textTransform: 'uppercase',
+                              cursor: 'pointer'
                             }}
                           >
                             press enter
