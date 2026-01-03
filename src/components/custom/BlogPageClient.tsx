@@ -2,13 +2,7 @@
 
 import { useAppTheme } from '@/contexts/AppThemeContext';
 import AnimatedBlogContent from './AnimatedBlogContent';
-
-interface Article {
-  slug: string;
-  title: string;
-  description: string;
-  date: string;
-}
+import type { Article } from '@/types/article';
 
 interface BlogPageClientProps {
   articles: Article[];

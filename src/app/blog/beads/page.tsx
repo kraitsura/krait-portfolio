@@ -6,7 +6,7 @@ import ArticleLayout, {
   ArticleSubheading,
   ArticleParagraph,
   ArticleCode,
-  ArticleImagePlaceholder,
+  ArticleImage,
   ArticleList,
   ArticleLink,
 } from "@/components/custom/ArticleLayout";
@@ -16,6 +16,7 @@ export default function BeadsArticle() {
     <ArticleLayout
       category="Task Management System"
       title="Beads"
+      status="in_progress"
       intro={
         <>
           A self-referential workflow system for long-horizon tasks with
@@ -135,14 +136,22 @@ curl -fsSL https://raw.githubusercontent.com/kraitsura/beads-viewer/main/install
           We started with this plan: 1 epic and approximately 20 tasks.
         </ArticleParagraph>
 
-        <ArticleImagePlaceholder caption="INSERT SCREENSHOT: Initial plan showing epic and task structure" />
+        <ArticleImage
+          src="/blog_img/beads/phase1.png"
+          alt="Initial plan showing 1 epic and 20 tasks organized across 4 phases in the terminal"
+          caption="Initial plan: 1 epic with 20 tasks across 4 phases"
+        />
 
         <ArticleParagraph>
           This was the result of phase 1, after one conversation with 90%
           context utilization.
         </ArticleParagraph>
 
-        <ArticleImagePlaceholder caption="INSERT SCREENSHOT: Completed phase 1 results" />
+        <ArticleImage
+          src="/blog_img/beads/line145.png"
+          alt="Diagram showing how context compacts but beads persist on disk, allowing sessions to pick up where they left off"
+          caption="Context dies. Beads live. Pick up exactly where you left off."
+        />
 
         <ArticleParagraph>
           I encountered some bugs, so I compacted and started squashing them
@@ -193,7 +202,11 @@ to get started working on it. Create the necessary beads for this feature.`}
           Once my phase 1 fixes were done, this was the end result:
         </ArticleParagraph>
 
-        <ArticleImagePlaceholder caption="INSERT SCREENSHOT: Completed phase 1 with fixes" />
+        <ArticleImage
+          src="/blog_img/beads/line196.png"
+          alt="Diagram showing how discovered-from links track bugs found during work back to their origin tasks"
+          caption="Discovered-from: tracking how work actually unfolds"
+        />
 
         <ArticleParagraph>
           We can still see that some things were missing. I wanted a built-in
@@ -202,13 +215,21 @@ to get started working on it. Create the necessary beads for this feature.`}
           parallel git worktree:
         </ArticleParagraph>
 
-        <ArticleImagePlaceholder caption="INSERT SCREENSHOT: Task viewer implementation" />
+        <ArticleImage
+          src="/blog_img/beads/line205.png"
+          alt="Diagram showing parallel git worktrees sharing a single beads database for unified visibility"
+          caption="Parallel worktrees with unified beads visibility"
+        />
 
         <ArticleParagraph>
           Now I have a nice task viewer to view my phase 2 tasks:
         </ArticleParagraph>
 
-        <ArticleImagePlaceholder caption="INSERT SCREENSHOT: Phase 2 task view" />
+        <ArticleImage
+          src="/blog_img/beads/line211.png"
+          alt="Diagram showing automatic unblocking of dependency chains as phases complete"
+          caption="Dependency chains: automatic unblocking as work completes"
+        />
       </ArticleSection>
 
       {/* Working with Resistance */}
@@ -501,7 +522,11 @@ to get started working on it. Create the necessary beads for this feature.`}
           a pretty comprehensive plan with Beads:
         </ArticleParagraph>
 
-        <ArticleImagePlaceholder caption="INSERT SCREENSHOT: Comprehensive plan with Beads" />
+        <ArticleImage
+          src="/blog_img/beads/line138.png"
+          alt="Epic tree diagram showing organized phases with tasks and discovered bugfixes"
+          caption="Epic structure with phases, dependencies, and discovered work"
+        />
 
         <ArticleParagraph>
           This is my latest workflow. The Ralph Wiggum iterations act as
@@ -510,7 +535,11 @@ to get started working on it. Create the necessary beads for this feature.`}
           the prompt I use:
         </ArticleParagraph>
 
-        <ArticleImagePlaceholder caption="INSERT: Ralph Wiggum prompt configuration" />
+        <ArticleImage
+          src="/blog_img/beads/line514.png"
+          alt="Diagram showing the Ralph Wiggum loop: bd ready, spawn agent, implement task, bd close, repeat"
+          caption="Ralph Wiggum loop: automated task execution with stop conditions"
+        />
 
         <ArticleParagraph>
           Mind you, the Ralph Wiggum plugin is severely broken and honestly
@@ -532,7 +561,11 @@ to get started working on it. Create the necessary beads for this feature.`}
           fill up:
         </ArticleParagraph>
 
-        <ArticleImagePlaceholder caption="INSERT SCREENSHOT: Progress tracking in labels viewer" />
+        <ArticleImage
+          src="/blog_img/beads/labelviewer-phase2.png"
+          alt="The beads viewer TUI showing labels, task status, and progress tracking"
+          caption="Labels viewer: tracking progress across phases in real-time"
+        />
 
         <ArticleParagraph>
           This was the most satisfying part, and it felt like a week&apos;s

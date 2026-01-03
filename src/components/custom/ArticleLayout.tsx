@@ -2,14 +2,20 @@
 
 import { motion } from 'framer-motion';
 import { ReactNode, useEffect, useState } from 'react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { useAppTheme } from '@/contexts/AppThemeContext';
+import { useTouchDevice } from '@/contexts/TouchContext';
 import BlogToolbar from './BlogToolbar';
+import ContentLock from './ContentLock';
+import type { ArticleStatus } from '@/types/article';
 
 interface ArticleLayoutProps {
   children: ReactNode;
   category?: string;
   title: string;
   intro?: ReactNode;
+  status?: ArticleStatus;
 }
 
 /**
@@ -21,8 +27,11 @@ export default function ArticleLayout({
   category,
   title,
   intro,
+  status = 'published',
 }: ArticleLayoutProps) {
   const { theme } = useAppTheme();
+  const { isTouchDevice } = useTouchDevice();
+  const router = useRouter();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -30,9 +39,58 @@ export default function ArticleLayout({
   }, []);
 
   const isDark = theme === 'dark';
+  const isLocked = status === 'in_progress';
+
+  // Keyboard navigation for articles
+  useEffect(() => {
+    const SCROLL_LINE = 60; // pixels for j/k
+    const SCROLL_PAGE = window.innerHeight * 0.8; // 80% of viewport for u/d
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't handle if locked (ContentLock handles it)
+      // Check for dev mode bypass
+      const devMode = new URLSearchParams(window.location.search).has('dev');
+      if (isLocked && !devMode) return;
+
+      switch (e.key) {
+        case 'Backspace':
+          e.preventDefault();
+          router.back();
+          break;
+        case 'j':
+          e.preventDefault();
+          window.scrollBy({ top: SCROLL_LINE, behavior: 'smooth' });
+          break;
+        case 'k':
+          e.preventDefault();
+          window.scrollBy({ top: -SCROLL_LINE, behavior: 'smooth' });
+          break;
+        case 'u':
+          e.preventDefault();
+          if (e.ctrlKey) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          } else {
+            window.scrollBy({ top: -SCROLL_PAGE, behavior: 'smooth' });
+          }
+          break;
+        case 'd':
+          e.preventDefault();
+          if (e.ctrlKey) {
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+          } else {
+            window.scrollBy({ top: SCROLL_PAGE, behavior: 'smooth' });
+          }
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isLocked, router]);
 
   return (
-    <div
+    <ContentLock isLocked={isLocked}>
+      <div
       className={`min-h-screen w-full relative overflow-hidden transition-colors duration-300 ${
         mounted
           ? isDark
@@ -104,7 +162,22 @@ export default function ArticleLayout({
           {children}
         </div>
       </motion.article>
-    </div>
+
+      {/* Keybind hints - hidden on mobile */}
+      {!isTouchDevice && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.5, duration: 0.5 }}
+          className={`fixed bottom-8 left-1/2 -translate-x-1/2 text-[10px] tracking-wider z-20 ${
+            isDark ? 'text-gray-600' : 'text-[#1a1a1a]/30'
+          }`}
+        >
+          j/k: scroll | u/d: page | ^u/^d: top/bottom | t: theme | ⌫: back
+        </motion.div>
+      )}
+      </div>
+    </ContentLock>
   );
 }
 
@@ -297,6 +370,53 @@ export function ArticleImagePlaceholder({ caption }: ArticleImagePlaceholderProp
         {caption}
       </p>
     </div>
+  );
+}
+
+interface ArticleImageProps {
+  src: string;
+  alt: string;
+  caption?: string;
+}
+
+export function ArticleImage({ src, alt, caption }: ArticleImageProps) {
+  const { theme } = useAppTheme();
+  const isDark = theme === 'dark';
+
+  return (
+    <figure className="my-8">
+      <div
+        className="rounded-lg overflow-hidden relative"
+        style={{
+          borderWidth: '1px',
+          borderColor: isDark
+            ? 'rgba(var(--theme-primary-rgb), 0.2)'
+            : 'rgba(var(--theme-primary-rgb), 0.15)',
+        }}
+      >
+        <Image
+          src={src}
+          alt={alt}
+          width={1200}
+          height={675}
+          className="w-full h-auto"
+          quality={85}
+          sizes="(max-width: 768px) 100vw, 768px"
+        />
+      </div>
+      {caption && (
+        <figcaption
+          className="text-sm text-center mt-3"
+          style={{
+            color: isDark
+              ? 'rgba(var(--theme-primary-rgb), 0.6)'
+              : 'rgba(var(--theme-primary-rgb), 0.7)',
+          }}
+        >
+          {caption}
+        </figcaption>
+      )}
+    </figure>
   );
 }
 

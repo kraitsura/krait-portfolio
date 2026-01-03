@@ -7,13 +7,7 @@ import { useRouter } from 'next/navigation';
 import BlogToolbar from './BlogToolbar';
 import { useTouchDevice } from '@/contexts/TouchContext';
 import { useAppTheme } from '@/contexts/AppThemeContext';
-
-interface Article {
-  slug: string;
-  title: string;
-  description: string;
-  date: string;
-}
+import type { Article } from '@/types/article';
 
 interface AnimatedBlogContentProps {
   articles: Article[];
@@ -153,13 +147,22 @@ export default function AnimatedBlogContent({ articles }: AnimatedBlogContentPro
                       : ''
                   }`}>
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline gap-1 sm:gap-4 mb-2">
-                      <h2 className={`text-xl sm:text-2xl md:text-3xl font-thin transition-colors duration-300 ${
+                      <h2 className={`text-xl sm:text-2xl md:text-3xl font-thin transition-colors duration-300 flex items-center gap-3 ${
                         isSelected
                           ? isDark ? 'text-red-500' : 'text-red-600'
                           : isDark ? 'group-hover:text-red-500' : 'group-hover:text-red-600'
                       }`}>
                         {isSelected && <span className="mr-2 opacity-60">▸</span>}
                         {article.title}
+                        {article.status === 'in_progress' && (
+                          <span className={`text-[10px] sm:text-xs font-normal px-2 py-0.5 rounded-full ${
+                            isDark
+                              ? 'bg-amber-500/20 text-amber-400'
+                              : 'bg-amber-500/20 text-amber-700'
+                          }`}>
+                            Coming Soon
+                          </span>
+                        )}
                       </h2>
                       <span className={`text-xs sm:text-sm transition-colors duration-300 shrink-0 ${
                         isDark ? 'text-gray-400' : 'text-[#1a1a1a]/60'
