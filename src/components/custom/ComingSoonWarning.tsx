@@ -40,18 +40,11 @@ const ComingSoonWarning: React.FC<ComingSoonWarningProps> = ({ onClose }) => {
           {/* Content */}
           <div className="relative z-10 flex flex-col items-center justify-center gap-2 md:gap-3">
             {/* Video */}
-            <div className="w-[180px] h-[120px] md:w-[240px] md:h-[160px] flex items-center justify-center">
-              <video
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="w-full h-full object-contain"
-              >
-                <source src="/images/fallback.webm" type="video/webm" />
-                <source src="/images/fallback.mp4" type="video/mp4" />
-              </video>
-            </div>
+            <img
+                src="/images/fallback.gif"
+                alt="Coming Soon"
+                className="w-[180px] h-[120px] md:w-[240px] md:h-[160px]"
+              />
 
             {/* Coming Soon Text */}
             <div className="text-center">

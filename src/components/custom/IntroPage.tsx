@@ -9,6 +9,7 @@ import React, {
   lazy,
   Suspense,
 } from "react";
+import { useSearchParams } from "next/navigation";
 // import Image from "next/image"; // Temporarily unused while background is disabled
 import styles from "@/styles/fadeIn.module.css";
 import Pipboy from "@/components/custom/Pipboy";
@@ -21,9 +22,35 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 
 const Dashboard = lazy(() => import("./Dashboard"));
 
+interface ActivityEntry {
+  id: string;
+  type: 'commit' | 'tweet';
+  message: string;
+  date: string;
+  timestamp: string;
+  source: string;
+  url: string | null;
+  isPrivate?: boolean;
+  shortHash?: string;
+}
+
+interface GithubStats {
+  commitsThisWeek: number;
+  activeRepos: number;
+  currentStreak: number;
+}
+
 interface IntroPageProps {
   image: string;
 }
+
+// Boot sequence messages
+const bootMessages = [
+  'INITIALIZING SYSTEM...',
+  'LOADING MODULES...',
+  'SCANNING MEMORY...',
+  'READY',
+];
 
 // Memoized NavigationArrow component extracted for performance
 const NavigationArrow = memo(
@@ -73,15 +100,37 @@ NavigationArrow.displayName = "NavigationArrow";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const IntroPage: React.FC<IntroPageProps> = ({ image }) => {
+  const searchParams = useSearchParams();
+  const isFullInit = searchParams.get('init') === 'true'; // Full boot animation only from splash
+
   const { isTouchDevice } = useTouchDevice();
   const { theme } = useAppTheme();
   const { setIsInRocketScene } = useRocketScene();
   const isDark = theme === 'dark';
+
+  // Track if component has mounted to prevent hydration flash
+  const [hasMounted, setHasMounted] = useState(false);
+
   const [scrollState, setScrollState] = useState({
     percentage: 0,
     isAtBottom: false,
     isAtTop: true,
   });
+
+  // Boot sequence state - skip if not full init
+  const [bootIndex, setBootIndex] = useState(0);
+  const [bootComplete, setBootComplete] = useState(false);
+  const [glitchActive, setGlitchActive] = useState(false);
+
+  // Logs state (lifted from Pipboy)
+  const [activityLogs, setActivityLogs] = useState<ActivityEntry[]>([]);
+  const [logsLoading, setLogsLoading] = useState(true);
+  const [githubStats, setGithubStats] = useState<GithubStats | null>(null);
+  const [, setStatsLoading] = useState(true); // Stats loading not critical for init gate
+
+  // UI visibility (only show after boot + logs ready)
+  const [initComplete, setInitComplete] = useState(false);
+
   // Loading sequence: video loads → video fades in → UI fades in
   const [mediaLoaded, setMediaLoaded] = useState(false);
   const [mediaVisible, setMediaVisible] = useState(false);
@@ -131,6 +180,95 @@ const IntroPage: React.FC<IntroPageProps> = ({ image }) => {
     }
   }, [mediaLoaded]);
 
+  // Initialize on mount - determine boot behavior based on URL param
+  useEffect(() => {
+    setHasMounted(true);
+    if (!isFullInit) {
+      // Skip boot animation - mark as complete immediately
+      setBootIndex(bootMessages.length - 1);
+      setBootComplete(true);
+    }
+  }, [isFullInit]);
+
+  // Boot sequence animation - only for full init from splash
+  useEffect(() => {
+    if (!hasMounted || !isFullInit) return; // Skip boot animation if not from splash
+
+    const bootInterval = setInterval(() => {
+      setBootIndex((prev) => {
+        if (prev < bootMessages.length - 1) return prev + 1;
+        clearInterval(bootInterval);
+        // Mark boot as complete after showing READY
+        setTimeout(() => setBootComplete(true), 300);
+        return prev;
+      });
+    }, 400);
+
+    // Random glitch effect
+    const glitchInterval = setInterval(() => {
+      setGlitchActive(true);
+      setTimeout(() => setGlitchActive(false), 100);
+    }, 2000);
+
+    return () => {
+      clearInterval(bootInterval);
+      clearInterval(glitchInterval);
+    };
+  }, [hasMounted, isFullInit]);
+
+  // Fetch activity logs on mount
+  useEffect(() => {
+    fetch('/api/git-logs')
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to fetch logs');
+        return res.json();
+      })
+      .then(data => {
+        setActivityLogs(data.activity || []);
+      })
+      .catch((err) => {
+        console.warn('Failed to load activity logs:', err);
+      })
+      .finally(() => {
+        setLogsLoading(false);
+      });
+  }, []);
+
+  // Fetch GitHub stats on mount
+  useEffect(() => {
+    fetch('/api/github-stats')
+      .then(res => res.json())
+      .then(data => {
+        setGithubStats(data);
+        setStatsLoading(false);
+      })
+      .catch(() => setStatsLoading(false));
+  }, []);
+
+  // Initialize complete when boot is done AND logs are loaded
+  useEffect(() => {
+    if (bootComplete && !logsLoading) {
+      // Small delay for smooth transition
+      const timer = setTimeout(() => {
+        setInitComplete(true);
+      }, 200);
+      return () => clearTimeout(timer);
+    }
+  }, [bootComplete, logsLoading]);
+
+  // Fallback: ensure init completes even if fetch hangs
+  // Shorter timeout if not doing full init (just waiting for logs)
+  useEffect(() => {
+    const timeout = isFullInit ? 3000 : 1500;
+    const fallback = setTimeout(() => {
+      if (!initComplete) {
+        setLogsLoading(false);
+        setBootComplete(true);
+      }
+    }, timeout);
+    return () => clearTimeout(fallback);
+  }, [initComplete, isFullInit]);
+
   // Handler for video loading errors (temporarily disabled with background)
   /*
   const handleVideoError = useCallback(() => {
@@ -157,12 +295,12 @@ const IntroPage: React.FC<IntroPageProps> = ({ image }) => {
     return () => clearTimeout(uiTimer);
   }, [mediaLoaded]);
 
-  // Background disabled - immediately trigger loaded state
+  // Only trigger media loaded after initialization is complete
   useEffect(() => {
-    if (mediaLoaded) return;
-    // Background is disabled, trigger loaded immediately
+    if (mediaLoaded || !initComplete) return;
+    // Background is disabled, trigger loaded after init
     handleMediaLoaded();
-  }, [mediaLoaded, handleMediaLoaded]);
+  }, [mediaLoaded, initComplete, handleMediaLoaded]);
 
   // Poll for video ready state + fallback timeout (disabled with background)
   /*
@@ -373,6 +511,105 @@ const IntroPage: React.FC<IntroPageProps> = ({ image }) => {
         isDark ? 'bg-black text-white' : 'bg-[#FFFBF0] text-[#1a1a1a]'
       }`}
     >
+        {/* Terminal boot overlay - shows initialization sequence */}
+        {/* Only show after mount and if: full init OR logs still loading */}
+        {hasMounted && (isFullInit || logsLoading) && (
+          <div
+            className={`fixed inset-0 z-[100] font-mono overflow-hidden transition-opacity duration-500 ease-out ${
+              isDark ? 'bg-black' : 'bg-[#FFFBF0]'
+            } ${initComplete ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+          >
+            {isFullInit ? (
+              <>
+                {/* CRT scanlines overlay */}
+                <div
+                  className="absolute inset-0 pointer-events-none opacity-[0.03]"
+                  style={{
+                    background: `repeating-linear-gradient(
+                      0deg,
+                      transparent,
+                      transparent 2px,
+                      ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'} 2px,
+                      ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'} 4px
+                    )`,
+                  }}
+                />
+
+                {/* Corner brackets */}
+                <div className="absolute inset-4 md:inset-8 pointer-events-none">
+                  <div
+                    className="absolute top-0 left-0 w-8 h-8 border-l-2 border-t-2 opacity-60"
+                    style={{ borderColor: 'var(--theme-primary)' }}
+                  />
+                  <div
+                    className="absolute top-0 right-0 w-8 h-8 border-r-2 border-t-2 opacity-60"
+                    style={{ borderColor: 'var(--theme-primary)' }}
+                  />
+                  <div
+                    className="absolute bottom-0 left-0 w-8 h-8 border-l-2 border-b-2 opacity-60"
+                    style={{ borderColor: 'var(--theme-primary)' }}
+                  />
+                  <div
+                    className="absolute bottom-0 right-0 w-8 h-8 border-r-2 border-b-2 opacity-60"
+                    style={{ borderColor: 'var(--theme-primary)' }}
+                  />
+                </div>
+
+                {/* Boot content */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-8">
+                  <div className={`relative ${glitchActive ? 'animate-glitch' : ''}`}>
+                    {/* Horizontal boot messages with * spacers */}
+                    <div
+                      className="text-xs md:text-sm flex flex-wrap items-center justify-center gap-x-2"
+                      style={{ color: 'var(--theme-primary)' }}
+                    >
+                      {bootMessages.slice(0, bootIndex + 1).map((msg, i) => (
+                        <span key={i} className="flex items-center gap-2">
+                          {i > 0 && <span className="opacity-40">*</span>}
+                          <span
+                            className={`transition-opacity duration-200 ${
+                              i === bootIndex ? 'opacity-100' : 'opacity-40'
+                            }`}
+                          >
+                            {msg}
+                          </span>
+                        </span>
+                      ))}
+                      {/* Blinking cursor inline */}
+                      <span
+                        className="inline-block w-2 h-4 animate-blink ml-1"
+                        style={{ backgroundColor: 'var(--theme-primary)' }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Static loading bar */}
+                  <div className="mt-8 w-48 md:w-64">
+                    <div
+                      className="h-[2px] w-full"
+                      style={{ backgroundColor: 'var(--theme-primary)', opacity: 0.6 }}
+                    />
+                  </div>
+                </div>
+              </>
+            ) : (
+              /* Minimal loading for non-splash navigation - just a pulsing dot */
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="relative">
+                  <div
+                    className="absolute inset-0 rounded-full animate-ping opacity-20"
+                    style={{ backgroundColor: 'var(--theme-primary)' }}
+                  />
+                  <div
+                    className="w-3 h-3 rounded-full animate-pulse"
+                    style={{ backgroundColor: 'var(--theme-primary)' }}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Loading overlay - covers everything until video is ready */}
         <div
           className={`absolute inset-0 z-50 transition-opacity duration-1000 ease-out ${
@@ -436,6 +673,8 @@ const IntroPage: React.FC<IntroPageProps> = ({ image }) => {
               <div className="w-full max-w-[1000px]">
                 <Pipboy
                   isActive={scrollState.percentage < 70}
+                  initialLogs={activityLogs}
+                  initialStats={githubStats}
                 />
                 {/* Down arrow - desktop only (touch devices use Socials tab in Pipboy) */}
                 {!isTouchDevice && (

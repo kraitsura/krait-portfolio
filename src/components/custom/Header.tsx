@@ -65,22 +65,12 @@ const Header: React.FC = React.memo(() => {
   const [aboutShadowColor, setAboutShadowColor] = useState('#ff0000');
   const [blogShadowColor, setBlogShadowColor] = useState('#ff0000');
 
-  const handleAboutClick = () => {
-    router.push('/about');
-  };
-
-  const handleBlogClick = () => {
-    router.push('/blog');
-  };
-
   const handleAboutHover = () => {
     setAboutShadowColor(getRandomVibrantColor());
-    router.prefetch('/about');
   };
 
   const handleBlogHover = () => {
     setBlogShadowColor(getRandomVibrantColor());
-    router.prefetch('/blog');
   };
 
   const handleNavHover = (index: number) => {
@@ -169,11 +159,11 @@ const Header: React.FC = React.memo(() => {
       <nav className="font-mono theme-body container mx-auto flex justify-between items-start gap-2">
         {/* Brutalist buttons on the left */}
         <div className="flex gap-2">
-          <button
+          <Link
+            href="/about"
             suppressHydrationWarning
-            onClick={handleAboutClick}
             onMouseEnter={handleAboutHover}
-            className={`w-[70px] sm:w-[80px] px-2 py-1 sm:px-3 sm:py-1.5 font-bold text-black transition-all duration-150 hover:translate-x-[3px] hover:translate-y-[3px] active:translate-x-0 active:translate-y-0 active:shadow-none tracking-tight text-xs sm:text-sm ${
+            className={`block w-[70px] sm:w-[80px] px-2 py-1 sm:px-3 sm:py-1.5 font-bold text-black transition-all duration-150 hover:translate-x-[3px] hover:translate-y-[3px] active:translate-x-0 active:translate-y-0 active:shadow-none tracking-tight text-xs sm:text-sm ${
               selectedIndex === -2 && theme !== 'light' ? 'ring-2 ring-black ring-offset-2' : ''
             }`}
             style={{
@@ -190,12 +180,12 @@ const Header: React.FC = React.memo(() => {
             }}
           >
             /about
-          </button>
-          <button
+          </Link>
+          <Link
+            href="/blog"
             suppressHydrationWarning
-            onClick={handleBlogClick}
             onMouseEnter={handleBlogHover}
-            className={`w-[70px] sm:w-[80px] px-2 py-1 sm:px-3 sm:py-1.5 font-bold text-black transition-all duration-150 hover:translate-x-[3px] hover:translate-y-[3px] active:translate-x-0 active:translate-y-0 active:shadow-none tracking-tight text-xs sm:text-sm ${
+            className={`block w-[70px] sm:w-[80px] px-2 py-1 sm:px-3 sm:py-1.5 font-bold text-black transition-all duration-150 hover:translate-x-[3px] hover:translate-y-[3px] active:translate-x-0 active:translate-y-0 active:shadow-none tracking-tight text-xs sm:text-sm ${
               selectedIndex === -1 && theme !== 'light' ? 'ring-2 ring-black ring-offset-2' : ''
             }`}
             style={{
@@ -212,7 +202,7 @@ const Header: React.FC = React.memo(() => {
             }}
           >
             /blog
-          </button>
+          </Link>
         </div>
 
         <div className="w-auto sm:w-[200px] flex flex-col items-end space-y-1">

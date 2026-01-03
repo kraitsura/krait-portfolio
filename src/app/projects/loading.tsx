@@ -1,7 +1,4 @@
-'use client';
-
-import LoadingScreen from '@/components/custom/LoadingScreen';
-
+// Instant loading - no visible spinner for smoother nav
 export default function ProjectsLoading() {
-  return <LoadingScreen variant="default" />;
+  return null;
 }

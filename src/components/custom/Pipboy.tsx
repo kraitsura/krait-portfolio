@@ -35,12 +35,17 @@ interface GithubStats {
 
 interface PipboyProps {
   isActive?: boolean;
+  // Pre-fetched data from parent (avoids duplicate fetches)
+  initialLogs?: ActivityEntry[];
+  initialStats?: GithubStats | null;
 }
 
 type ConfigSection = 'main' | 'colors' | 'theme';
 
 const Pipboy: React.FC<PipboyProps> = ({
   isActive = true,
+  initialLogs,
+  initialStats,
 }) => {
   const { isTouchDevice } = useTouchDevice();
   const { color, setColor } = useThemeColor();
@@ -54,13 +59,13 @@ const Pipboy: React.FC<PipboyProps> = ({
   const [configSection, setConfigSection] = useState<ConfigSection>('main');
   const [selectedConfigIndex, setSelectedConfigIndex] = useState(0);
   const [selectedThemeIndex, setSelectedThemeIndex] = useState(theme === 'dark' ? 0 : 1);
-  const [activityLogs, setActivityLogs] = useState<ActivityEntry[]>([]);
-  const [logsLoading, setLogsLoading] = useState(true);
+  const [activityLogs, setActivityLogs] = useState<ActivityEntry[]>(initialLogs || []);
+  const [logsLoading, setLogsLoading] = useState(!initialLogs);
   const [logsMode, setLogsMode] = useState(false); // Whether we're navigating within logs
   const [showVideoBg, setShowVideoBg] = useState(false); // Video background toggle
   const [selectedLogIndex, setSelectedLogIndex] = useState(0);
-  const [githubStats, setGithubStats] = useState<GithubStats | null>(null);
-  const [statsLoading, setStatsLoading] = useState(true);
+  const [githubStats, setGithubStats] = useState<GithubStats | null>(initialStats || null);
+  const [statsLoading, setStatsLoading] = useState(!initialStats);
   const tabContentRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<HTMLDivElement>(null);
   const logsListRef = useRef<HTMLDivElement>(null);
@@ -89,8 +94,25 @@ const Pipboy: React.FC<PipboyProps> = ({
     setBrowser(isSafari ? "safari" : "chrome");
   }, []);
 
-  // Fetch activity logs (git commits + tweets) on mount
+  // Sync with parent-provided logs when they arrive
   useEffect(() => {
+    if (initialLogs && initialLogs.length > 0) {
+      setActivityLogs(initialLogs);
+      setLogsLoading(false);
+    }
+  }, [initialLogs]);
+
+  // Sync with parent-provided stats when they arrive
+  useEffect(() => {
+    if (initialStats) {
+      setGithubStats(initialStats);
+      setStatsLoading(false);
+    }
+  }, [initialStats]);
+
+  // Fetch activity logs (git commits + tweets) on mount - only if not provided
+  useEffect(() => {
+    if (initialLogs) return; // Already have data from parent
     fetch('/api/git-logs')
       .then(res => res.json())
       .then(data => {
@@ -98,10 +120,11 @@ const Pipboy: React.FC<PipboyProps> = ({
         setLogsLoading(false);
       })
       .catch(() => setLogsLoading(false));
-  }, []);
+  }, [initialLogs]);
 
-  // Fetch GitHub stats on mount
+  // Fetch GitHub stats on mount - only if not provided
   useEffect(() => {
+    if (initialStats !== undefined) return; // Already have data from parent
     fetch('/api/github-stats')
       .then(res => res.json())
       .then(data => {
@@ -109,7 +132,7 @@ const Pipboy: React.FC<PipboyProps> = ({
         setStatsLoading(false);
       })
       .catch(() => setStatsLoading(false));
-  }, []);
+  }, [initialStats]);
 
   // Track cursor position (only on non-touch devices when active)
   useEffect(() => {

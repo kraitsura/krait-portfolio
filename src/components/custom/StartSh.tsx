@@ -63,7 +63,8 @@ const StartSh: React.FC = () => {
     // Add loading state to prevent flash of content
     document.body.setAttribute('data-loading', 'true');
     setStarted(true);
-    router.push('/home');
+    // Pass init param to trigger full boot animation
+    router.push('/home?init=true');
   }, [router]);
 
   // Preload video on hover for faster loading
@@ -181,7 +182,7 @@ const StartSh: React.FC = () => {
         </div>
 
         {/* Custom terminal prompt - powerline style */}
-        <div className="mb-6 font-mono text-sm flex items-center justify-between bg-gray-900 px-3 py-2 rounded border border-green-700/30">
+        <div className="mb-6 font-mono text-sm flex items-center justify-between px-1 py-2">
           <div className="flex items-center gap-2">
             <span className="text-cyan-400 font-semibold">krait@portfolio</span>
             <span className="text-gray-500">~</span>
@@ -193,7 +194,7 @@ const StartSh: React.FC = () => {
               main
             </span>
           </div>
-          <span className="text-green-400 text-xs">
+          <span className="text-green-400/80 text-xs">
             {currentTime.toLocaleTimeString('en-US', { hour12: false })}
           </span>
         </div>
@@ -238,7 +239,7 @@ const StartSh: React.FC = () => {
                 e.currentTarget.style.boxShadow = `0 0 0 transparent`;
               }}
             >
-              ./blogs.sh
+              blog.sh
             </button>
           </div>
           <div className="flex justify-between items-center">

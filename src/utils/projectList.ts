@@ -113,17 +113,6 @@ export const projects: Project[] = [
       "A quick and easy wishlist manager for the command line. Store items you want to buy, track prices, and organize your shopping lists. Built with Go and Bubble Tea for a smooth terminal experience.",
   },
   {
-    id: "pomo-cli",
-    title: "Pomo CLI Tool",
-    description: "First CLI I ever built, simple pomodoro clock",
-    images: projectImagesData["pomo-cli"],
-    tags: ["Python", "CLI"],
-    category: "Productivity Tools",
-    status: "Coming Soon",
-    content:
-      "My first ever CLI tool - a simple but effective Pomodoro timer built with Python. Helps maintain focus and productivity using the Pomodoro Technique with work sessions and breaks tracked right in your terminal.",
-  },
-  {
     id: "wiin-website",
     title: "Wiin Website",
     description: "Client work, landing page for nicotine pouch",

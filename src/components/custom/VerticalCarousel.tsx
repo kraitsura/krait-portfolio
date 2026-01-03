@@ -126,6 +126,7 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = React.memo(({ images, 
                     priority={idx === 0}
                     sizes="(max-width: 768px) 100vw, 90vw"
                     quality={90}
+                    unoptimized={img.endsWith('.gif')}
                   />
                 )}
               </div>

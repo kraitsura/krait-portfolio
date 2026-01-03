@@ -1,7 +1,5 @@
-'use client';
-
-import LoadingScreen from '@/components/custom/LoadingScreen';
-
+// Instant loading - terminal boot sequence is for cold starts only
+// For warm navigation, show nothing to avoid jarring "reboot" effect
 export default function HomeLoading() {
-  return <LoadingScreen variant="terminal" />;
+  return null;
 }

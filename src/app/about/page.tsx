@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import ProjectsIndex from "@/components/custom/ProjectsIndex";
 import SocialsIndex from "@/components/custom/SocialsIndex";
 import { projects } from "@/utils/projectList";
+import { useAppTheme } from "@/contexts/AppThemeContext";
 
 type TabType = "about" | "projects" | "socials";
 type FocusArea = "menu" | "content";
@@ -24,6 +25,8 @@ function SummarizeContent() {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isKeyboardNav, setIsKeyboardNav] = useState(false);
   const [focusArea, setFocusArea] = useState<FocusArea>("menu");
+  const { theme } = useAppTheme();
+  const isDark = theme === "dark";
 
   // Initialize active tab from URL param or default to "about"
   const tabParam = searchParams.get("tab");
@@ -149,13 +152,21 @@ function SummarizeContent() {
   }, [router, activeTab, selectedIndex, focusArea]);
 
   return (
-    <div className="h-screen overflow-y-auto bg-[#FFFBF0] px-4 sm:px-6 py-16 sm:py-20">
+    <div className={`h-screen overflow-y-auto px-4 sm:px-6 py-16 sm:py-20 transition-colors duration-300 ${
+      isDark ? "bg-black" : "bg-[#FFFBF0]"
+    }`}>
       {/* Sidebar Navigation - Mobile: sticky at top, Desktop: fixed to viewport */}
       <nav
         suppressHydrationWarning
-        className={`sticky top-0 z-10 bg-[#FFFBF0] pb-4 flex flex-col gap-2 mb-8 lg:mb-0 lg:pb-0 lg:bg-transparent lg:static lg:fixed lg:top-1/2 lg:-translate-y-1/2 lg:left-[calc(50%-325px-100px)] transition-all duration-700 ease-out ${
-          isVisible ? "opacity-100" : "opacity-0"
-        } ${focusArea === "menu" ? "lg:border-l-2 lg:border-[#1a1a1a] lg:pl-2" : ""}`}
+        className={`sticky top-0 z-10 pb-4 flex flex-col gap-2 mb-8 lg:mb-0 lg:pb-0 lg:bg-transparent lg:static lg:fixed lg:top-1/2 lg:-translate-y-1/2 lg:left-[calc(50%-325px-100px)] transition-all duration-700 ease-out ${
+          isDark ? "bg-black" : "bg-[#FFFBF0]"
+        } ${isVisible ? "opacity-100" : "opacity-0"} ${
+          focusArea === "menu"
+            ? isDark
+              ? "lg:border-l-2 lg:border-white lg:pl-2"
+              : "lg:border-l-2 lg:border-[#1a1a1a] lg:pl-2"
+            : ""
+        }`}
         style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
       >
         {tabs.map((tab) => (
@@ -165,9 +176,11 @@ function SummarizeContent() {
               setActiveTab(tab);
               setFocusArea("menu");
             }}
-            className={`text-left text-sm text-[#1a1a1a] hover:opacity-60 transition-all duration-200 ${
-              activeTab === tab ? "underline underline-offset-[3px]" : ""
-            } ${activeTab === tab && focusArea === "menu" ? "translate-x-1" : ""}`}
+            className={`text-left text-sm hover:opacity-60 transition-all duration-200 ${
+              isDark ? "text-white" : "text-[#1a1a1a]"
+            } ${activeTab === tab ? "underline underline-offset-[3px]" : ""} ${
+              activeTab === tab && focusArea === "menu" ? "translate-x-1" : ""
+            }`}
           >
             {tab}
           </button>
@@ -179,27 +192,27 @@ function SummarizeContent() {
           suppressHydrationWarning
           className={`w-full max-w-[650px] transition-all duration-700 ease-out ${
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-          }`}
+          } ${isDark ? "text-white" : "text-[#1a1a1a]"}`}
           style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
         >
           {/* Main Content */}
           {activeTab === "about" && (
             <>
               <h1
-                className="text-3xl sm:text-4xl mb-2 text-[#1a1a1a] leading-[1.3]"
+                className="text-3xl sm:text-4xl mb-2 leading-[1.3]"
                 style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
               >
                 hello,
               </h1>
               <h2
-                className="text-xl sm:text-2xl mb-6 sm:mb-8 text-[#1a1a1a] leading-[1.3]"
+                className="text-xl sm:text-2xl mb-6 sm:mb-8 leading-[1.3]"
                 style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
               >
                 here I am on paper;
               </h2>
 
               <div
-                className="text-base sm:text-lg space-y-4 sm:space-y-6 text-[#1a1a1a] leading-[1.7]"
+                className="text-base sm:text-lg space-y-4 sm:space-y-6 leading-[1.7]"
                 style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
               >
                 <p className="mb-6">
@@ -226,7 +239,9 @@ function SummarizeContent() {
                   Feel free to{" "}
                   <a
                     href="mailto:b.aarya.reddy@gmail.com"
-                    className="text-[#1a1a1a] underline underline-offset-[2px] hover:opacity-70 transition-opacity"
+                    className={`underline underline-offset-[2px] hover:opacity-70 transition-opacity ${
+                      isDark ? "text-white" : "text-[#1a1a1a]"
+                    }`}
                   >
                     reach out
                   </a>{" "}
@@ -240,7 +255,7 @@ function SummarizeContent() {
           {activeTab === "projects" && (
             <>
               <div
-                className="text-base sm:text-lg text-[#1a1a1a] leading-[1.7]"
+                className="text-base sm:text-lg leading-[1.7]"
                 style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
               >
                 <ProjectsIndex
@@ -265,7 +280,7 @@ function SummarizeContent() {
           {activeTab === "socials" && (
             <>
               <div
-                className="text-base sm:text-lg text-[#1a1a1a] leading-[1.7]"
+                className="text-base sm:text-lg leading-[1.7]"
                 style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
               >
                 <SocialsIndex
@@ -292,9 +307,21 @@ function SummarizeContent() {
   );
 }
 
+function SuspenseFallback() {
+  const { theme } = useAppTheme();
+  const isDark = theme === "dark";
+  return (
+    <div
+      className={`h-screen overflow-hidden transition-colors duration-300 ${
+        isDark ? "bg-black" : "bg-[#FFFBF0]"
+      }`}
+    />
+  );
+}
+
 export default function SummarizePage() {
   return (
-    <Suspense fallback={<div className="h-screen overflow-hidden bg-[#FFFBF0]" />}>
+    <Suspense fallback={<SuspenseFallback />}>
       <SummarizeContent />
     </Suspense>
   );

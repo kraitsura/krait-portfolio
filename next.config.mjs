@@ -23,6 +23,11 @@ const nextConfig = {
         optimizePackageImports: ['lucide-react', 'three', 'framer-motion'],
         // Enable React Compiler for automatic optimization
         reactCompiler: true,
+        // Keep prefetched routes fresh longer for smoother navigation
+        staleTimes: {
+            dynamic: 30, // Cache dynamic routes for 30 seconds
+            static: 180, // Cache static routes for 3 minutes
+        },
     },
     // Compiler optimizations
     compiler: {

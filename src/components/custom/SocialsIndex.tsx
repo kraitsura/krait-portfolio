@@ -1,5 +1,7 @@
 "use client";
 
+import { useAppTheme } from "@/contexts/AppThemeContext";
+
 const socialLinks = [
   {
     name: "github",
@@ -30,6 +32,9 @@ export default function SocialsIndex({
   setIsKeyboardNav,
   isFocused = true,
 }: SocialsIndexProps) {
+  const { theme } = useAppTheme();
+  const isDark = theme === "dark";
+
   const handleMouseEnter = (index: number) => {
     if (!isKeyboardNav) {
       setSelectedIndex(index);
@@ -44,7 +49,13 @@ export default function SocialsIndex({
 
   return (
     <div className="flex justify-center pt-[30vh] lg:pt-[40vh]" onMouseMove={handleMouseMove}>
-      <div className={`flex gap-6 transition-all duration-200 ${isFocused ? "border-b-2 border-[#1a1a1a] pb-1" : ""}`}>
+      <div className={`flex gap-6 transition-all duration-200 ${
+        isFocused
+          ? isDark
+            ? "border-b-2 border-white pb-1"
+            : "border-b-2 border-[#1a1a1a] pb-1"
+          : ""
+      }`}>
         {socialLinks.map((social, index) => (
           <a
             key={social.name}

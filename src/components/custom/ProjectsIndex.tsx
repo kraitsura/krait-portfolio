@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { projectsByCategory, categoryOrder } from "@/utils/projectList";
+import { useAppTheme } from "@/contexts/AppThemeContext";
 
 interface ProjectsIndexProps {
   selectedIndex: number;
@@ -24,6 +25,9 @@ export default function ProjectsIndex({
   const [centerIndex, setCenterIndex] = useState<number | null>(null);
   const [isInitialScroll, setIsInitialScroll] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
+
+  const { theme } = useAppTheme();
+  const isDark = theme === "dark";
 
   // Create ordered projects array based on category order
   const orderedProjects = categoryOrder.flatMap(
@@ -206,7 +210,9 @@ export default function ProjectsIndex({
               return (
                 <div key={category} className="mb-12 first:mt-0">
                   <h2
-                    className="text-2xl font-light mb-4 text-[#1a1a1a] px-8"
+                    className={`text-2xl font-light mb-4 px-8 ${
+                      isDark ? "text-white" : "text-[#1a1a1a]"
+                    }`}
                     style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
                   >
                     {category}
@@ -234,7 +240,9 @@ export default function ProjectsIndex({
                         <div className={`
                           py-2
                           ${isHighlighted
-                            ? 'border-l-4 border-[#1a1a1a] pl-5'
+                            ? isDark
+                              ? 'border-l-4 border-white pl-5'
+                              : 'border-l-4 border-[#1a1a1a] pl-5'
                             : 'pl-6 border-l-4 border-transparent'
                           }
                           transition-all duration-200
@@ -242,8 +250,8 @@ export default function ProjectsIndex({
                           <div className="mb-2">
                             <span className={`font-medium text-base ${
                               isHighlighted
-                                ? 'text-[#1a1a1a]'
-                                : 'text-[#1a1a1a]/70'
+                                ? isDark ? 'text-white' : 'text-[#1a1a1a]'
+                                : isDark ? 'text-white/70' : 'text-[#1a1a1a]/70'
                             } transition-colors duration-200`}>
                               {project.title}
                             </span>

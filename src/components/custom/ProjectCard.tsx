@@ -154,6 +154,7 @@ const ProjectCard: React.FC<ProjectCardProps> = React.memo(({ project, index, on
                   quality={85}
                   loading={idx === 0 && index < 3 ? 'eager' : 'lazy'}
                   priority={idx === 0 && index < 3}
+                  unoptimized={img.endsWith('.gif')}
                 />
               )}
             </div>

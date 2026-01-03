@@ -4,6 +4,7 @@ import localFont from "next/font/local";
 import { Inter, Roboto_Mono, Playfair_Display, Press_Start_2P } from "next/font/google";
 import Header from "@/components/custom/Header";
 import VideoPreloader from "@/components/VideoPreloader";
+import RoutePrefetcher from "@/components/RoutePrefetcher";
 import { GlobalKeybinds } from "@/components/GlobalKeybinds";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { TouchProvider } from "@/contexts/TouchContext";
@@ -89,6 +90,7 @@ export default function RootLayout({
                 <RocketSceneProvider>
                   <GlobalKeybinds />
                   <VideoPreloader />
+                  <RoutePrefetcher />
                   <Header />
                   <main className="flex-grow">{children}</main>
                 </RocketSceneProvider>
